@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racional Jazz Band - Música, Arte e Cultura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        // --- Configuração Tailwind ---
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'rjb-yellow': '#FFD700',
+                        'rjb-text': '#2A2A2A',
+                        'rjb-bg-light': '#F8F9FA',
+                        'rjb-card-light': '#FFFFFF',
+                        'rjb-bg-dark': '#121212',
+                        'rjb-card-dark': '#1E1E1E',
+                        'rjb-text-dark': '#E0E0E0',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas'],
+                    },
+                    boxShadow: {
+                        'soft-glow': '0 0 20px rgba(255, 215, 0, 0.6)',
+                        'subtle-glow': '0 0 10px rgba(255, 215, 0, 0.2)',
+                        'deep-shadow': '0 10px 30px rgba(0, 0, 0, 0.1)',
+                    },
+                }
+            }
+        }
+
+        // --- DADOS E VARIÁVEIS GLOBAIS ---
+        let currentPage = 'home';
+        let currentAudio = null;
+        let playingButton = null;
+
+        const subMenuRJB = {
+            'apresentacoes': 'A RJB / Apresentações',
+            'bastidores': 'A RJB / Ensaios',
+            'repertorio': 'A RJB / Repertório',
+            'partituras': 'A RJB / Partituras',
+            'fotos': 'A RJB / Fotos',
+        };
+
+        // Dados de Vídeo Centralizados (MANTIDOS)
+        const APRESENTACOES_VIDEOS = [
+            { title: 'Canto das três Raças - Retiro Racional', date: '04/OUT/2025', id: '9n4l2zXi_yE' },
+            { title: 'Oxigênio - Retiro Racional', date: '04/NOV/2017', id: 'U5vlHEpb82Q' },
+            { title: 'Do seu lado - Retiro Racional', date: '04/OUT/2025', id: 'ZWNoul_SB0c' },
+        ];
+
+        const BASTIDORES_VIDEOS = [
+            { title: 'O Dever de Fazer Propaganda Deste Conhecimento', date: '04/OUT/2025', id: 'aCdnUJeLzRQ' },
+            { title: 'Whisky à go-go', date: '15/DEZ/2025', id: 'Cnj23NucMnY' },
+            { title: 'Titanium', date: '04/OUT/2025', id: '73XEtc64fdw' },
+            { title: 'Titanium - Guitarra', date: '04/OUT/2025', id: 'pXIKPmZB0IM' },
+            { title: 'Trompeta da Espanha', date: '04/OUT/2025', id: 'RF7dOiaO5cw' },
+            { title: 'Anunciação - Guitarra', date: '04/OUT/2025', id: 'THH7BrWbC6o' },
+        ];
+
+        // --- FUNÇÕES DE UTILIDADE GERAL ---
+        
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function navigateTo(page) {
+            const content = document.getElementById('main-content');
+            closeVideoModal();
+            stopCurrentAudio();
+
+            if (currentPage === page) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            content.classList.add('opacity-0');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            setTimeout(() => {
+                currentPage = page;
+                renderPage();
+
+                content.classList.remove('opacity-0');
+
+                const menu = document.getElementById('mobile-menu');
+                if (menu && !menu.classList.contains('hidden')) {
+                    document.getElementById('mobile-menu-button').click();
+                }
+            }, 500);
+        }
+
+        function updateActiveMenu() {
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                btn.classList.remove('nav-link-active');
+            });
+
+            const activeLink = document.getElementById(`nav-${currentPage}`);
+            if (activeLink) {
+                activeLink.classList.add('nav-link-active');
+            }
+            
+            // Tratamento de links adicionais
+            if (currentPage === 'member-registration') {
+                const cadastroDesktop = document.getElementById('nav-cadastro-desktop');
+                const cadastroMobile = document.getElementById('nav-cadastro-mobile');
+                if (cadastroDesktop) cadastroDesktop.classList.add('nav-link-active');
+                if (cadastroMobile) cadastroMobile.classList.add('nav-link-active');
+            }
+            if (currentPage === 'reports') {
+                const relatoriosDesktop = document.getElementById('nav-relatorios-desktop');
+                const relatoriosMobile = document.getElementById('nav-relatorios-mobile');
+                if (relatoriosDesktop) relatoriosDesktop.classList.add('nav-link-active');
+                if (relatoriosMobile) relatoriosMobile.classList.add('nav-link-active');
+            }
+
+            if (subMenuRJB[currentPage]) {
+                const rjbButton = document.getElementById('nav-rjb-dropdown');
+                if (rjbButton) rjbButton.classList.add('nav-link-active');
+            }
+        }
+
+        function stopCurrentAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (playingButton) {
+                playingButton.classList.remove('playing');
+                playingButton = null;
+            }
+        }
+
+        function togglePlay(title, mp3File) {
+            const button = event.currentTarget;
+            const isPlaying = button.classList.contains('playing');
+
+            if (isPlaying) {
+                stopCurrentAudio();
+                return;
+            }
+
+            stopCurrentAudio();
+
+            currentAudio = new Audio(`/audio/${mp3File}.mp3`);
+            currentAudio.load();
+
+            playingButton = button;
+            button.classList.add('playing');
+            currentAudio.play();
+
+            showMessage(`Tocando: ${title}`);
+
+            currentAudio.onended = () => {
+                stopCurrentAudio();
+            };
+
+            currentAudio.onerror = () => {
+                showMessage(`Erro ao carregar o áudio de: ${title}. Arquivo /audio/${mp3File}.mp3 não encontrado ou inválido.`, true);
+                stopCurrentAudio();
+            };
+        }
+
+        function openModal(imageUrl) {
+            const modal = document.getElementById('image-modal');
+            const modalImage = document.getElementById('modal-image');
+
+            modalImage.src = imageUrl;
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.add('opacity-100');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.remove('opacity-100');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('modal-image').src = "";
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function openVideoModal(videoId) {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('video-iframe');
+
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.add('opacity-100');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('video-iframe');
+
+            modal.classList.remove('opacity-100');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                iframe.src = ""; // Importante: Limpa o src para parar o som/vídeo
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function showMessage(msg, isError = false) {
+            const messageBox = document.getElementById('custom-message-box');
+            const messageText = document.getElementById('message-text');
+            messageText.textContent = msg;
+
+            messageBox.classList.remove('hidden', 'opacity-0', 'message-error', 'bg-rjb-yellow', 'text-rjb-text');
+
+            if (isError) {
+                messageBox.classList.add('message-error');
+            } else {
+                messageBox.classList.add('bg-rjb-yellow', 'text-rjb-text');
+            }
+
+            messageBox.classList.add('opacity-100');
+            const displayTime = isError ? 5000 : 2500;
+            const hideTime = isError ? 5500 : 3000;
+
+            setTimeout(() => {
+                messageBox.classList.remove('opacity-100');
+                messageBox.classList.add('opacity-0');
+            }, displayTime);
+            
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, hideTime);
+        }
+
+        // --- FUNÇÕES DE SUBMISSÃO E LOGIN (NOVAS) ---
+
+        async function submitContactForm(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+
+            showMessage('Enviando mensagem...');
+
+            const formData = {
+                to: 'contato.racionaljazzband@gmail.com',
+                subject: `Nova Mensagem da RJB de ${name}`,
+                senderName: name,
+                senderEmail: email,
+                body: message
+            };
+
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    showMessage('Mensagem enviada com sucesso! Entraremos em contato em breve.');
+                    document.getElementById('contact-form').reset();
+                } else {
+                    const errorDetails = await response.text();
+                    console.error('Erro no Backend:', response.status, errorDetails);
+                    showMessage(`Falha ao enviar. Erro ${response.status}. Verifique o console.`, true);
+                }
+
+            } catch (error) {
+                console.error('ERRO DE CONEXÃO/REDE:', error);
+                showMessage('Erro de conexão. O endpoint do backend pode estar incorreto ou offline.', true);
+            }
+        }
+
+        async function submitMemberRegistration(event) {
+            event.preventDefault();
+
+            const inviteKey = document.getElementById('reg-invite-key').value;
+            const name = document.getElementById('reg-name').value;
+            const instrument = document.getElementById('reg-instrument').value;
+            const email = document.getElementById('reg-email').value;
+            const city = document.getElementById('reg-city').value;
+            const state = document.getElementById('reg-state').value;
+
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/register-member';
+
+            showMessage('Enviando inscrição...');
+
+            const memberData = {
+                inviteKey: inviteKey, name: name, instrument: instrument, email: email, city: city, state: state
+            };
+
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(memberData),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage(result.message || 'Inscrição de membro registrada com sucesso!');
+                    document.getElementById('member-registration-form').reset();
+                } else {
+                    console.error('Erro no Backend:', response.status, result.message);
+                    showMessage(`Falha na inscrição. Erro ${response.status}. Detalhes: ${result.message || 'Erro desconhecido.'}`, true);
+                }
+
+            } catch (error) {
+                console.error('ERRO DE CONEXÃO/REDE:', error);
+                showMessage('Erro de conexão. O serviço de cadastro de membros pode estar offline.', true);
+            }
+        }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/admin/login'; 
+
+            showMessage('Acessando Área Administrativa...');
+
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('adminToken', result.token);
+                    localStorage.setItem('adminRole', result.role);
+                    showMessage('Login bem-sucedido. Carregando relatórios...');
+                    renderProtectedReportView();
+                } else {
+                    showMessage(result.message || 'E-mail ou senha incorretos.', true);
+                }
+
+            } catch (error) {
+                console.error('ERRO DE CONEXÃO/REDE ao fazer login:', error);
+                showMessage('Erro de conexão com a API de login.', true);
+            }
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminRole');
+            navigateTo('reports'); 
+            showMessage('Você saiu da Área Administrativa.', false);
+        }
+
+        async function fetchMemberReport(token) {
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
+            const outputArea = document.getElementById('report-output-area');
+
+            showMessage('Buscando dados protegidos...');
+            outputArea.innerHTML = '';
+            outputArea.classList.add('hidden');
+
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Relatório carregado com sucesso!');
+                    renderReportData(data);
+                    outputArea.classList.remove('hidden');
+                } else if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('adminRole');
+                    showMessage(data.message || 'Sessão expirada. Faça login novamente.', true);
+                    renderProtectedReportView();
+                } else {
+                    showMessage(data.message || `Erro ${response.status} ao buscar o relatório.`, true);
+                }
+
+            } catch (error) {
+                console.error('ERRO DE CONEXÃO/REDE ao buscar relatório:', error);
+                showMessage('Erro de conexão com a API de relatórios.', true);
+            }
+        }
+
+        function renderProtectedReportView() {
+            const token = localStorage.getItem('adminToken');
+            const authArea = document.getElementById('admin-login-area');
+            const outputArea = document.getElementById('report-output-area');
+            
+            if (!authArea || !outputArea) return;
+
+            if (token) {
+                authArea.classList.add('hidden');
+                outputArea.classList.remove('hidden');
+                fetchMemberReport(token);
+            } else {
+                authArea.classList.remove('hidden');
+                outputArea.classList.add('hidden');
+            }
+        }
+
+        function renderReportData(data) {
+            const outputArea = document.getElementById('report-output-area');
+            
+            // Conteúdo de relatório (Simplificado para evitar quebras, dependente do seu index.js)
+            const totalMembros = data.totalMembers || 0;
+            const membersListHtml = data.allMembers ? data.allMembers.map(m => `
+                <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors">
+                    <td class="p-3 font-medium">${m.name}</td>
+                    <td class="p-3">${m.instrument}</td>
+                    <td class="p-3 hidden sm:table-cell">${m.city}/${m.state}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="3" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
+
+            outputArea.innerHTML = `
+                <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
+                <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
+                
+                <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
+                        <thead>
+                            <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
+                                <th class="p-3">Nome</th>
+                                <th class="p-3">Instrumento</th>
+                                <th class="p-3 hidden sm:table-cell">Localidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>${membersListHtml}</tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button onclick="adminLogout()" class="bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow text-rjb-yellow font-bold py-2 px-6 rounded-lg hover:bg-rjb-yellow/10 transition">
+                        Sair
+                    </button>
+                </div>
+            `;
+        }
+        
+        // FUNÇÃO DE FALLBACK ROBUSTO PARA MINIATURAS (MANTIDO)
+        function handleVideoFallback(img, videoId) {
+            let fallbackLevel = parseInt(img.getAttribute('data-fallback-level')) || 0;
+            const urls = [
+                `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                `https://img.youtube.com/vi/${videoId}/default.jpg`
+            ];
+
+            if (fallbackLevel < urls.length) {
+                img.setAttribute('data-fallback-level', fallbackLevel + 1);
+                img.src = urls[fallbackLevel];
+            } else {
+                img.onerror = null;
+                img.style.backgroundColor = '#1E1E1E';
+                img.style.opacity = '0.5';
+            }
+        }
+        
+function generateVideoCard(video) {
+    const thumbnailUrl = `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
+    return `
+        <div class="group relative rounded-xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-soft-glow hover:scale-[1.02] border border-rjb-yellow/10 bg-gray-50 dark:bg-rjb-card-dark/50">
+            <div class="video-thumbnail-container" onclick="openVideoModal('${video.id}')">
+                <img src="${thumbnailUrl}" alt="${video.title}" class="video-thumbnail-img" data-fallback-level="0" onerror="handleVideoFallback(this, '${video.id}')">
+                <div class="play-icon-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="white"></path></svg></div>
+            </div>
+            <div class="p-4">
+                <h3 class="text-lg font-bold text-rjb-text dark:text-rjb-text-dark leading-tight mb-1">${video.title}</h3>
+                <p class="text-rjb-yellow text-sm font-mono">${video.date}</p>
+            </div>
+        </div>
+    `;
+}
+
+        // --- FUNÇÕES DE GERAÇÃO DE CONTEÚDO ---
+        
+function generateHomePageWrapper() { /* (MANTIDO) */ return `
+    <section id="home-background-section" class="relative">
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            ${generateHomePage()}
+        </div>
+    </section>
+    <section class="bg-rjb-bg-light dark:bg-rjb-bg-dark max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 mt-[-5rem] relative z-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div class="p-6 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark shadow-deep-shadow dark:shadow-xl dark:shadow-black/50 border-t-4 border-rjb-yellow/70 transition-all duration-300 hover:shadow-soft-glow dark:hover:shadow-soft-glow">
+                <svg class="w-10 h-10 mx-auto mb-3 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6h.01M21 3h.01"></path></svg>
+                <h3 class="text-xl font-semibold mb-2 text-rjb-text dark:text-rjb-text-dark">Música Instrumental</h3>
+                <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">A harmonia perfeita entre os instrumentos e o saber.</p>
+            </div>
+            <div class="p-6 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark shadow-deep-shadow dark:shadow-xl dark:shadow-black/50 border-t-4 border-rjb-yellow/70 transition-all duration-300 hover:shadow-soft-glow dark:hover:shadow-soft-glow">
+                <svg class="w-10 h-10 mx-auto mb-3 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8l4-2 4 2V7m0 8a2 2 0 11-4 0 2 2 0 014 0zM12 11c0 1.657-1.343 3-3 3H5a2 2 0 01-2-2v-3a2 2 0 012-2h4a2 2 0 012 2v1zM21 17a2 2 0 01-2 2h-5m-7-2a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v5"></path></svg>
+                <h3 class="text-xl font-semibold mb-2 text-rjb-text dark:text-rjb-text-dark">Repertório Único</h3>
+                <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Composições próprias e arranjos exclusivos da cultura Racional.</p>
+            </div>
+            <div class="p-6 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark shadow-deep-shadow dark:shadow-xl dark:shadow-black/50 border-t-4 border-rjb-yellow/70 transition-all duration-300 hover:shadow-soft-glow dark:hover:shadow-soft-glow">
+                <svg class="w-10 h-10 mx-auto mb-3 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="text-xl font-semibold mb-2 text-rjb-text dark:text-rjb-text-dark">Compromisso Cultural</h3>
+                <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Divulgando a Cultura Racional em eventos e apresentações.</p>
+            </div>
+        </div>
+    </section>
+`; }
+
+function generateHomePage() { /* (MANTIDO) */ return `
+    <div class="text-center pt-24 pb-24">
+        <h1 class="text-7xl md:text-9xl font-mono rjb-logo-text text-rjb-yellow mb-2">Racional Jazz Band</h1>
+        <h2 class="text-3xl md:text-5xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-6 transition-colors duration-500">Música, Arte e Cultura Racional</h2>
+        <p class="text-lg md:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 mb-10 max-w-4xl mx-auto transition-colors duration-500">
+            A Racional Jazz Band é a expressão musical do conhecimento Racional, unindo a força do jazz, a beleza da melodia e a pureza de um saber que transcende.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <button onclick="navigateTo('apresentacoes')" class="bg-rjb-yellow text-rjb-text font-bold py-3 px-8 rounded-full text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-105 shadow-subtle-glow hover:shadow-soft-glow">
+                Ver Apresentações
+            </button>
+            <button onclick="navigateTo('sobre')" class="bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-8 rounded-full text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 transition duration-300 transform hover:scale-105">
+                Conheça a História
+            </button>
+        </div>
+    </div>
+`; }
+
+function generateSobrePage() { /* (MANTIDO) */ return `
+    <div class="text-rjb-text dark:text-rjb-text-dark transition-colors duration-500">
+        <p class="text-xl mb-6 border-l-4 border-rjb-yellow pl-4 italic font-light text-rjb-text/90 dark:text-rjb-text-dark/90">
+            "A Racional Jazz Band não é apenas uma orquestra; é um veículo da Luz e do Saber que a Música Racional carrega consigo."
+        </p>
+        <p class="mb-4 text-rjb-text/80 dark:text-rjb-text-dark/80">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+        <p class="mb-4 text-rjb-text/80 dark:text-rjb-text-dark/80">
+            Nascida do ideal de unir a expressividade do Jazz com os fundamentos da Cultura Racional, a RJB tem percorrido um caminho de excelência e dedicação. A orquestra é composta por músicos e colaboradores que se dedicam a elevar o padrão artístico e cultural de suas apresentações.
+        </p>
+        <p class="text-rjb-text/80 dark:text-rjb-text-dark/80">
+            Acreditamos que a música é uma linguagem universal capaz de tocar a essência humana. Por isso, cada nota, cada arranjo e cada performance é cuidadosamente planejado para transmitir uma mensagem de paz, equilíbrio e conhecimento. Venha conhecer mais sobre nossa <button onclick="navigateTo('repertorio')" class="text-rjb-yellow hover:underline">música</button> e nossa <button onclick="navigateTo('fotos')" class="text-rjb-yellow hover:underline">história visual</button>.
+        </p>
+    </div>
+    <div class="mt-12 p-6 bg-rjb-yellow/10 dark:bg-rjb-yellow/5 rounded-lg border border-rjb-yellow/30 transition-colors duration-500">
+        <h3 class="text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4">Nossa Missão</h3>
+        <ul class="list-disc list-inside space-y-2 text-rjb-text/80 dark:text-rjb-text-dark/80 ml-4">
+            <li>Promover a Cultura Racional através da arte musical.</li>
+            <li>Desenvolver e executar um repertório instrumental de alta qualidade.</li>
+            <li>Inspirar e capacitar novos músicos e colaboradores.</li>
+        </ul>
+    </div>
+`; }
+
+        function generateApresentacoesPage() { /* (MANTIDO) */ return `
+				<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
+					<p>Assista aos nossos principais shows e apresentações de grande público. Experiências sonoras e visuais completas da Racional Jazz Band.</p>
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+					${APRESENTACOES_VIDEOS.map(generateVideoCard).join('')}
+				</div>
+				<p class="text-center mt-12 text-rjb-text/70 dark:text-rjb-text-dark/70">
+					Assista a mais performances no nosso canal oficial do YouTube.
+				</p>
+			`;
+        }
+
+        function generateBastidoresPage() { /* (MANTIDO) */ return `
+				<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
+					<p>Acompanhe o processo criativo, os ensaios e a dedicação dos músicos da Racional Jazz Band. Veja a música sendo feita, nota por nota, em vídeos exclusivos dos bastidores e entrevistas com a equipe.</p>
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+					${BASTIDORES_VIDEOS.map(generateVideoCard).join('')}
+				</div>
+				<p class="text-center mt-12 text-rjb-text/70 dark:text-rjb-text-dark/70">
+					Assista a mais vídeos de bastidores e entrevistas no nosso canal oficial do YouTube.
+				</p>
+			`;
+        }
+        
+function generateRepertorioPage() {
+    // MOCK DE DADOS INTERNOS PARA ESTA PÁGINA (GARANTINDO QUE NÃO QUEBRE)
+    const racionais = [
+                { title: 'A Consciência Positiva', time: '3:00', mp3: 'A_Consciencia_Positiva' },
+                { title: 'A Luz do Saber', time: '3:00', mp3: 'A_Luz_do_Saber' },
+                { title: 'A Luz que Mudou o Meu Destino', time: '3:00', mp3: 'A_Luz_que_Mudou_o_Meu_Destino' },
+                { title: 'Apoteose Racional', time: '3:00', mp3: 'Apoteose_Racional' },
+                { title: 'De Onde Veio e Vai', time: '3:00', mp3: 'De_Onde_Veio_e_Vai' },
+                { title: 'Deixa Quem Quiser Falar', time: '3:00', mp3: 'Deixa_Quem_Quiser_Falar' },
+                { title: 'Desencanto Universal', time: '3:00', mp3: 'Desencanto_Universal' },
+                { title: 'Homenagem a Brud', time: '3:00', mp3: 'Homenagem_a_Brud' },
+                { title: 'Jubileu de Ouro', time: '3:00', mp3: 'Jubileu_de_Ouro' },
+                { title: 'Menino Rei', time: '3:00', mp3: 'Menino_Rei' },
+                { title: 'Meu Lugar Não é Aqui', time: '3:00', mp3: 'Meu_Lugar_Nao_e_Aqui' },
+                { title: 'Mundo Racional', time: '3:00', mp3: 'Mundo_Racional' },
+                { title: 'O Homem', time: '3:00', mp3: 'O_Homem' },
+                { title: 'Os Caravaneiros - Em Andamento', time: '3:00', mp3: 'Os_Caravaneiros_Em_Andamento' },
+                { title: 'Oxigênio', time: '3:00', mp3: 'Oxigenio' },
+                { title: 'Paraíso Racional', time: '3:00', mp3: 'Paraiso_Racional' },
+                { title: 'Paz Interior', time: '3:00', mp3: 'Paz_Interior' },
+                { title: 'Salve o Retiro Racional', time: '3:00', mp3: 'Salve_o_Retiro_Racional' },
+                { title: 'Ser Iluminado', time: '3:00', mp3: 'Ser_Iluminado' },
+                { title: 'Viva a Cultura Racional', time: '3:00', mp3: 'Viva_a_Cultura_Racional' },
+            ];
+
+            const diversas = [
+                { title: 'AI QUE SAUDADE', time: '3:45', mp3: 'AI_QUE_SAUDADE' },
+                { title: 'ANUNCIACAO', time: '4:10', mp3: 'ANUNCIACAO' },
+                { title: 'ARIA CANTINELA', time: '3:20', mp3: 'ARIA_CANTINELA' },
+                { title: 'AS FORCAS DA NATUREZA', time: '4:55', mp3: 'AS_FORCAS_DA_NATUREZA' },
+                { title: 'BILLY JEAN', time: '4:50', mp3: 'BILLY_JEAN' },
+                { title: 'CAROLINA SEU JORGE', time: '3:30', mp3: 'CAROLINA_SEU_JORGES' },
+                { title: 'CARUSO', time: '4:20', mp3: 'CARUSO' },
+                { title: 'CHEIA DE MANIAS', time: '3:50', mp3: 'CHEIA_DE_MANIAS' },
+                { title: 'CLAREOU', time: '4:05', mp3: 'CLAREOU' },
+                { title: 'COLO DE MENINA', time: '3:55', mp3: 'COLO_DE_MENINA' },
+                { title: 'CONTE PARTIRO ARRANJO', time: '4:40', mp3: 'CONTE_PARTIRO_ARRANJO' },
+                { title: 'DAQUI PARA SEMPRE', time: '3:15', mp3: 'DAQUI_PARA_SEMPRE' },
+                { title: 'DO JEITO QUE A VIDA QUER', time: '4:00', mp3: 'DO_JEITO_QUE_A_VIDA_QUER' },
+                { title: 'DO SEU LADO', time: '3:35', mp3: 'DO_SEU_LADO' },
+                { title: 'EU SO QUERO UM XODO', time: '3:05', mp3: 'EU_SO_QUERO_UM_XODO' },
+                { title: 'FELICIDADE', time: '3:25', mp3: 'FELICIDADE' },
+                { title: 'FULMINANTE', time: '4:35', mp3: 'FULMINANTE' },
+                { title: 'GAME OF THRONES', time: '3:40', mp3: 'GAME_OF_THRONES' },
+                { title: 'GIRLS JUST WANT TO HAVE FUN', time: '4:00', mp3: 'GIRLS_JUST_WANT_TO_HAVE_FUN' },
+                { title: 'HEAL THE WORLD PARTES', time: '5:00', mp3: 'HEAL_THE_WORLD_PARTES' },
+                { title: 'MENINA CAROLINA', time: '3:10', mp3: 'MENINA_CAROLINA' },
+                { title: 'NAQUELA MESA', time: '3:58', mp3: 'NAQUELA_MESA' },
+                { title: 'O CANTO DAS TRES RACAS', time: '4:25', mp3: 'O_CANTO_DAS_TRES_RACAS' },
+                { title: 'O HOMEM - ROBERTO CARLOS', time: '4:15', mp3: 'O_HOMEM_ROBERTO_CARLOS' },
+                { title: 'O REI LEAO', time: '4:30', mp3: 'O_REI_LEAO' },
+                { title: 'OLHOS COLORIDOS', time: '3:40', mp3: 'OLHOS_COLORIDOS' },
+                { title: 'OURO NEGRO', time: '3:55', mp3: 'OURO_NEGRO' },
+                { title: 'PARABENS JAZZ', time: '3:12', mp3: 'PARABENS_JAZZ' },
+                { title: 'PRECISO ME ENCONTRAR', time: '4:02', mp3: 'PRECISO_ME_ENCONTRAR' },
+                { title: 'QUE NEM MARE', time: '3:28', mp3: 'QUE_NEM_MARE' },
+                { title: 'SWEET CHILD O MINE', time: '5:05', mp3: 'SWEET_CHILD_O_MINE' },
+                { title: 'THE FINAL COUNTDOWN', time: '5:10', mp3: 'THE_FINAL_COUNTDOWN' },
+                { title: 'TITANIUM', time: '4:40', mp3: 'TITANIUM' },
+                { title: 'TROMPETA DE ESPANHA', time: '3:08', mp3: 'TROMPETA_DE_ESPANHA' },
+                { title: 'VILAREJO', time: '3:18', mp3: 'VILAREJO' },
+                { title: 'WHISKY A GO GO', time: '3:33', mp3: 'WHISKY_A_GO_GO' },
+    ].sort((a, b) => a.title.localeCompare(b.title));
+
+    // Função interna para renderizar listas
+    const renderList = (title, songs, isRacional) => `
+        <div class="mb-10">
+            <h3 class="text-3xl font-extrabold mb-6 ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/90 dark:text-rjb-text-dark/90'} border-b-2 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20'} pb-2 transition-colors duration-500">
+                ${title}
+            </h3>
+            <ul class="space-y-3">
+                ${songs.map((song) => `
+                    <li class="flex justify-between items-center p-4 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark/50 hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 transition-colors duration-300 shadow-sm border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/30 dark:border-rjb-text-dark/30'}">
+                        <div class="flex items-center space-x-3">
+                            <button onclick="togglePlay('${song.title.trim().replace(/'/g, "\\'")}', '${song.mp3}')" class="play-button text-rjb-yellow hover:text-yellow-600 transition-colors transform hover:scale-105 p-2 rounded-full bg-rjb-yellow/10 hover:bg-rjb-yellow/20 dark:bg-rjb-yellow/5 dark:hover:bg-rjb-yellow/10" data-title="${song.title.trim()}" aria-label="Tocar ${song.title.trim()}">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            <span class="text-lg font-medium text-rjb-text dark:text-rjb-text-dark">${song.title}</span>
+                        </div>
+                        <span class="text-sm ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/70 dark:text-rjb-text-dark/70'}">${song.time}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+    `;
+
+    // Retorno final da página
+    return `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            ${renderList('Músicas Racionais 🎧', racionais, true)}
+            ${renderList('Outros Clássicos 🎷', diversas, false)}
+        </div>
+        <p class="text-center mt-12 text-rjb-text/70 dark:text-rjb-text-dark/70 italic">
+            Nosso repertório está em constante expansão e renovação.
+        </p>
+    `;
+}
+
+        function generatePartiturasPage() {
+    // MOCK de dados internos para esta página
+    const sheets = [
+        { name: 'Melodia da Esfera', mp3: 'melodia_esfera.mp3' },
+        { name: 'Vibrações de Outro Mundo', mp3: 'vibra_outro_mundo.mp3' },
+        { name: 'Conhecimento Universal', mp3: 'conhecimento_uni.mp3' },
+    ];
+
+    return `
+        <div class="space-y-6">
+            <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8">
+                Área exclusiva para músicos. Aqui você pode fazer o download das partituras nos formatos Sibelius e PDF, além de ouvir a referência em MP3.
+            </p>
+
+            ${sheets.map(sheet => `
+                <div class="p-5 md:p-6 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark flex flex-col md:flex-row justify-between items-center border border-rjb-yellow/30 shadow-md hover:shadow-lg transition-all duration-300">
+                    <div class="mb-4 md:mb-0 md:w-1/3">
+                        <h3 class="text-xl font-bold text-rjb-text dark:text-rjb-text-dark">${sheet.name}</h3>
+                        <p class="text-sm text-rjb-yellow/90">Partituras e Referência</p>
+                    </div>
+
+                    <div class="md:w-1/3 flex justify-center mb-4 md:mb-0">
+                        <audio controls class="w-full max-w-xs p-1 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark transition-colors duration-500">
+                            <source src="/audio/${sheet.mp3}" type="audio/mp3">
+                            Seu navegador não suporta o elemento audio.
+                        </audio>
+                    </div>
+
+                    <div class="md:w-1/3 flex justify-end space-x-4">
+                        <button onclick="showMessage('Download do arquivo .sib para ${sheet.name}')" class="flex items-center space-x-2 bg-rjb-text dark:bg-rjb-card-dark text-white dark:text-rjb-text-dark font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 dark:hover:bg-rjb-bg-dark transition-colors text-sm transform hover:scale-105 border border-transparent dark:border-rjb-text-dark/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>.SIB</span>
+                        </button>
+                        <button onclick="showMessage('Download do arquivo .pdf para ${sheet.name}')" class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-4 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-105 shadow-subtle-glow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>.PDF</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function generateFotosPage() {
+    // MOCK de dados internos para esta página
+    const photos = [
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841433.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534258.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534262.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534265.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534263.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534264.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534261.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534260.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534259.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534257.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841431.jpg',
+                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841432.jpg',
+    ];
+
+    return `
+        <div class="space-y-6">
+            <p class="text-lg">
+                Uma galeria de momentos capturados em nossos shows, ensaios e eventos.
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-xl border border-rjb-yellow/10 transition-colors duration-500">
+                ${photos.map((url, index) => `
+                    <div onclick="openModal('${url}')" class="group relative overflow-hidden rounded-lg shadow-md aspect-square transition-shadow duration-500 hover:shadow-soft-glow cursor-pointer">
+                        <img src="${url}" alt="Foto da Apresentação ${index + 1}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:rotate-1">
+                        <div class="absolute inset-0 bg-rjb-yellow/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
+                            <span class="text-rjb-text dark:text-rjb-text-dark text-3xl opacity-0 group-hover:opacity-100 transition-opacity delay-200">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <p class="pt-4 text-sm italic text-rjb-text/60 dark:text-rjb-text-dark/60">
+                Essa turma é linda não é? :)
+            </p>
+        </div>
+    `;
+}
+
+function generateAgendaPage() {
+    // MOCK de dados internos para esta página
+    const events = [
+        { date: '2025-12-30', time: '20:00', title: 'Dia do Sábio', location: 'Retiro Racional - Nova Iguaçu (RJ)', link: '#', dateString: '15 DEZ 2025' },
+        //{ date: '2026-01-20', time: '19:30', title: 'Pocket Show - Jazz na Praça', location: 'Praça Tiradentes, Curitiba (PR)', link: '#', dateString: '20 JAN 2026' },
+        //{ date: '2026-03-05', time: '21:00', title: 'Festival de Jazz de Inverno', location: 'Teatro Pedro II, Ribeirão Preto (SP)', link: '#', dateString: '05 MAR 2026' },
+    ];
+
+    return `
+        <div class="space-y-6">
+            <p class="text-lg text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
+                Confira a nossa agenda de apresentações para participar de momentos inesquecíveis de música e cultura.
+            </p>
+            ${events.map(event => `
+                <div class="flex flex-col md:flex-row items-start md:items-center p-6 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark border-l-8 border-rjb-yellow shadow-md hover:shadow-lg transition-all duration-300">
+                    <div class="flex-shrink-0 w-full md:w-32 mb-4 md:mb-0 mr-6 text-center">
+                        <p class="text-3xl font-extrabold text-rjb-yellow leading-none">${event.dateString.split(' ')[0]}</p>
+                        <p class="text-md font-semibold text-rjb-text/90 dark:text-rjb-text-dark/90">${event.dateString.split(' ')[1]} ${event.dateString.split(' ')[2]}</p>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1">${event.title}</h3>
+                        <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">${event.location} &bull; ${event.time}h</p>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+        function generateContatoPage() { /* (MANTIDO) */ return `
+				<div class="max-w-xl mx-auto">
+					<p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8 text-center">
+						Para contratações, parcerias ou dúvidas gerais, envie-nos uma mensagem.
+					</p>
+					<form id="contact-form" onsubmit="submitContactForm(event);">
+						<div class="space-y-4">
+							<div>
+								<label for="name" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Nome Completo</label>
+								<input type="text" id="name" name="name" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Seu nome">
+							</div>
+							<div>
+								<label for="email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Email</label>
+								<input type="email" id="email" name="email" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="seu.email@exemplo.com">
+							</div>
+							<div>
+								<label for="message" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Mensagem</label>
+								<textarea id="message" name="message" rows="4" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Sua mensagem..."></textarea>
+							</div>
+							<button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
+								Enviar Mensagem
+							</button>
+						</div>
+					</form>
+				</div>
+			`;
+        }
+
+        function generateCadastroPage() { /* (ATUALIZADO) */ return `
+            <div class="max-w-xl mx-auto">
+                <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8 text-center">
+                    Se você é músico, colaborador ou deseja se juntar à Racional Jazz Band, preencha o formulário abaixo utilizando a **Chave de Convite** fornecida pela equipe.
+                </p>
+                <form id="member-registration-form" onsubmit="submitMemberRegistration(event);">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="reg-invite-key" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Chave de Convite (Obrigatório)</label>
+                            <input type="text" id="reg-invite-key" name="inviteKey" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: RJB-MEMBER-2025">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="reg-name" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Nome</label>
+                                <input type="text" id="reg-name" name="name" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all">
+                            </div>
+                            <div>
+                                <label for="reg-instrument" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Instrumento / Área de Colaboração</label>
+                                <input type="text" id="reg-instrument" name="instrument" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: Saxofone, Design, Logística">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="reg-email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Email</label>
+                            <input type="email" id="reg-email" name="email" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all">
+                            </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="reg-city" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Cidade</label>
+                                <input type="text" id="reg-city" name="city" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: Curitiba">
+                            </div>
+                            <div>
+                                <label for="reg-state" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Estado (UF)</label>
+                                <input type="text" id="reg-state" name="state" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: PR">
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="terms" type="checkbox" required class="w-4 h-4 text-rjb-yellow bg-rjb-bg-light dark:bg-rjb-bg-dark border-gray-300 rounded focus:ring-rjb-yellow transition-colors duration-300">
+                            <label for="terms" class="ml-2 text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">Eu li e concordo com os termos de participação.</label>
+                        </div>
+                        <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
+                            Enviar Inscrição
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `; }
+        
+        function generateReportsPage() { /* (NOVA PÁGINA DE LOGIN) */ return `
+            <div class="max-w-md mx-auto">
+                <h2 class="text-3xl font-extrabold text-rjb-yellow mb-6 text-center">Área Administrativa</h2>
+                <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8 text-center">
+                    Acesso restrito.
+                </p>
+
+                <div id="admin-login-area" class="bg-rjb-bg-light dark:bg-rjb-bg-dark/70 p-6 rounded-lg shadow-xl border border-rjb-yellow/20">
+                    <form id="admin-login-form" onsubmit="handleAdminLogin(event);">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="admin-email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">E-mail</label>
+                                <input type="email" id="admin-email" name="email" required 
+                                    class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
+                                    placeholder="Seu e-mail de administrador">
+                            </div>
+                            <div>
+                                <label for="admin-password" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Senha</label>
+                                <input type="password" id="admin-password" name="password" required 
+                                    class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
+                                    placeholder="Sua senha secreta">
+                            </div>
+                            <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
+                                Entrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="report-output-area" class="hidden mt-10">
+                    </div>
+            </div>
+        `; }
+        
+        // --- FUNÇÃO DE RENDERIZAÇÃO PRINCIPAL (CORRIGIDA) ---
+        function renderPage() {
+            const content = document.getElementById('main-content');
+            let html = '';
+
+            let pageTitle = '';
+            
+            // 1. Define o título da página (CORRIGIDO: Apenas define o título)
+            if (subMenuRJB[currentPage]) {
+                pageTitle = subMenuRJB[currentPage];
+            } else {
+                switch (currentPage) {
+                    case 'home': pageTitle = 'Racional Jazz Band'; break;
+                    case 'sobre': pageTitle = 'Sobre a RJB'; break;
+                    case 'agenda': pageTitle = 'Agenda de Eventos'; break;
+                    case 'contato': pageTitle = 'Fale Conosco'; break;
+                    case 'member-registration': pageTitle = 'Cadastro de Membros'; break;
+                    case 'reports': pageTitle = 'Área Administrativa'; break;
+                    default: pageTitle = 'Página Não Encontrada';
+                }
+            }
+            
+            // 2. Renderiza a Home Page ou o Wrapper de Conteúdo
+            if (currentPage === 'home') {
+                html += generateHomePageWrapper();
+            } else {
+                html += `
+					<div class="pt-32 md:pt-40 pb-16 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+						<h1 class="text-6xl md:text-8xl font-extrabold rjb-logo-text text-rjb-yellow mb-4 text-center">
+							${pageTitle.split('/')[0].trim()}
+						</h1>
+						${pageTitle.includes('/') ? `<p class="text-xl dark:text-rjb-text-dark/70 text-rjb-text/70 mb-12 text-center">${pageTitle.split('/')[1].trim()}</p>` : ''}
+						
+						<div class="bg-rjb-card-light dark:bg-rjb-card-dark p-6 md:p-10 rounded-xl shadow-deep-shadow dark:shadow-xl dark:shadow-black/30 z-10 border border-rjb-yellow/10 transition-colors duration-500 text-rjb-text dark:text-rjb-text-dark">
+				`;
+
+                // 3. Renderiza o conteúdo específico da página
+                switch (currentPage) {
+                    case 'sobre': html += generateSobrePage(); break;
+                    case 'apresentacoes': html += generateApresentacoesPage(); break;
+                    case 'bastidores': html += generateBastidoresPage(); break;
+                    case 'repertorio': html += generateRepertorioPage(); break;
+                    case 'partituras': html += generatePartiturasPage(); break;
+                    case 'fotos': html += generateFotosPage(); break;
+                    case 'agenda': html += generateAgendaPage(); break;
+                    case 'contato': html += generateContatoPage(); break;
+                    case 'member-registration': html += generateCadastroPage(); break;
+                    case 'reports': html += generateReportsPage(); break;
+                    default: html += '<p class="text-center text-xl dark:text-rjb-text-dark/80 text-rjb-text/80">Opa! Página não encontrada.</p>';
+                }
+
+                html += `
+						</div>
+					</div>
+				`;
+            }
+            content.innerHTML = html;
+
+            updateActiveMenu();
+            
+            // CHAMA O CONTROLE DE ACESSO SOMENTE NA PÁGINA DE RELATÓRIOS
+            if (currentPage === 'reports') {
+                setTimeout(renderProtectedReportView, 0); 
+            }
+        }
+        
+        // --- Inicialização ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            renderPage();
+
+            // Lógica de menu móvel (MANTIDA)
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    const openIcon = document.getElementById('menu-open-icon');
+                    const closeIcon = document.getElementById('menu-close-icon');
+                    if (mobileMenu.classList.contains('hidden')) {
+                        openIcon.classList.remove('hidden');
+                        closeIcon.classList.add('hidden');
+                    } else {
+                        openIcon.classList.add('hidden');
+                        closeIcon.classList.remove('hidden');
+                    }
+                });
+            }
+
+            // Lógica de dropdown (MANTIDA)
+            const rjbDropdownButton = document.getElementById('nav-rjb-dropdown');
+            const rjbDropdownMenu = document.getElementById('rjb-dropdown-menu');
+            if (rjbDropdownButton) {
+                rjbDropdownButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    rjbDropdownMenu.classList.toggle('hidden');
+                });
+            }
+
+            const rjbDropdownButtonMobile = document.getElementById('rjb-dropdown-button-mobile');
+            const rjbDropdownMenuMobile = document.getElementById('rjb-dropdown-menu-mobile');
+            if (rjbDropdownButtonMobile) {
+                rjbDropdownButtonMobile.addEventListener('click', () => {
+                    rjbDropdownMenuMobile.classList.toggle('hidden');
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (rjbDropdownMenu && rjbDropdownButton && !rjbDropdownMenu.classList.contains('hidden')) {
+                    if (!rjbDropdownButton.contains(e.target) && !rjbDropdownMenu.contains(e.target)) {
+                        rjbDropdownMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* --- Estilos CSS (MANTIDOS) --- */
+        body { transition: background-color 0.5s ease, color 0.5s ease; min-height: 100vh; }
+        .rjb-logo-text { text-shadow: 0 0 4px rgba(255, 215, 0, 0.8); letter-spacing: -0.05em; }
+        #home-background-section { background-image: url("WhatsApp Image 2025-11-19 at 17.15.58.jpeg"); background-size: cover; background-position: center 40%; background-attachment: fixed; position: relative; padding-top: 10rem; padding-bottom: 10rem; }
+        #home-background-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.88); z-index: 1; transition: background-color 0.5s ease; }
+        .dark #home-background-section::before { background-color: rgba(0, 0, 0, 0.7); }
+        .video-thumbnail-container { position: relative; width: 100%; padding-top: 56.25%; overflow: hidden; cursor: pointer; }
+        .video-thumbnail-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease, opacity 0.3s ease; }
+        .group:hover .video-thumbnail-img { transform: scale(1.05); }
+        .play-icon-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(0, 0, 0, 0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .group:hover .play-icon-overlay { background-color: rgba(255, 215, 0, 0.9); transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); }
+        .play-icon-overlay svg { width: 30px; height: 30px; fill: #FFD700; margin-left: 4px; transition: fill 0.3s ease; }
+        .group:hover .play-icon-overlay svg { fill: #2A2A2A; }
+        .header-rjb { background-color: var(--tw-rjb-card-light); border-bottom: 1px solid #EEEEEE; transition: background-color 0.5s ease, border-color 0.5s ease; }
+        .dark .header-rjb { background-color: var(--tw-rjb-card-dark); border-bottom: 1px solid rgba(255, 215, 0, 0.1); }
+        .nav-link-active { border-bottom: 2px solid #FFD700; padding-bottom: 5px; }
+        .rjb-logo-image { border-radius: 50%; border: 2px solid var(--tw-rjb-yellow); box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); transition: all 0.5s ease; }
+        .dark .rjb-logo-image { border: 2px solid rgba(255, 215, 0, 0.6); box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 5px rgba(255, 215, 0, 0.2) inset; }
+        .play-button.playing svg path { d: path("M6 19h4V5H6v14zm8-14v14h4V5h-4z"); fill-rule: unset; clip-rule: unset; }
+        .message-error { background-color: #D32F2F !important; color: white !important; box-shadow: 0 0 10px rgba(211, 47, 47, 0.7); }
+    </style>
+</head>
+
+<body class="font-sans bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text transition-colors duration-500">
+
+    <header class="sticky top-0 header-rjb shadow-lg dark:shadow-black/50 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <button onclick="navigateTo('home')"
+                    class="hover:opacity-80 transition-opacity flex items-center space-x-2">
+                    <img src="logo.jpeg" alt="Racional Jazz Band Logo"
+                        class="h-16 w-auto dark:hidden block rjb-logo-image">
+                    <img src="logo-dark.png" alt="Racional Jazz Band Logo Dark"
+                        class="h-16 w-auto hidden dark:block rjb-logo-image">
+                    <span class="sr-only">Racional Jazz Band</span>
+                </button>
+
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <button id="nav-home" onclick="navigateTo('home')"
+                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Home</button>
+                    <button id="nav-sobre" onclick="navigateTo('sobre')"
+                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Sobre</button>
+
+                    <div class="relative group">
+                        <button id="nav-rjb-dropdown"
+                            class="nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">
+                            A RJB
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="rjb-dropdown-menu"
+                            class="hidden absolute left-1/2 transform -translate-x-1/2 mt-0 w-48 rounded-md shadow-lg bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-rjb-yellow/20 dark:ring-rjb-yellow/50 focus:outline-none z-50 transition-colors duration-500">
+                            <div class="py-1">
+                                <button id="nav-repertorio" onclick="navigateTo('repertorio')"
+                                    class="nav-link block w-full text-left px-4 py-2 text-sm text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow hover:text-rjb-text transition-colors">Repertório</button>
+                                <button id="nav-partituras" onclick="navigateTo('partituras')"
+                                    class="nav-link block w-full text-left px-4 py-2 text-sm text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow hover:text-rjb-text transition-colors">Área
+                                    de Partituras</button>
+                                <button id="nav-fotos" onclick="navigateTo('fotos')"
+                                    class="nav-link block w-full text-left px-4 py-2 text-sm text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow hover:text-rjb-text transition-colors">Galeria
+                                    de Fotos</button>
+                                <button id="nav-apresentacoes" onclick="navigateTo('apresentacoes')"
+                                    class="nav-link block w-full text-left px-4 py-2 text-sm text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow hover:text-rjb-text transition-colors">Apresentações</button>
+                                <button id="nav-bastidores" onclick="navigateTo('bastidores')"
+                                    class="nav-link block w-full text-left px-4 py-2 text-sm text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow hover:text-rjb-text transition-colors">Ensaios</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="nav-agenda" onclick="navigateTo('agenda')"
+                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Agenda</button>
+                    <button id="nav-contato" onclick="navigateTo('contato')"
+                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Contato</button>
+                    
+                    <button id="nav-relatorios-desktop" onclick="navigateTo('reports')"
+                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Área Administrativa</button>
+
+                    <button onclick="toggleDarkMode()"
+                        class="text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors p-2 rounded-full hover:bg-rjb-yellow/10 focus:outline-none">
+                        <svg class="w-6 h-6 dark:block hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                        <svg class="w-6 h-6 dark:hidden block" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                    </button>
+                </nav>
+
+                <button id="nav-cadastro-desktop" onclick="navigateTo('member-registration')"
+                    class="nav-link bg-rjb-yellow text-rjb-text font-bold py-2 px-4 rounded-full text-sm hover:bg-yellow-500 transition-colors shadow-subtle-glow hidden md:block">
+                    Cadastro
+                </button>
+
+                <div class="md:hidden flex items-center space-x-2">
+                    <button onclick="toggleDarkMode()"
+                        class="text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors p-2 rounded-md hover:bg-rjb-yellow/10 focus:outline-none">
+                        <svg class="w-6 h-6 dark:block hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                        <svg class="w-6 h-6 dark:hidden block" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <button id="mobile-menu-button" type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-text dark:hover:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-card-dark focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rjb-yellow transition-colors duration-500"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                        <svg id="menu-open-icon" class="block h-6 w-6" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg id="menu-close-icon" class="hidden h-6 w-6" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:hidden hidden absolute w-full bg-rjb-card-light dark:bg-rjb-card-dark border-b border-rjb-yellow/30 pb-3 transition-colors duration-500"
+            id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button id="nav-home-mobile" onclick="navigateTo('home')"
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Home</button>
+                <button id="nav-sobre-mobile" onclick="navigateTo('sobre')"
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Sobre</button>
+
+                <div class="relative nav-item-rjb">
+                    <button id="rjb-dropdown-button-mobile"
+                        class="flex items-center justify-between w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors"
+                        aria-expanded="false">
+                        A RJB
+                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <div id="rjb-dropdown-menu-mobile"
+                        class="hidden pl-4 bg-rjb-bg-light dark:bg-rjb-card-dark/70 rounded-md transition-colors duration-500">
+                        <button id="nav-apresentacoes-mobile" onclick="navigateTo('apresentacoes')"
+                            class="nav-link block w-full text-left px-3 py-2 text-sm text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-text transition-colors">Performances
+                            Oficiais</button>
+                        <button id="nav-bastidores-mobile" onclick="navigateTo('bastidores')"
+                            class="nav-link block w-full text-left px-3 py-2 text-sm text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-text transition-colors">Bastidores
+                            & Ensaios</button>
+                        <button id="nav-repertorio-mobile" onclick="navigateTo('repertorio')"
+                            class="nav-link block w-full text-left px-3 py-2 text-sm text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-text transition-colors">Repertório</button>
+                        <button id="nav-partituras-mobile" onclick="navigateTo('partituras')"
+                            class="nav-link block w-full text-left px-3 py-2 text-sm text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-text transition-colors">Área
+                            de Partituras</button>
+                        <button id="nav-fotos-mobile" onclick="navigateTo('fotos')"
+                            class="nav-link block w-full text-left px-3 py-2 text-sm text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-text transition-colors">Fotos</button>
+                    </div>
+                </div>
+
+                <button id="nav-agenda-mobile" onclick="navigateTo('agenda')"
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Agenda</button>
+                <button id="nav-contato-mobile" onclick="navigateTo('contato')"
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Contato</button>
+                
+                <button id="nav-relatorios-mobile" onclick="navigateTo('reports')"
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Área Administrativa</button>
+
+                <button id="nav-cadastro-mobile" onclick="navigateTo('member-registration')"
+                    class="nav-link block w-full text-left mt-2 bg-rjb-yellow text-rjb-text font-bold py-2 px-3 rounded-md text-base hover:bg-yellow-500 transition-colors shadow-subtle-glow">Cadastro</button>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="z-10 relative opacity-100 transition-opacity duration-500">
+    </main>
+
+    <footer
+        class="bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow/20 mt-12 py-8 z-20 relative transition-colors duration-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="rjb-logo-text text-xl font-mono font-extrabold text-rjb-yellow">RJB</div>
+            <p class="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm mt-1 mb-4">Racional Jazz Band &copy; 2025.
+                Todos os direitos reservados.</p>
+            <div class="space-x-4 text-rjb-text/50 dark:text-rjb-text-dark/50 text-sm">
+                <button onclick="navigateTo('sobre')" class="hover:text-rjb-yellow transition-colors">Política de
+                    Privacidade</button>
+                <span>|</span>
+                <button onclick="navigateTo('contato')" class="hover:text-rjb-yellow transition-colors">Termos de
+                    Uso</button>
+                <span>|</span>
+                <button onclick="navigateTo('member-registration')" class="hover:text-rjb-yellow transition-colors">Trabalhe
+                    Conosco</button>
+            </div>
+        </div>
+        <div id="audio-player-container" class="hidden"></div>
+    </footer>
+
+    <div id="image-modal" onclick="closeModal()"
+        class="fixed inset-0 bg-black bg-opacity-90 z-[70] hidden flex items-center justify-center transition-opacity duration-300 opacity-0">
+        <div onclick="event.stopPropagation()" class="max-w-7xl max-h-[90vh] mx-auto p-4 relative">
+            <button onclick="closeModal()"
+                class="absolute top-4 right-4 text-white hover:text-rjb-yellow transition-colors text-4xl font-light z-10 p-2">
+                &times;
+            </button>
+            <img id="modal-image" src="" alt="Imagem Ampliada"
+                class="max-h-[85vh] w-auto object-contain rounded-lg shadow-soft-glow">
+        </div>
+    </div>
+
+    <div id="video-modal" onclick="closeVideoModal()"
+        class="fixed inset-0 bg-black bg-opacity-95 z-[80] hidden flex items-center justify-center transition-opacity duration-300 opacity-0">
+        <div onclick="event.stopPropagation()" class="w-full max-w-5xl mx-auto p-4 relative">
+            <button onclick="closeVideoModal()"
+                class="absolute -top-10 right-4 text-white hover:text-rjb-yellow text-4xl font-light z-10 p-2 transition-colors">&times;</button>
+
+            <div class="relative w-full pt-[56.25%] bg-black rounded-lg shadow-soft-glow overflow-hidden border border-rjb-yellow/30">
+                <iframe 
+                    id="video-iframe" 
+                    class="absolute top-0 left-0 w-full h-full"
+                    src="" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+    <div id="custom-message-box"
+        class="hidden opacity-0 fixed top-5 left-1/2 transform -translate-x-1/2 bg-rjb-yellow text-rjb-text px-6 py-3 rounded-lg shadow-deep-shadow dark:shadow-soft-glow z-[60] transition-opacity duration-300">
+        <p id="message-text" class="font-semibold"></p>
+    </div>
+
+</body>
+
+</html>
