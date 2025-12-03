@@ -7,7 +7,8 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit'); 
 const admin = require('firebase-admin'); 
 const jwt = require('jsonwebtoken'); 
-
+const { Storage } = require('@google-cloud/storage');
+const multer = require('multer');
 // --- Configurações de E-mail (Lidas das Variáveis de Ambiente do GCP) ---
 // Usamos GMAIL_USER e GMAIL_PASS conforme sua configuração no Cloud Run.
 const SENDER_EMAIL = process.env.GMAIL_USER;
@@ -106,9 +107,6 @@ const limiter = rateLimit({
 });
 // -----------------------------------------------------------
 // index.js (APENAS TRECHOS QUE DEVEM SER ALTERADOS/ADICIONADOS)
-
-// Substitua a linha de importação de admin
-const admin = require('firebase-admin'); 
 // E adicione o Storage e Multer
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
