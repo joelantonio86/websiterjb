@@ -384,7 +384,252 @@
             navigateTo('reports'); 
             showMessage('Você saiu da Área Administrativa.', false);
         }
+// index.html (Adicionar dentro do bloco <script>, perto das outras funções de fetch/render)
 
+// ... (Funções de fetchMemberReport, renderReportData, etc.) ...
+
+// --- FUNÇÕES DE ARQUIVOS (ANEXOS) ---
+
+async function fetchAttachmentsReport(token) {
+    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/list';
+    const attachmentsArea = document.getElementById('attachments-output-area');
+
+    showMessage('Buscando lista de anexos...');
+    attachmentsArea.innerHTML = '';
+    
+    try {
+        const response = await fetch(endpointUrl, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            renderAttachmentsData(data);
+        } else {
+            showMessage(data.message || `Erro ${response.status} ao buscar anexos.`, true);
+        }
+
+    } catch (error) {
+        console.error('ERRO DE CONEXÃO/REDE ao buscar anexos:', error);
+        showMessage('Erro de conexão com a API de anexos.', true);
+    }
+}
+
+async function handleFileUpload(event) {
+    event.preventDefault();
+    
+    const fileInput = document.getElementById('attachment-file');
+    const token = localStorage.getItem('adminToken');
+    
+    if (!fileInput.files.length) {
+        showMessage('Selecione um arquivo para upload.', true);
+        return;
+    }
+    
+    showMessage('Enviando arquivo...', false);
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    
+    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/upload';
+
+    try {
+        const response = await fetch(endpointUrl, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showMessage(result.message || 'Arquivo enviado com sucesso!');
+            document.getElementById('file-upload-form').reset();
+            fetchAttachmentsReport(token); // Atualiza a lista
+        } else {
+            console.error('Erro no Backend:', response.status, result.message);
+            showMessage(result.message || `Falha no upload. Erro ${response.status}.`, true);
+        }
+
+    } catch (error) {
+        console.error('ERRO DE CONEXÃO/REDE ao fazer upload:', error);
+        showMessage('Erro de conexão com a API de upload.', true);
+    }
+}
+
+async function handleDeleteFile(fileName) {
+    if (!confirm(`Tem certeza que deseja EXCLUIR o arquivo '${fileName}'? Esta ação é irreversível.`)) {
+        return;
+    }
+    
+    const token = localStorage.getItem('adminToken');
+    const endpointUrl = `https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/delete/${fileName}`;
+
+    showMessage(`Excluindo ${fileName}...`);
+
+    try {
+        const response = await fetch(endpointUrl, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showMessage(result.message || 'Arquivo excluído com sucesso!');
+            fetchAttachmentsReport(token); // Atualiza a lista
+        } else {
+            console.error('Erro no Backend:', response.status, result.message);
+            showMessage(result.message || `Falha na exclusão. Erro ${response.status}.`, true);
+        }
+
+    } catch (error) {
+        console.error('ERRO DE CONEXÃO/REDE ao deletar:', error);
+        showMessage('Erro de conexão com a API de exclusão.', true);
+    }
+}
+
+function renderAttachmentsData(files) {
+    const attachmentsArea = document.getElementById('attachments-output-area');
+
+    if (files.length === 0) {
+        attachmentsArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum anexo encontrado no Google Cloud Storage.</p>';
+        return;
+    }
+    
+    const formatSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const fileListHtml = files.map(file => {
+        const date = new Date(file.uploaded).toLocaleDateString('pt-BR');
+        const time = new Date(file.uploaded).toLocaleTimeString('pt-BR');
+        
+        return `
+            <div class="flex flex-col sm:flex-row justify-between items-center p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark/50 hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 transition-colors duration-300 border-l-4 border-rjb-yellow/50">
+                <div class="flex-grow mb-2 sm:mb-0 sm:mr-4">
+                    <p class="font-medium text-rjb-text dark:text-rjb-text-dark break-all">${file.name}</p>
+                    <p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">${formatSize(file.size)} &bull; ${date} ${time}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="${file.downloadUrl}" target="_blank" download="${file.name}"
+                        class="text-sm bg-rjb-yellow text-rjb-text font-bold py-1 px-3 rounded-md hover:bg-yellow-500 transition flex items-center">
+                        Download
+                    </a>
+                    <button onclick="handleDeleteFile('${file.name.replace(/'/g, "\\'")}')"
+                        class="text-sm bg-red-600 text-white font-bold py-1 px-3 rounded-md hover:bg-red-700 transition flex items-center">
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    attachmentsArea.innerHTML = `
+        <div class="space-y-3">${fileListHtml}</div>
+    `;
+}
+
+function handleDownloadCSV() {
+    const token = localStorage.getItem('adminToken');
+    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members/csv'; 
+    
+    if (!token) {
+        showMessage('Erro: Você não está logado.', true);
+        return;
+    }
+
+    showMessage('Iniciando download do relatório CSV...');
+
+    fetch(endpointUrl, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(error => { throw new Error(error.message || 'Falha na requisição.'); });
+        }
+        // Cria um link temporário para forçar o download do blob
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rjb_members_report.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showMessage('Download CSV iniciado com sucesso!');
+    })
+    .catch(error => {
+        console.error('ERRO AO BAIXAR CSV:', error);
+        showMessage(`Falha ao baixar o arquivo: ${error.message}`, true);
+    });
+}
+
+
+function renderProtectedReportView() {
+    const token = localStorage.getItem('adminToken');
+    const authArea = document.getElementById('admin-login-area');
+    const outputArea = document.getElementById('report-output-area');
+    
+    if (!authArea || !outputArea) return;
+
+    if (token) {
+        authArea.classList.add('hidden');
+        outputArea.classList.remove('hidden');
+        fetchMemberReport(token);
+        fetchAttachmentsReport(token); // Chama a nova função de listagem
+    } else {
+        authArea.classList.remove('hidden');
+        outputArea.classList.add('hidden');
+    }
+}
+
+
+function renderReportData(data) {
+    const reportArea = document.getElementById('member-report-details');
+    // ... (restante da lógica de renderReportData) ...
+    
+    // Altere o final da função para usar um elemento filho 'member-report-details'
+    reportArea.innerHTML = `
+        <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
+        <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
+        
+        <button onclick="handleDownloadCSV()" class="bg-rjb-yellow text-rjb-text font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition mb-6 shadow-subtle-glow flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Baixar CSV Completo</span>
+        </button>
+        
+        <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
+                <thead>
+                    <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
+                        <th class="p-3">Nome</th>
+                        <th class="p-3">Instrumento</th>
+                        <th class="p-3 hidden sm:table-cell">Localidade</th>
+                    </tr>
+                </thead>
+                <tbody>${membersListHtml}</tbody>
+            </table>
+        </div>
+    `;
+    
+    // Remove o botão "Sair" daqui, ele será colocado no wrapper principal
+}
+
+// ... (Restante das funções) ...
         async function fetchMemberReport(token) {
             const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
             const outputArea = document.getElementById('report-output-area');
@@ -899,37 +1144,67 @@ function generateAgendaPage() {
         `; }
         
         function generateReportsPage() { /* (NOVA PÁGINA DE LOGIN) */ return `
-            <div class="max-w-md mx-auto">
-                <h2 class="text-3xl font-extrabold text-rjb-yellow mb-6 text-center">Área Administrativa</h2>
-                <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8 text-center">
-                    Acesso restrito.
-                </p>
-
-                <div id="admin-login-area" class="bg-rjb-bg-light dark:bg-rjb-bg-dark/70 p-6 rounded-lg shadow-xl border border-rjb-yellow/20">
-                    <form id="admin-login-form" onsubmit="handleAdminLogin(event);">
-                        <div class="space-y-4">
-                            <div>
-                                <label for="admin-email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">E-mail</label>
-                                <input type="email" id="admin-email" name="email" required 
-                                    class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
-                                    placeholder="Seu e-mail de administrador">
-                            </div>
-                            <div>
-                                <label for="admin-password" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Senha</label>
-                                <input type="password" id="admin-password" name="password" required 
-                                    class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
-                                    placeholder="Sua senha secreta">
-                            </div>
-                            <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
-                                Entrar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <div id="report-output-area" class="hidden mt-10">
+            <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl font-extrabold text-rjb-yellow mb-8 text-center">Área Administrativa</h2>
+        
+        <div id="admin-login-area" class="bg-rjb-bg-light dark:bg-rjb-bg-dark/70 p-6 rounded-lg shadow-xl border border-rjb-yellow/20">
+            <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-6 text-center">Acesso restrito para regentes e administradores.</p>
+            <form id="admin-login-form" onsubmit="handleAdminLogin(event);">
+                <div class="space-y-4">
+                    <div>
+                        <label for="admin-email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">E-mail</label>
+                        <input type="email" id="admin-email" name="email" required 
+                            class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
+                            placeholder="Seu e-mail de administrador">
                     </div>
+                    <div>
+                        <label for="admin-password" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Senha</label>
+                        <input type="password" id="admin-password" name="password" required 
+                            class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
+                            placeholder="Sua senha secreta">
+                    </div>
+                    <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
+                        Entrar
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="report-output-area" class="hidden mt-10 space-y-10">
+            
+            <div id="member-report-details" class="p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
+                <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando relatório de membros...</p>
             </div>
+
+            <div class="p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
+                <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Gerenciamento de Anexos (Arquivos)</h3>
+                
+                <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-4">Faça upload de arquivos (PDF, DOCX, XLSX, etc.) e gerencie os anexos disponíveis para o regente.</p>
+                
+                <form id="file-upload-form" onsubmit="handleFileUpload(event);" class="mb-6 p-4 border border-dashed border-rjb-yellow/50 rounded-lg">
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                        <input type="file" id="attachment-file" name="file" required 
+                               class="w-full sm:w-2/3 p-2 border border-rjb-yellow/30 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <button type="submit" class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2 px-4 rounded-lg hover:bg-yellow-500 transition">
+                            Upload
+                        </button>
+                    </div>
+                    <p class="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mt-2">Tamanho máximo: 5MB.</p>
+                </form>
+
+                <h4 class="text-xl font-semibold mt-8 mb-3">Arquivos Atuais no Cloud Storage</h4>
+                <div id="attachments-output-area" class="space-y-3">
+                    <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando anexos...</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="adminLogout()" class="bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow text-rjb-yellow font-bold py-2 px-6 rounded-lg hover:bg-rjb-yellow/10 transition">
+                    Sair da Área Administrativa
+                </button>
+            </div>
+        </div>
+    </div>
         `; }
         
         // --- FUNÇÃO DE RENDERIZAÇÃO PRINCIPAL (CORRIGIDA) ---

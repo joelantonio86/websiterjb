@@ -105,12 +105,233 @@ const limiter = rateLimit({
     legacyHeaders: false, 
 });
 // -----------------------------------------------------------
+// index.js (APENAS TRECHOS QUE DEVEM SER ALTERADOS/ADICIONADOS)
 
+// Substitua a linha de importação de admin
+const admin = require('firebase-admin'); 
+// E adicione o Storage e Multer
+const { Storage } = require('@google-cloud/storage');
+const multer = require('multer');
+
+// ... (Restante das importações e configurações iniciais) ...
+
+// --- INICIALIZAÇÃO DO GOOGLE CLOUD STORAGE E MULTER ---
+
+// 1. Storage: Conecta ao Storage e aponta para o bucket (Use o nome do seu bucket do GCP)
+const storage = new Storage();
+// **ATENÇÃO:** Mude 'rjb-admin-files-bucket' para o nome do seu bucket no Google Cloud Storage.
+const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
+const bucket = storage.bucket(BUCKET_NAME);
+
+// 2. Multer: Configurado para armazenar o arquivo em memória (buffer)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024 // Limita a 5MB
+    }
+});
+
+// ... (Restante da inicialização do Firebase/Firestore) ...
+
+// ... (Configurações de Express, Rate Limiter, etc.) ...
+
+/**
+ * Rota GET para listar arquivos de anexo no Google Cloud Storage.
+ * PROTEGIDA POR JWT.
+ * URL: /api/attachments/list
+ */
+app.get('/api/attachments/list', authenticateJWT, async (req, res) => {
+    try {
+        // 1. Verifica se o bucket existe
+        const [exists] = await bucket.exists();
+        if (!exists) {
+            console.error(`Bucket GCS não encontrado: ${BUCKET_NAME}`);
+            return res.status(500).json({ status: 500, message: 'Bucket de armazenamento indisponível.' });
+        }
+
+        // 2. Lista os arquivos (blobs) no bucket
+        const [files] = await bucket.getFiles();
+        
+        const fileList = files.map(file => ({
+            name: file.name,
+            size: file.metadata.size, // Tamanho em bytes
+            uploaded: file.metadata.timeCreated,
+            // URL pública para download (se for público) ou para uso interno (assinada)
+            url: file.publicUrl(),
+            // URL de download direta, para download forçado (se for privado, é preferível uma URL assinada)
+            downloadUrl: `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(file.name)}` 
+        }));
+
+        console.log(`Lista de ${fileList.length} arquivos acessada por ${req.user.userId}`);
+        return res.status(200).json(fileList);
+
+    } catch (error) {
+        console.error('ERRO AO LISTAR ARQUIVOS GCS:', error);
+        return res.status(500).json({ status: 500, message: 'Erro interno ao listar anexos.' });
+    }
+});
+
+/**
+ * Rota POST para upload de um novo arquivo para o Cloud Storage.
+ * PROTEGIDA POR JWT.
+ * URL: /api/attachments/upload
+ */
+app.post('/api/attachments/upload', authenticateJWT, upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ status: 400, message: 'Nenhum arquivo enviado.' });
+    }
+    
+    // O Multer armazena o arquivo em req.file (se usarmos memoryStorage)
+    const file = req.file; 
+    
+    // Cria um nome de arquivo único ou usa o nome original
+    const fileName = `${Date.now()}-${file.originalname.replace(/ /g, "_")}`;
+    
+    const blob = bucket.file(fileName);
+    
+    // Cria um stream de upload para o GCS
+    const blobStream = blob.createWriteStream({
+        resumable: false,
+        metadata: {
+            contentType: file.mimetype,
+            // Adiciona metadados sobre quem fez o upload
+            metadata: {
+                uploader: req.user.userId,
+                originalName: file.originalname
+            }
+        }
+    });
+
+    blobStream.on('error', (err) => {
+        console.error('ERRO NO UPLOAD DE GCS:', err);
+        return res.status(500).json({ status: 500, message: 'Erro ao enviar o arquivo para o Cloud Storage.' });
+    });
+
+    blobStream.on('finish', () => {
+        // Arquivo enviado com sucesso. Torna-o público (se desejar)
+        // blob.makePublic().then(() => { ... });
+        console.log(`Arquivo ${fileName} enviado por ${req.user.userId}.`);
+        
+        return res.status(200).json({ 
+            status: 200, 
+            message: 'Upload concluído com sucesso.', 
+            fileName: fileName,
+            publicUrl: blob.publicUrl()
+        });
+    });
+
+    // Finaliza o stream de upload com o buffer do arquivo
+    blobStream.end(file.buffer);
+});
+
+/**
+ * Rota DELETE para excluir um arquivo do Cloud Storage.
+ * PROTEGIDA POR JWT.
+ * URL: /api/attachments/delete
+ */
+app.delete('/api/attachments/delete/:fileName', authenticateJWT, async (req, res) => {
+    const { fileName } = req.params;
+    
+    if (!fileName) {
+        return res.status(400).json({ status: 400, message: 'Nome do arquivo ausente.' });
+    }
+
+    try {
+        const file = bucket.file(fileName);
+        
+        // Tenta deletar o arquivo
+        await file.delete();
+        
+        console.log(`Arquivo ${fileName} excluído por ${req.user.userId}.`);
+        return res.status(200).json({ status: 200, message: `Arquivo '${fileName}' excluído com sucesso.` });
+        
+    } catch (error) {
+        // Se o arquivo não existir, GCS retorna um erro. 
+        if (error.code === 404) {
+             return res.status(404).json({ status: 404, message: `Arquivo '${fileName}' não encontrado.` });
+        }
+        console.error('ERRO AO DELETAR ARQUIVO GCS:', error);
+        return res.status(500).json({ status: 500, message: 'Erro interno ao excluir o anexo.' });
+    }
+});
+
+// ... (Restante das rotas do Nodemailer e Firestore) ...
+
+// ... (Final da inicialização do servidor) ...
 
 /**
  * Rota POST ORIGINAL para receber a submissão do formulário de CONTATO.
  * URL: /
  */
+// index.js (Adicionar após a rota /api/reports/members)
+
+/**
+ * Rota GET para exportar a lista completa de membros em formato CSV.
+ * PROTEGIDA POR JWT.
+ * URL: /api/reports/members/csv
+ */
+app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => { 
+    if (!db || !membersCollection) {
+        return res.status(503).json({ status: 503, message: 'Serviço de banco de dados indisponível.' });
+    }
+
+    try {
+        const snapshot = await membersCollection.get();
+        const allMembersData = [];
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Formata o timestamp do Firestore para algo legível, se existir
+            const submittedAt = data.submittedAt && data.submittedAt.toDate ? data.submittedAt.toDate().toISOString() : '';
+            
+            allMembersData.push({ 
+                id: doc.id, 
+                name: data.name,
+                instrument: data.instrument,
+                email: data.email,
+                city: data.city,
+                state: data.state,
+                submittedAt: submittedAt
+            });
+        });
+
+        if (allMembersData.length === 0) {
+            return res.status(404).json({ status: 404, message: 'Nenhum membro encontrado para exportação.' });
+        }
+        
+        // 1. Cria o cabeçalho CSV
+        const headers = ['ID', 'Nome', 'Instrumento', 'Email', 'Cidade', 'Estado', 'Data de Inscrição'];
+        let csv = headers.join(',') + '\n';
+
+        // 2. Preenche as linhas CSV
+        allMembersData.forEach(member => {
+            const values = [
+                member.id,
+                `"${member.name.replace(/"/g, '""')}"`, // Garante que aspas em nomes sejam tratadas
+                `"${member.instrument.replace(/"/g, '""')}"`,
+                member.email,
+                member.city,
+                member.state,
+                member.submittedAt
+            ];
+            csv += values.join(',') + '\n';
+        });
+
+        // 3. Envia o arquivo CSV para download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="rjb_members_report.csv"');
+        console.log(`Exportação CSV acessada por: ${req.user.userId}`);
+        return res.status(200).send(csv);
+
+    } catch (error) {
+        console.error('ERRO AO EXPORTAR CSV:', error);
+        return res.status(500).json({ 
+            status: 500, 
+            message: 'Erro interno ao gerar o relatório CSV.' 
+        });
+    }
+});
+
 app.post('/', limiter, async (req, res) => { 
     // 1. Validação
     if (!req.body) {
