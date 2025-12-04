@@ -7,7 +7,8 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit'); 
 const admin = require('firebase-admin'); 
 const jwt = require('jsonwebtoken'); 
-const { Storage } = require('@google-cloud/storage');
+//const { Storage } = require('@google-cloud/storage');
+const GcpStorage = require('@google-cloud/storage').Storage;
 const multer = require('multer');
 // --- Configurações de E-mail (Lidas das Variáveis de Ambiente do GCP) ---
 // Usamos GMAIL_USER e GMAIL_PASS conforme sua configuração no Cloud Run.
@@ -37,7 +38,7 @@ try {
     // Captura qualquer erro de runtime e garante que db/membersCollection permaneçam nulos.
     console.error('ERRO FATAL CAPTURADO: O processo continuará sem acesso ao DB.', error.message);
 }
-const storage = new Storage();
+const storage = new GcpStorage();
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
 const bucket = storage.bucket(BUCKET_NAME);
 
