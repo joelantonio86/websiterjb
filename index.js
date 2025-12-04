@@ -37,7 +37,16 @@ try {
     // Captura qualquer erro de runtime e garante que db/membersCollection permaneçam nulos.
     console.error('ERRO FATAL CAPTURADO: O processo continuará sem acesso ao DB.', error.message);
 }
+const storage = new Storage();
+const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
+const bucket = storage.bucket(BUCKET_NAME);
 
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024 // Limita a 5MB
+    }
+});
 
 // --- CONFIGURAÇÕES DE ADMINISTRAÇÃO E SEGURANÇA ---
 
@@ -104,29 +113,6 @@ const limiter = rateLimit({
     },
     standardHeaders: true, 
     legacyHeaders: false, 
-});
-// -----------------------------------------------------------
-// index.js (APENAS TRECHOS QUE DEVEM SER ALTERADOS/ADICIONADOS)
-// E adicione o Storage e Multer
-const { Storage } = require('@google-cloud/storage');
-const multer = require('multer');
-
-// ... (Restante das importações e configurações iniciais) ...
-
-// --- INICIALIZAÇÃO DO GOOGLE CLOUD STORAGE E MULTER ---
-
-// 1. Storage: Conecta ao Storage e aponta para o bucket (Use o nome do seu bucket do GCP)
-const storage = new Storage();
-// **ATENÇÃO:** Mude 'rjb-admin-files-bucket' para o nome do seu bucket no Google Cloud Storage.
-const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
-const bucket = storage.bucket(BUCKET_NAME);
-
-// 2. Multer: Configurado para armazenar o arquivo em memória (buffer)
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024 // Limita a 5MB
-    }
 });
 
 // ... (Restante da inicialização do Firebase/Firestore) ...
