@@ -6,11 +6,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit'); 
 const admin = require('firebase-admin'); 
-const path = require('path');
 const jwt = require('jsonwebtoken'); 
 const { Storage } = require('@google-cloud/storage');
-//const GcpStorage = require('@google-cloud/storage').Storage;
 const multer = require('multer');
+const path = require('path'); // <<< LINHA CRÍTICA ADICIONADA
 // --- Configurações de E-mail (Lidas das Variáveis de Ambiente do GCP) ---
 // Usamos GMAIL_USER e GMAIL_PASS conforme sua configuração no Cloud Run.
 const SENDER_EMAIL = process.env.GMAIL_USER;
@@ -18,7 +17,7 @@ const SENDER_PASS = process.env.GMAIL_PASS;
 const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com'; 
 
 // --- INICIALIZAÇÃO DO FIREBASE ADMIN E FIRESTORE (REFORÇADO MÁXIMO) ---
-let db = null;
+let db = null;  
 let membersCollection = null;
 
 try {
