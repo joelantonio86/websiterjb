@@ -53,7 +53,12 @@ const limiter = rateLimit({
 
 // 🚨 CORREÇÃO CRÍTICA: INICIA O SERVIDOR IMEDIATAMENTE 🚨
 // Isso permite que o Cloud Run satisfaça o Health Check rapidamente.
-app.listen(PORT, () => {
+app.listen(PORT, (err) => {
+    if (err) {
+        console.error("ERRO AO INICIAR O LISTENER DO EXPRESS:", err);
+        // Não usar process.exit(1) aqui também, deixar o processo terminar naturalmente
+        return;
+    }
     console.log(`Servidor Express rodando e escutando na porta ${PORT} (Verificação de saúde OK).`);
 });
 
@@ -61,7 +66,6 @@ app.listen(PORT, () => {
 // 2. BLOCO DE CÓDIGO CRÍTICO PARA DEBUG (AGORA ISOLADO)
 process.on('uncaughtException', (err) => {
     console.error('ERRO FATAL NO PROCESSO NODE.JS:', err);
-    process.exit(1); 
 });
 // --- FIM DO BLOCO DE DEBUG --
 
