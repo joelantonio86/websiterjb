@@ -10,6 +10,12 @@ const jwt = require('jsonwebtoken');
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 const path = require('path'); // <<< LINHA CRÍTICA ADICIONADA
+// --- BLOCO DE CÓDIGO CRÍTICO PARA DEBUG ---
+process.on('uncaughtException', (err) => {
+    console.error('ERRO FATAL NO PROCESSO NODE.JS:', err);
+    process.exit(1); // Garante que o contêiner morra para o Cloud Run pegar o erro
+});
+// --- FIM DO BLOCO DE DEBUG ---
 // --- Configurações de E-mail (Lidas das Variáveis de Ambiente do GCP) ---
 // Usamos GMAIL_USER e GMAIL_PASS conforme sua configuração no Cloud Run.
 const SENDER_EMAIL = process.env.GMAIL_USER;
@@ -85,9 +91,6 @@ app.get('/', (req, res) => {
 
 // 2. MANIPULADOR DE REQUISIÇÕES OPTIONS (CRÍTICO PARA CORS/PREFLIGHT)
 app.options('*', cors());   
-// 2. MANIPULADOR DE REQUISIÇÕES OPTIONS (CRÍTICO PARA CORS/PREFLIGHT)
-// Garante que requisições OPTIONS passem, permitindo que o Rate Limiter seja aplicado depois.
-app.options('*', cors()); 
 
 // --- FUNÇÃO DE PROTEÇÃO JWT (MIDDLEWARE) ---
 /**
