@@ -33,7 +33,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-9
 // --- Configuração do Servidor Express ---
 const app = express();
 const PORT = process.env.PORT || 8080; 
-
+app.set('trust proxy', true);
 // 1. Configurações de CORS e JSON/BodyParser
 app.use(cors({ origin: true }));
 app.use(bodyParser.json());
