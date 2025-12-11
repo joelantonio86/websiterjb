@@ -89,12 +89,6 @@ app.get('/', (req, res) => {
 });
 // index.js (APÓS TODOS OS REQUIRES)
 
-process.on('uncaughtException', (err) => {
-    console.error('ERRO FATAL NO PROCESSO NODE.JS:', err);
-    process.exit(1); 
-});
-// --- FIM DA NOVA CONFIGURAÇÃO ---
-
 // 2. MANIPULADOR DE REQUISIÇÕES OPTIONS (CRÍTICO PARA CORS/PREFLIGHT)
 app.options('*', cors());   
 
