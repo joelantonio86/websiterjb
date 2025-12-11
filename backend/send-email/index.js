@@ -87,6 +87,12 @@ app.get('/', (req, res) => {
     // __dirname é o diretório onde o index.js está.
     res.sendFile(__dirname + '/index.html');
 });
+// index.js (APÓS TODOS OS REQUIRES)
+
+process.on('uncaughtException', (err) => {
+    console.error('ERRO FATAL NO PROCESSO NODE.JS:', err);
+    process.exit(1); 
+});
 // --- FIM DA NOVA CONFIGURAÇÃO ---
 
 // 2. MANIPULADOR DE REQUISIÇÕES OPTIONS (CRÍTICO PARA CORS/PREFLIGHT)
