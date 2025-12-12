@@ -14,7 +14,7 @@ const path = require('path');
 // 1. Definição das Constantes de E-mail/Ambiente
 const SENDER_EMAIL = process.env.GMAIL_USER;
 const SENDER_PASS = process.env.GMAIL_PASS;
-const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com'; 
+const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com, racionaljazzbandoficial@gmail.com';
 
 // --- Credenciais e Chaves ---
 const VALID_INVITE_KEYS = [
