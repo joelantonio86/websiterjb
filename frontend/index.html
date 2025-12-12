@@ -577,7 +577,7 @@ function handleDownloadCSV() {
     });
 }
 
-// index.html (NOVO CÓDIGO PARA A FUNÇÃO renderProtectedReportView)
+// index.html - CÓDIGO CORRIGIDO/FINAL
 function renderProtectedReportView() {
     const token = localStorage.getItem('adminToken');
     const authArea = document.getElementById('admin-login-area');
@@ -591,7 +591,7 @@ function renderProtectedReportView() {
         
         // --- CHAME AMBOS OS RELATÓRIOS AQUI ---
         fetchMemberReport(token);
-        fetchAttachmentsReport(token); // <--- AGORA ESTÁ CHAMANDO A LISTA DE ANEXOS!
+        fetchAttachmentsReport(token); // <-- INCLUSÃO CRÍTICA
     } else {
         authArea.classList.remove('hidden');
         outputArea.classList.add('hidden');
