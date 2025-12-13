@@ -630,58 +630,68 @@ function renderReportData(data) {
     // Remove o botão "Sair" daqui, ele será colocado no wrapper principal
 }
 
-// ... (Restante das funções) ...
-        async function fetchMemberReport(token) {
-            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
-            const outputArea = document.getElementById('report-output-area');
+// index.html (NOVA VERSÃO CORRIGIDA DE fetchMemberReport)
+async function fetchMemberReport(token) {
+    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
+    const outputArea = document.getElementById('report-output-area');
 
-            showMessage('Buscando dados protegidos...');
-            outputArea.innerHTML = '';
-            outputArea.classList.add('hidden');
+    showMessage('Buscando dados protegidos...');
+    outputArea.innerHTML = '';
+    outputArea.classList.add('hidden');
 
-            try {
-                const response = await fetch(endpointUrl, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+    try {
+        const response = await fetch(endpointUrl, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-                const data = await response.json();
+        const data = await response.json();
 
-                if (response.ok) {
-                    showMessage('Relatório carregado com sucesso!');
-                    renderReportData(data);
-                    outputArea.classList.remove('hidden');
-                } else if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('adminToken');
-                    localStorage.removeItem('adminRole');
-                    showMessage(data.message || 'Sessão expirada. Faça login novamente.', true);
-                    renderProtectedReportView();
-                } else {
-                    showMessage(data.message || `Erro ${response.status} ao buscar o relatório.`, true);
-                }
-
-            } catch (error) {
-                console.error('ERRO DE CONEXÃO/REDE ao buscar relatório:', error);
-                showMessage('Erro de conexão com a API de relatórios.', true);
-            }
-        }
-
-        function renderProtectedReportView() {
-            const token = localStorage.getItem('adminToken');
-            const authArea = document.getElementById('admin-login-area');
-            const outputArea = document.getElementById('report-output-area');
+        if (response.ok) {
+            showMessage('Relatório carregado com sucesso!');
+            renderReportData(data); // LINHA 654: INJETA O NOVO HTML (COM A DIV DE ANEXOS)
+            console.log("Membros recebidos. Continuando...");
+            outputArea.classList.remove('hidden');
             
-            if (!authArea || !outputArea) return;
+            // --- CORREÇÃO CRÍTICA DO TIMING ---
+            // Espera o DOM se atualizar antes de buscar os anexos.
+            setTimeout(() => {
+                fetchAttachmentsReport(token);
+            }, 50); // 50ms é um tempo seguro para o DOM atualizar
+            // --- FIM DA CORREÇÃO CRÍTICA ---
 
-            if (token) {
-                authArea.classList.add('hidden');
-                outputArea.classList.remove('hidden');
-                fetchMemberReport(token);
-            } else {
-                authArea.classList.remove('hidden');
-                outputArea.classList.add('hidden');
-            }
+        } else if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminRole');
+            showMessage(data.message || 'Sessão expirada. Faça login novamente.', true);
+            renderProtectedReportView();
+        } else {
+            showMessage(data.message || `Erro ${response.status} ao buscar o relatório.`, true);
         }
+
+    } catch (error) {
+        console.error('ERRO DE CONEXÃO/REDE ao buscar relatório:', error);
+        showMessage('Erro de conexão com a API de relatórios.', true);
+    }
+}
+
+// index.html (CORREÇÃO DE EXECUÇÃO: TENTAR FORÇAR AS DUAS CHAMADAS)
+function renderProtectedReportView() {
+    const token = localStorage.getItem('adminToken');
+    const authArea = document.getElementById('admin-login-area');
+    const outputArea = document.getElementById('report-output-area');
+    
+    if (!authArea || !outputArea) return;
+
+    if (token) {
+        authArea.classList.add('hidden');
+        outputArea.classList.remove('hidden');
+        fetchMemberReport(token); // <--- APENAS INICIA A CADEIA DE EVENTOS
+    } else {
+        authArea.classList.remove('hidden');
+        outputArea.classList.add('hidden');
+    }
+}
 
         function renderReportData(data) {
             const outputArea = document.getElementById('report-output-area');
