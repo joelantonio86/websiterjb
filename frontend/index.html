@@ -66,7 +66,7 @@
         ];
         // index.html: DADOS E VARIÁVEIS GLOBAIS
         // Substitua o placeholder pela URL pública do seu bucket R2
-        const R2_BASE_URL = 'https://seu-bucket-id.r2.cloudflarestorage.com/rjb-sheets';
+        const R2_BASE_URL = 'https://pub-934c96bc6fb449a7ad7b3491065976d3.r2.dev/rjb-sheets';
         // OU, se você usa domínio próprio:
         // const R2_BASE_URL = 'https://files.rjb.com.br/sheets';
         const racionais = [
@@ -1060,10 +1060,10 @@ function generateSobrePage() {
 
 // index.html (FUNÇÃO generatePartiturasPage - Aprox. Linha 969)
 function generatePartiturasPage() {
-    // 1. Combine e classifique todas as músicas, usando os arrays globais
+    // 1. Combine e classifique todas as músicas, ADICIONANDO A PROPRIEDADE 'FOLDER'
     const allSheets = [
-        ...racionais.map(s => ({ ...s, category: 'Música Racional', isRacional: true })),
-        ...diversas.map(s => ({ ...s, category: 'Outros Clássicos', isRacional: false })),
+        ...racionais.map(s => ({ ...s, category: 'Música Racional', folder: 'racionais' })),
+        ...diversas.map(s => ({ ...s, category: 'Outros Clássicos', folder: 'diversas' })),
     ].sort((a, b) => a.title.localeCompare(b.title));
 
     // 2. Agrupe por categoria para renderização em blocos
@@ -1076,7 +1076,7 @@ function generatePartiturasPage() {
     const renderSheetList = (categoryTitle, sheets) => {
         if (!sheets || sheets.length === 0) return '';
 
-        const isRacional = sheets[0].isRacional;
+        const isRacional = sheets[0].folder === 'racionais'; // Usa a nova propriedade 'folder'
         const titleClass = isRacional ? 'text-rjb-yellow' : 'text-rjb-text dark:text-rjb-text-dark';
         const borderColor = isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20';
 
@@ -1096,19 +1096,19 @@ function generatePartiturasPage() {
 
                             <div class="md:w-2/3 flex flex-wrap justify-end space-x-2 space-y-2 md:space-y-0">
                                 
-                                <a href="${R2_BASE_URL}/${sheet.mp3}.mp3" download="${sheet.title.replace(/ /g, '_')}.mp3"
+                                <a href="${R2_BASE_URL}/${sheet.folder}/mp3/${sheet.mp3}.mp3" download="${sheet.title.replace(/ /g, '_')}.mp3"
                                     class="flex items-center space-x-2 bg-rjb-yellow/10 text-rjb-yellow font-semibold py-2 px-3 rounded-lg hover:bg-rjb-yellow/20 transition-colors text-sm transform hover:scale-[1.03]">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"></path></svg>
                                     <span>MP3</span>
                                 </a>
                                 
-                                <a href="${R2_BASE_URL}/${sheet.mp3}.pdf" download="${sheet.title.replace(/ /g, '_')}.pdf"
+                                <a href="${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf" download="${sheet.title.replace(/ /g, '_')}.pdf"
                                     class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-3 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-[1.03] shadow-subtle-glow">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                                     <span>PDF</span>
                                 </a>
                                 
-                                <a href="${R2_BASE_URL}/${sheet.mp3}.sib" download="${sheet.title.replace(/ /g, '_')}.sib"
+                                <a href="${R2_BASE_URL}/${sheet.folder}/sib/${sheet.mp3}.sib" download="${sheet.title.replace(/ /g, '_')}.sib"
                                     class="flex items-center space-x-2 bg-rjb-text dark:bg-rjb-card-dark text-white dark:text-rjb-text-dark font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 dark:hover:bg-rjb-bg-dark transition-colors text-sm transform hover:scale-[1.03] border border-transparent dark:border-rjb-text-dark/20">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     <span>SIB</span>
