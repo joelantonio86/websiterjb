@@ -64,9 +64,99 @@
             { title: 'Trompeta da Espanha', date: '04/OUT/2025', id: 'RF7dOiaO5cw' },
             { title: 'Anunciação - Guitarra', date: '04/OUT/2025', id: 'THH7BrWbC6o' },
         ];
+        // index.html: DADOS E VARIÁVEIS GLOBAIS
+        // Substitua o placeholder pela URL pública do seu bucket R2
+        const R2_BASE_URL = 'https://seu-bucket-id.r2.cloudflarestorage.com/rjb-sheets';
+        // OU, se você usa domínio próprio:
+        // const R2_BASE_URL = 'https://files.rjb.com.br/sheets';
+        const racionais = [
+            { title: 'A Consciência Positiva', time: '3:00', mp3: 'A_Consciencia_Positiva' },
+            { title: 'A Luz do Saber', time: '3:00', mp3: 'A_Luz_do_Saber' },
+            { title: 'A Luz que Mudou o Meu Destino', time: '3:00', mp3: 'A_Luz_que_Mudou_o_Meu_Destino' },
+            { title: 'Apoteose Racional', time: '3:00', mp3: 'Apoteose_Racional' },
+            { title: 'De Onde Veio e Vai', time: '3:00', mp3: 'De_Onde_Veio_e_Vai' },
+            { title: 'Deixa Quem Quiser Falar', time: '3:00', mp3: 'Deixa_Quem_Quiser_Falar' },
+            { title: 'Desencanto Universal', time: '3:00', mp3: 'Desencanto_Universal' },
+            { title: 'Homenagem a Brud', time: '3:00', mp3: 'Homenagem_a_Brud' },
+            { title: 'Jubileu de Ouro', time: '3:00', mp3: 'Jubileu_de_Ouro' },
+            { title: 'Menino Rei', time: '3:00', mp3: 'Menino_Rei' },
+            { title: 'Meu Lugar Não é Aqui', time: '3:00', mp3: 'Meu_Lugar_Nao_e_Aqui' },
+            { title: 'Mundo Racional', time: '3:00', mp3: 'Mundo_Racional' },
+            { title: 'O Homem', time: '3:00', mp3: 'O_Homem' },
+            { title: 'Os Caravaneiros - Em Andamento', time: '3:00', mp3: 'Os_Caravaneiros_Em_Andamento' },
+            { title: 'Oxigênio', time: '3:00', mp3: 'Oxigenio' },
+            { title: 'Paraíso Racional', time: '3:00', mp3: 'Paraiso_Racional' },
+            { title: 'Paz Interior', time: '3:00', mp3: 'Paz_Interior' },
+            { title: 'Salve o Retiro Racional', time: '3:00', mp3: 'Salve_o_Retiro_Racional' },
+            { title: 'Ser Iluminado', time: '3:00', mp3: 'Ser_Iluminado' },
+            { title: 'Viva a Cultura Racional', time: '3:00', mp3: 'Viva_a_Cultura_Racional' },
+        ];
 
+        const diversas = [
+            { title: 'AI QUE SAUDADE', time: '3:45', mp3: 'AI_QUE_SAUDADE' },
+            { title: 'ANUNCIACAO', time: '4:10', mp3: 'ANUNCIACAO' },
+            { title: 'ARIA CANTINELA', time: '3:20', mp3: 'ARIA_CANTINELA' },
+            { title: 'AS FORCAS DA NATUREZA', time: '4:55', mp3: 'AS_FORCAS_DA_NATUREZA' },
+            { title: 'BILLY JEAN', time: '4:50', mp3: 'BILLY_JEAN' },
+            { title: 'CAROLINA SEU JORGE', time: '3:30', mp3: 'CAROLINA_SEU_JORGES' },
+            { title: 'CARUSO', time: '4:20', mp3: 'CARUSO' },
+            { title: 'CHEIA DE MANIAS', time: '3:50', mp3: 'CHEIA_DE_MANIAS' },
+            { title: 'CLAREOU', time: '4:05', mp3: 'CLAREOU' },
+            { title: 'COLO DE MENINA', time: '3:55', mp3: 'COLO_DE_MENINA' },
+            { title: 'CONTE PARTIRO ARRANJO', time: '4:40', mp3: 'CONTE_PARTIRO_ARRANJO' },
+            { title: 'DAQUI PARA SEMPRE', time: '3:15', mp3: 'DAQUI_PARA_SEMPRE' },
+            { title: 'DO JEITO QUE A VIDA QUER', time: '4:00', mp3: 'DO_JEITO_QUE_A_VIDA_QUER' },
+            { title: 'DO SEU LADO', time: '3:35', mp3: 'DO_SEU_LADO' },
+            { title: 'EU SO QUERO UM XODO', time: '3:05', mp3: 'EU_SO_QUERO_UM_XODO' },
+            { title: 'FELICIDADE', time: '3:25', mp3: 'FELICIDADE' },
+            { title: 'FULMINANTE', time: '4:35', mp3: 'FULMINANTE' },
+            { title: 'GAME OF THRONES', time: '3:40', mp3: 'GAME_OF_THRONES' },
+            { title: 'GIRLS JUST WANT TO HAVE FUN', time: '4:00', mp3: 'GIRLS_JUST_WANT_TO_HAVE_FUN' },
+            { title: 'HEAL THE WORLD PARTES', time: '5:00', mp3: 'HEAL_THE_WORLD_PARTES' },
+            { title: 'MENINA CAROLINA', time: '3:10', mp3: 'MENINA_CAROLINA' },
+            { title: 'NAQUELA MESA', time: '3:58', mp3: 'NAQUELA_MESA' },
+            { title: 'O CANTO DAS TRES RACAS', time: '4:25', mp3: 'O_CANTO_DAS_TRES_RACAS' },
+            { title: 'O HOMEM - ROBERTO CARLOS', time: '4:15', mp3: 'O_HOMEM_ROBERTO_CARLOS' },
+            { title: 'O REI LEAO', time: '4:30', mp3: 'O_REI_LEAO' },
+            { title: 'OLHOS COLORIDOS', time: '3:40', mp3: 'OLHOS_COLORIDOS' },
+            { title: 'OURO NEGRO', time: '3:55', mp3: 'OURO_NEGRO' },
+            { title: 'PARABENS JAZZ', time: '3:12', mp3: 'PARABENS_JAZZ' },
+            { title: 'PRECISO ME ENCONTRAR', time: '4:02', mp3: 'PRECISO_ME_ENCONTRAR' },
+            { title: 'QUE NEM MARE', time: '3:28', mp3: 'QUE_NEM_MARE' },
+            { title: 'SWEET CHILD O MINE', time: '5:05', mp3: 'SWEET_CHILD_O_MINE' },
+            { title: 'THE FINAL COUNTDOWN', time: '5:10', mp3: 'THE_FINAL_COUNTDOWN' },
+            { title: 'TITANIUM', time: '4:40', mp3: 'TITANIUM' },
+            { title: 'TROMPETA DE ESPANHA', time: '3:08', mp3: 'TROMPETA_DE_ESPANHA' },
+            { title: 'VILAREJO', time: '3:18', mp3: 'VILAREJO' },
+            { title: 'WHISKY A GO GO', time: '3:33', mp3: 'WHISKY_A_GO_GO' },
+        ];
         // --- FUNÇÕES DE UTILIDADE GERAL ---
-        
+        // index.html (Adicionar no bloco de Funções de Utilidade Geral)
+
+function toggleLoader(show, message = 'Carregando...') {
+    const loader = document.getElementById('loading-overlay');
+    const loaderMessage = document.getElementById('loader-message');
+    
+    if (!loader || !loaderMessage) return;
+
+    if (show) {
+        loaderMessage.textContent = message;
+        loader.classList.remove('hidden');
+        // Força o reflow para garantir que a transição de opacidade funcione
+        void loader.offsetWidth; 
+        loader.classList.add('opacity-100', 'flex');
+        document.body.style.overflow = 'hidden'; // Opcional: trava o scroll
+    } else {
+        loader.classList.remove('opacity-100');
+        loader.classList.add('opacity-0');
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            loader.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300); // Tempo igual à transição CSS
+    }
+}
+
         function toggleDarkMode() {
             const html = document.documentElement;
             if (html.classList.contains('dark')) {
@@ -124,7 +214,7 @@
             if (activeLink) {
                 activeLink.classList.add('nav-link-active');
             }
-            
+
             // Tratamento de links adicionais
             if (currentPage === 'member-registration') {
                 const cadastroDesktop = document.getElementById('nav-cadastro-desktop');
@@ -255,7 +345,7 @@
                 messageBox.classList.remove('opacity-100');
                 messageBox.classList.add('opacity-0');
             }, displayTime);
-            
+
             setTimeout(() => {
                 messageBox.classList.add('hidden');
             }, hideTime);
@@ -345,58 +435,85 @@
             }
         }
 
-        async function handleAdminLogin(event) {
-            event.preventDefault();
+// index.html (SUBSTITUIR A FUNÇÃO handleAdminLogin)
+async function handleAdminLogin(event) {
+    event.preventDefault();
 
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/admin/login'; 
+    const email = document.getElementById('admin-email').value;
+    const password = document.getElementById('admin-password').value;
+    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/admin/login';
 
-            showMessage('Acessando Área Administrativa...');
+    toggleLoader(true, 'Verificando credenciais...'); // 👈 ATIVA O LOADER
 
-            try {
-                const response = await fetch(endpointUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
+    try {
+        const response = await fetch(endpointUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
 
-                const result = await response.json();
+        const result = await response.json();
 
-                if (response.ok) {
-                    localStorage.setItem('adminToken', result.token);
-                    localStorage.setItem('adminRole', result.role);
-                    showMessage('Login bem-sucedido. Carregando relatórios...');
-                    renderProtectedReportView();
-                } else {
-                    showMessage(result.message || 'E-mail ou senha incorretos.', true);
-                }
-
-            } catch (error) {
-                console.error('ERRO DE CONEXÃO/REDE ao fazer login:', error);
-                showMessage('Erro de conexão com a API de login.', true);
-            }
+        if (response.ok) {
+            localStorage.setItem('adminToken', result.token);
+            localStorage.setItem('adminRole', result.role);
+            toggleLoader(false); // 👈 DESATIVA ANTES DE CARREGAR O RELATÓRIO
+            showMessage('Login bem-sucedido. Carregando relatórios...');
+            renderProtectedReportView();
+        } else {
+            toggleLoader(false); // 👈 DESATIVA
+            showMessage(result.message || 'E-mail ou senha incorretos.', true);
         }
 
-        function adminLogout() {
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminRole');
-            navigateTo('reports'); 
-            showMessage('Você saiu da Área Administrativa.', false);
-        }
-// index.html (Adicionar dentro do bloco <script>, perto das outras funções de fetch/render)
+    } catch (error) {
+        console.error('ERRO DE CONEXÃO/REDE ao fazer login:', error);
+        toggleLoader(false); // 👈 DESATIVA
+        showMessage('Erro de conexão com a API de login.', true);
+    }
+}
+// index.html (SUBSTITUIR A FUNÇÃO adminLogout)
+function adminLogout() {
+    toggleLoader(true, 'Finalizando sessão...'); // 👈 ATIVA O LOADER
 
-// ... (Funções de fetchMemberReport, renderReportData, etc.) ...
+    // 1. Ação CRÍTICA: Remove os tokens de acesso.
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRole'); 
+    
+    // 2. Espera um breve momento (400ms) para a transição do loader
+    setTimeout(() => {
+        // 3. CORREÇÃO APLICADA: Navega para a página Home. 
+        navigateTo('home'); 
+
+        // 4. Desativa o loader após a navegação ter sido iniciada.
+        toggleLoader(false);
+        
+        // 5. Mostra a mensagem.
+        showMessage('Você saiu da Área Administrativa.', false);
+    }, 400); 
+}
+        // index.html (Adicionar dentro do bloco <script>, perto das outras funções de fetch/render)
+
+        // ... (Funções de fetchMemberReport, renderReportData, etc.) ...
+
+        // --- FUNÇÕES DE ARQUIVOS (ANEXOS) ---
+
+// index.html (Aprox. Linha 470)
 
 // --- FUNÇÕES DE ARQUIVOS (ANEXOS) ---
 
 async function fetchAttachmentsReport(token) {
     const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/list';
     const attachmentsArea = document.getElementById('attachments-output-area');
+    
+    // CORREÇÃO CRÍTICA: Se a área de anexos não existe, saia.
+    if (!attachmentsArea) {
+        console.warn('Área de anexos (#attachments-output-area) não encontrada no DOM.');
+        return; 
+    }
 
     showMessage('Buscando lista de anexos...');
     attachmentsArea.innerHTML = '';
-    
+
     try {
         const response = await fetch(endpointUrl, {
             method: 'GET',
@@ -409,109 +526,112 @@ async function fetchAttachmentsReport(token) {
             renderAttachmentsData(data);
         } else {
             showMessage(data.message || `Erro ${response.status} ao buscar anexos.`, true);
+            // Mostrar mensagem de erro dentro da área
+            attachmentsArea.innerHTML = `<p class="text-center text-red-500">Erro: ${data.message || 'Falha ao carregar anexos.'}</p>`;
         }
 
     } catch (error) {
         console.error('ERRO DE CONEXÃO/REDE ao buscar anexos:', error);
         showMessage('Erro de conexão com a API de anexos.', true);
+        attachmentsArea.innerHTML = `<p class="text-center text-red-500">Erro de rede ao conectar com a API de anexos.</p>`;
     }
 }
 
-async function handleFileUpload(event) {
-    event.preventDefault();
-    
-    const fileInput = document.getElementById('attachment-file');
-    const token = localStorage.getItem('adminToken');
-    
-    if (!fileInput.files.length) {
-        showMessage('Selecione um arquivo para upload.', true);
-        return;
-    }
-    
-    showMessage('Enviando arquivo...', false);
-    
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-    
-    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/upload';
+        async function handleFileUpload(event) {
+            event.preventDefault();
 
-    try {
-        const response = await fetch(endpointUrl, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-        });
+            const fileInput = document.getElementById('attachment-file');
+            const token = localStorage.getItem('adminToken');
 
-        const result = await response.json();
+            if (!fileInput.files.length) {
+                showMessage('Selecione um arquivo para upload.', true);
+                return;
+            }
 
-        if (response.ok) {
-            showMessage(result.message || 'Arquivo enviado com sucesso!');
-            document.getElementById('file-upload-form').reset();
-            fetchAttachmentsReport(token); // Atualiza a lista
-        } else {
-            console.error('Erro no Backend:', response.status, result.message);
-            showMessage(result.message || `Falha no upload. Erro ${response.status}.`, true);
+            showMessage('Enviando arquivo...', false);
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/upload';
+
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage(result.message || 'Arquivo enviado com sucesso!');
+                    document.getElementById('file-upload-form').reset();
+                    fetchAttachmentsReport(token); // Atualiza a lista
+                } else {
+                    console.error('Erro no Backend:', response.status, result.message);
+                    showMessage(result.message || `Falha no upload. Erro ${response.status}.`, true);
+                }
+
+            } catch (error) {
+                console.error('ERRO DE CONEXÃO/REDE ao fazer upload:', error);
+                showMessage('Erro de conexão com a API de upload.', true);
+            }
         }
 
-    } catch (error) {
-        console.error('ERRO DE CONEXÃO/REDE ao fazer upload:', error);
-        showMessage('Erro de conexão com a API de upload.', true);
-    }
-}
+        async function handleDeleteFile(fileName) {
+            if (!confirm(`Tem certeza que deseja EXCLUIR o arquivo '${fileName}'? Esta ação é irreversível.`)) {
+                return;
+            }
 
-async function handleDeleteFile(fileName) {
-    if (!confirm(`Tem certeza que deseja EXCLUIR o arquivo '${fileName}'? Esta ação é irreversível.`)) {
-        return;
-    }
-    
-    const token = localStorage.getItem('adminToken');
-    const endpointUrl = `https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/delete/${fileName}`;
+            const token = localStorage.getItem('adminToken');
+            const endpointUrl = `https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/delete/${fileName}`;
 
-    showMessage(`Excluindo ${fileName}...`);
+            showMessage(`Excluindo ${fileName}...`);
 
-    try {
-        const response = await fetch(endpointUrl, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-        const result = await response.json();
+                const result = await response.json();
 
-        if (response.ok) {
-            showMessage(result.message || 'Arquivo excluído com sucesso!');
-            fetchAttachmentsReport(token); // Atualiza a lista
-        } else {
-            console.error('Erro no Backend:', response.status, result.message);
-            showMessage(result.message || `Falha na exclusão. Erro ${response.status}.`, true);
+                if (response.ok) {
+                    showMessage(result.message || 'Arquivo excluído com sucesso!');
+                    fetchAttachmentsReport(token); // Atualiza a lista
+                } else {
+                    console.error('Erro no Backend:', response.status, result.message);
+                    showMessage(result.message || `Falha na exclusão. Erro ${response.status}.`, true);
+                }
+
+            } catch (error) {
+                console.error('ERRO DE CONEXÃO/REDE ao deletar:', error);
+                showMessage('Erro de conexão com a API de exclusão.', true);
+            }
         }
 
-    } catch (error) {
-        console.error('ERRO DE CONEXÃO/REDE ao deletar:', error);
-        showMessage('Erro de conexão com a API de exclusão.', true);
-    }
-}
+        function renderAttachmentsData(files) {
+            const attachmentsArea = document.getElementById('attachments-output-area');
 
-function renderAttachmentsData(files) {
-    const attachmentsArea = document.getElementById('attachments-output-area');
+            if (files.length === 0) {
+                attachmentsArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum anexo encontrado no Google Cloud Storage.</p>';
+                return;
+            }
 
-    if (files.length === 0) {
-        attachmentsArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum anexo encontrado no Google Cloud Storage.</p>';
-        return;
-    }
-    
-    const formatSize = (bytes) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+            const formatSize = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
 
-    const fileListHtml = files.map(file => {
-        const date = new Date(file.uploaded).toLocaleDateString('pt-BR');
-        const time = new Date(file.uploaded).toLocaleTimeString('pt-BR');
-        
-        return `
+            const fileListHtml = files.map(file => {
+                const date = new Date(file.uploaded).toLocaleDateString('pt-BR');
+                const time = new Date(file.uploaded).toLocaleTimeString('pt-BR');
+
+                return `
             <div class="flex flex-col sm:flex-row justify-between items-center p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark/50 hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 transition-colors duration-300 border-l-4 border-rjb-yellow/50">
                 <div class="flex-grow mb-2 sm:mb-0 sm:mr-4">
                     <p class="font-medium text-rjb-text dark:text-rjb-text-dark break-all">${file.name}</p>
@@ -529,80 +649,189 @@ function renderAttachmentsData(files) {
                 </div>
             </div>
         `;
-    }).join('');
+            }).join('');
 
-    attachmentsArea.innerHTML = `
+            attachmentsArea.innerHTML = `
         <div class="space-y-3">${fileListHtml}</div>
     `;
-}
+        }
 
-function handleDownloadCSV() {
-    const token = localStorage.getItem('adminToken');
-    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members/csv'; 
+        function handleDownloadCSV() {
+            const token = localStorage.getItem('adminToken');
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members/csv';
+
+            if (!token) {
+                showMessage('Erro: Você não está logado.', true);
+                return;
+            }
+
+            showMessage('Iniciando download do relatório CSV...');
+
+            fetch(endpointUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(error => { throw new Error(error.message || 'Falha na requisição.'); });
+                    }
+                    // Cria um link temporário para forçar o download do blob
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'rjb_members_report.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    showMessage('Download CSV iniciado com sucesso!');
+                })
+                .catch(error => {
+                    console.error('ERRO AO BAIXAR CSV:', error);
+                    showMessage(`Falha ao baixar o arquivo: ${error.message}`, true);
+                });
+        }
+
+        // index.html (FUNÇÃO renderProtectedReportView CORRIGIDA)
+        function renderProtectedReportView() {
+            const token = localStorage.getItem('adminToken');
+            const authArea = document.getElementById('admin-login-area');
+            const outputArea = document.getElementById('report-output-area');
+
+            if (!authArea || !outputArea) return;
+
+            if (token) {
+                authArea.classList.add('hidden');
+                outputArea.classList.remove('hidden');
+                // Apenas a chamada de membros, que vai disparar a de anexos APÓS o DOM estar pronto.
+                fetchMemberReport(token);
+            } else {
+                authArea.classList.remove('hidden');
+                outputArea.classList.add('hidden');
+            }
+        }
+
+        function renderReportData(data) {
+            const reportArea = document.getElementById('member-report-details');
+            // ... (restante da lógica de renderReportData) ...
+
+            // Altere o final da função para usar um elemento filho 'member-report-details'
+            reportArea.innerHTML = `
+        <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
+        <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
+        
+        <button onclick="handleDownloadCSV()" class="bg-rjb-yellow text-rjb-text font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition mb-6 shadow-subtle-glow flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Baixar CSV Completo</span>
+        </button>
+        
+        <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
+                <thead>
+                    <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
+                        <th class="p-3">Nome</th>
+                        <th class="p-3">Instrumento</th>
+                        <th class="p-3 hidden sm:table-cell">Localidade</th>
+                    </tr>
+                </thead>
+                <tbody>${membersListHtml}</tbody>
+            </table>
+        </div>
+    `;
+
+            // Remove o botão "Sair" daqui, ele será colocado no wrapper principal
+        }
+
+  // index.html (NOVA VERSÃO ROBUSTA DE fetchMemberReport)
+async function fetchMemberReport(token) {
+    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
     
-    if (!token) {
-        showMessage('Erro: Você não está logado.', true);
-        return;
+    // AÇÃO CRÍTICA: Mostrar que está carregando, mas não limpar a estrutura.
+    const reportArea = document.getElementById('member-report-details');
+    if (reportArea) {
+        reportArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Buscando dados protegidos...</p>';
+    } else {
+        return; // Falha na busca da div, evita o resto
     }
 
-    showMessage('Iniciando download do relatório CSV...');
+    try {
+        const response = await fetch(endpointUrl, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-    fetch(endpointUrl, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
+        const data = await response.json();
+
+        if (response.ok) {
+            showMessage('Relatório carregado com sucesso!');
+            renderReportData(data); // Preenche a seção de membros.
+            
+            // CORREÇÃO CRÍTICA DO TIMING: Não há mais o setTimeout, o DOM já deve estar pronto.
+            fetchAttachmentsReport(token);
+
+        } else if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminRole');
+            showMessage(data.message || 'Sessão expirada. Faça login novamente.', true);
+            renderProtectedReportView();
+        } else {
+            showMessage(data.message || `Erro ${response.status} ao buscar o relatório.`, true);
+            reportArea.innerHTML = `<p class="text-center text-red-500">Erro: ${data.message || 'Falha ao carregar relatório de membros.'}</p>`;
         }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(error => { throw new Error(error.message || 'Falha na requisição.'); });
-        }
-        // Cria um link temporário para forçar o download do blob
-        return response.blob();
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'rjb_members_report.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        showMessage('Download CSV iniciado com sucesso!');
-    })
-    .catch(error => {
-        console.error('ERRO AO BAIXAR CSV:', error);
-        showMessage(`Falha ao baixar o arquivo: ${error.message}`, true);
-    });
+
+    } catch (error) {
+        console.error('ERRO DE CONEXÃO/REDE ao buscar relatório:', error);
+        showMessage('Erro de conexão com a API de relatórios.', true);
+        reportArea.innerHTML = `<p class="text-center text-red-500">Erro de rede. Verifique o serviço de relatórios.</p>`;
+    }
 }
 
-// index.html - CÓDIGO CORRIGIDO/FINAL
+// index.html (FUNÇÃO renderProtectedReportView CORRIGIDA PARA GARANTIR ESTRUTURA)
 function renderProtectedReportView() {
     const token = localStorage.getItem('adminToken');
     const authArea = document.getElementById('admin-login-area');
     const outputArea = document.getElementById('report-output-area');
-    
+
     if (!authArea || !outputArea) return;
 
     if (token) {
         authArea.classList.add('hidden');
         outputArea.classList.remove('hidden');
-        
-        // --- CHAME AMBOS OS RELATÓRIOS AQUI ---
-        fetchMemberReport(token);
-        fetchAttachmentsReport(token); // <-- INCLUSÃO CRÍTICA
+        // Ação: Inicia a busca dos relatórios de Membros (que dispara a busca de Anexos)
+        fetchMemberReport(token); 
     } else {
         authArea.classList.remove('hidden');
         outputArea.classList.add('hidden');
+        // Oculta a área de membros se não estiver logado
+        document.getElementById('member-report-details').innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando relatório de membros...</p>';
     }
 }
 
+// index.html (SUBSTITUIR A FUNÇÃO COMPLETA POR ESTA)
 function renderReportData(data) {
-    const reportArea = document.getElementById('member-report-details');
-    // ... (restante da lógica de renderReportData) ...
+    // 1. AÇÃO CRÍTICA: Use a div de detalhes do relatório de membros (#member-report-details), e não a div pai.
+    const reportArea = document.getElementById('member-report-details'); 
     
-    // Altere o final da função para usar um elemento filho 'member-report-details'
+    // Se a div não existir (nunca deve ocorrer após o login), saia.
+    if (!reportArea) return; 
+
+    // Conteúdo de relatório (Simplificado para evitar quebras, dependente do seu index.js)
+    const totalMembros = data.totalMembers || 0;
+    const membersListHtml = data.allMembers ? data.allMembers.map(m => `
+        <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors">
+            <td class="p-3 font-medium">${m.name}</td>
+            <td class="p-3">${m.instrument}</td>
+            <td class="p-3 hidden sm:table-cell">${m.city}/${m.state}</td>
+        </tr>
+    `).join('') : '<tr><td colspan="3" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
+
+    // 2. PREENCHE APENAS A DIV #member-report-details (mantendo o formulário de anexos e o botão Sair)
     reportArea.innerHTML = `
         <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
         <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
@@ -627,111 +856,13 @@ function renderReportData(data) {
         </div>
     `;
     
-    // Remove o botão "Sair" daqui, ele será colocado no wrapper principal
-}
-
-// index.html (NOVA VERSÃO CORRIGIDA DE fetchMemberReport)
-async function fetchMemberReport(token) {
-    const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
-    const outputArea = document.getElementById('report-output-area');
-
-    showMessage('Buscando dados protegidos...');
-    outputArea.innerHTML = '';
-    outputArea.classList.add('hidden');
-
-    try {
-        const response = await fetch(endpointUrl, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            showMessage('Relatório carregado com sucesso!');
-            renderReportData(data); // LINHA 654: INJETA O NOVO HTML (COM A DIV DE ANEXOS)
-            console.log("Membros recebidos. Continuando...");
-            outputArea.classList.remove('hidden');
-            
-            // --- CORREÇÃO CRÍTICA DO TIMING ---
-            // Espera o DOM se atualizar antes de buscar os anexos.
-            setTimeout(() => {
-                fetchAttachmentsReport(token);
-            }, 50); // 50ms é um tempo seguro para o DOM atualizar
-            // --- FIM DA CORREÇÃO CRÍTICA ---
-
-        } else if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminRole');
-            showMessage(data.message || 'Sessão expirada. Faça login novamente.', true);
-            renderProtectedReportView();
-        } else {
-            showMessage(data.message || `Erro ${response.status} ao buscar o relatório.`, true);
-        }
-
-    } catch (error) {
-        console.error('ERRO DE CONEXÃO/REDE ao buscar relatório:', error);
-        showMessage('Erro de conexão com a API de relatórios.', true);
+    // Opcional: Garante que a área de anexos está limpa antes de carregar (para feedback visual)
+    const attachmentsArea = document.getElementById('attachments-output-area');
+    if (attachmentsArea) {
+        attachmentsArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando anexos...</p>';
     }
 }
 
-// index.html (CORREÇÃO DE EXECUÇÃO: TENTAR FORÇAR AS DUAS CHAMADAS)
-function renderProtectedReportView() {
-    const token = localStorage.getItem('adminToken');
-    const authArea = document.getElementById('admin-login-area');
-    const outputArea = document.getElementById('report-output-area');
-    
-    if (!authArea || !outputArea) return;
-
-    if (token) {
-        authArea.classList.add('hidden');
-        outputArea.classList.remove('hidden');
-        fetchMemberReport(token); // <--- APENAS INICIA A CADEIA DE EVENTOS
-    } else {
-        authArea.classList.remove('hidden');
-        outputArea.classList.add('hidden');
-    }
-}
-
-        function renderReportData(data) {
-            const outputArea = document.getElementById('report-output-area');
-            
-            // Conteúdo de relatório (Simplificado para evitar quebras, dependente do seu index.js)
-            const totalMembros = data.totalMembers || 0;
-            const membersListHtml = data.allMembers ? data.allMembers.map(m => `
-                <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors">
-                    <td class="p-3 font-medium">${m.name}</td>
-                    <td class="p-3">${m.instrument}</td>
-                    <td class="p-3 hidden sm:table-cell">${m.city}/${m.state}</td>
-                </tr>
-            `).join('') : '<tr><td colspan="3" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
-
-            outputArea.innerHTML = `
-                <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
-                <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
-                
-                <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
-                        <thead>
-                            <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
-                                <th class="p-3">Nome</th>
-                                <th class="p-3">Instrumento</th>
-                                <th class="p-3 hidden sm:table-cell">Localidade</th>
-                            </tr>
-                        </thead>
-                        <tbody>${membersListHtml}</tbody>
-                    </table>
-                </div>
-
-                <div class="flex justify-between mt-8">
-                    <button onclick="adminLogout()" class="bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow text-rjb-yellow font-bold py-2 px-6 rounded-lg hover:bg-rjb-yellow/10 transition">
-                        Sair
-                    </button>
-                </div>
-            `;
-        }
-        
         // FUNÇÃO DE FALLBACK ROBUSTO PARA MINIATURAS (MANTIDO)
         function handleVideoFallback(img, videoId) {
             let fallbackLevel = parseInt(img.getAttribute('data-fallback-level')) || 0;
@@ -750,10 +881,10 @@ function renderProtectedReportView() {
                 img.style.opacity = '0.5';
             }
         }
-        
-function generateVideoCard(video) {
-    const thumbnailUrl = `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
-    return `
+
+        function generateVideoCard(video) {
+            const thumbnailUrl = `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
+            return `
         <div class="group relative rounded-xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-soft-glow hover:scale-[1.02] border border-rjb-yellow/10 bg-gray-50 dark:bg-rjb-card-dark/50">
             <div class="video-thumbnail-container" onclick="openVideoModal('${video.id}')">
                 <img src="${thumbnailUrl}" alt="${video.title}" class="video-thumbnail-img" data-fallback-level="0" onerror="handleVideoFallback(this, '${video.id}')">
@@ -765,11 +896,11 @@ function generateVideoCard(video) {
             </div>
         </div>
     `;
-}
+        }
 
         // --- FUNÇÕES DE GERAÇÃO DE CONTEÚDO ---
-        
-function generateHomePageWrapper() { /* (MANTIDO) */ return `
+
+        function generateHomePageWrapper() { /* (MANTIDO) */ return `
     <section id="home-background-section" class="relative">
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             ${generateHomePage()}
@@ -794,9 +925,10 @@ function generateHomePageWrapper() { /* (MANTIDO) */ return `
             </div>
         </div>
     </section>
-`; }
+`;
+        }
 
-function generateHomePage() { /* (MANTIDO) */ return `
+        function generateHomePage() { /* (MANTIDO) */ return `
     <div class="text-center pt-24 pb-24">
         <h1 class="text-7xl md:text-9xl font-mono rjb-logo-text text-rjb-yellow mb-2">Racional Jazz Band</h1>
         <h2 class="text-3xl md:text-5xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-6 transition-colors duration-500">Música, Arte e Cultura Racional</h2>
@@ -812,33 +944,58 @@ function generateHomePage() { /* (MANTIDO) */ return `
             </button>
         </div>
     </div>
-`; }
+`;
+        }
 
-function generateSobrePage() { /* (MANTIDO) */ return `
-    <div class="text-rjb-text dark:text-rjb-text-dark transition-colors duration-500">
-        <p class="text-xl mb-6 border-l-4 border-rjb-yellow pl-4 italic font-light text-rjb-text/90 dark:text-rjb-text-dark/90">
-            "A Racional Jazz Band não é apenas uma orquestra; é um veículo da Luz e do Saber que a Música Racional carrega consigo."
-        </p>
-        <p class="mb-4 text-rjb-text/80 dark:text-rjb-text-dark/80">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p class="mb-4 text-rjb-text/80 dark:text-rjb-text-dark/80">
-            Nascida do ideal de unir a expressividade do Jazz com os fundamentos da Cultura Racional, a RJB tem percorrido um caminho de excelência e dedicação. A orquestra é composta por músicos e colaboradores que se dedicam a elevar o padrão artístico e cultural de suas apresentações.
-        </p>
-        <p class="text-rjb-text/80 dark:text-rjb-text-dark/80">
-            Acreditamos que a música é uma linguagem universal capaz de tocar a essência humana. Por isso, cada nota, cada arranjo e cada performance é cuidadosamente planejado para transmitir uma mensagem de paz, equilíbrio e conhecimento. Venha conhecer mais sobre nossa <button onclick="navigateTo('repertorio')" class="text-rjb-yellow hover:underline">música</button> e nossa <button onclick="navigateTo('fotos')" class="text-rjb-yellow hover:underline">história visual</button>.
-        </p>
-    </div>
-    <div class="mt-12 p-6 bg-rjb-yellow/10 dark:bg-rjb-yellow/5 rounded-lg border border-rjb-yellow/30 transition-colors duration-500">
-        <h3 class="text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4">Nossa Missão</h3>
-        <ul class="list-disc list-inside space-y-2 text-rjb-text/80 dark:text-rjb-text-dark/80 ml-4">
-            <li>Promover a Cultura Racional através da arte musical.</li>
-            <li>Desenvolver e executar um repertório instrumental de alta qualidade.</li>
-            <li>Inspirar e capacitar novos músicos e colaboradores.</li>
-        </ul>
-    </div>
-`; }
+  // index.html (SUBSTITUIR A FUNÇÃO generateSobrePage())
 
+// index.html (SUBSTITUIR A FUNÇÃO generateSobrePage())
+
+function generateSobrePage() {
+    return `
+        <div class="space-y-8 text-rjb-text dark:text-rjb-text-dark transition-colors duration-500">
+            
+            <h2 class="text-4xl font-extrabold text-rjb-yellow border-b-2 border-rjb-yellow/50 pb-3">
+                A Expressão Musical do Saber
+            </h2>
+
+            <div class="border-l-4 border-rjb-yellow pl-5 bg-rjb-bg-light/50 dark:bg-rjb-card-dark/50 p-4 rounded-lg shadow-sm">
+                <p class="text-lg font-medium italic text-rjb-text/90 dark:text-rjb-text-dark/90">
+                    A <strong>Racional Jazz Band (RJB)</strong> nasceu da união de dois propósitos elevados: a excelência artística do Jazz e a profundidade da <strong>Cultura Racional</strong>. Fundada em <strong>20 de novembro de 2015</strong>, a RJB rapidamente se estabeleceu como um veículo de expressão para um conhecimento que transcende, utilizando a música como sua linguagem universal.
+                </p>
+            </div>
+
+            <p class="text-rjb-text/80 dark:text-rjb-text-dark/80">
+                Acreditamos que a música instrumental é a forma mais pura de comunicação. O Jazz, com sua liberdade rítmica e improvisação harmoniosa, oferece o palco ideal para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
+            </p>
+            
+            <h3 class="text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mt-8 pt-4 border-t border-rjb-text/10 dark:border-rjb-text-dark/10">
+                O Conceito Racional
+            </h3>
+
+            <p class="text-rjb-text/80 dark:text-rjb-text-dark/80">
+                A Cultura Racional é o conhecimento que revela a origem e o destino de tudo e de todos, promovendo o raciocínio, o equilíbrio e a ligação com o Mundo de Energia Racional. Nossa missão não é apenas performar; é <strong>transmitir essa mensagem de Luz e de Paz</strong> através de arranjos exclusivos e composições inspiradas nos pilares da Cultura.
+            </p>
+            
+            <p class="text-rjb-text/80 dark:text-rjb-text-dark/80">
+                Cada apresentação, cada nota e cada melodia da RJB é um convite para o público refletir sobre sua essência e o universo que o cerca, encontrando a harmonia entre o macrocosmo e o próprio ser.
+            </p>
+
+            <div class="mt-12 p-6 bg-rjb-yellow/10 dark:bg-rjb-yellow/5 rounded-xl border border-rjb-yellow/30 shadow-md transition-colors duration-500">
+                <h3 class="text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 flex items-center space-x-2">
+                    <svg class="w-6 h-6 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Nossa Missão</span>
+                </h3>
+                <ul class="list-disc list-inside space-y-2 text-rjb-text/80 dark:text-rjb-text-dark/80 ml-4">
+                    <li>Promover a Cultura Racional através da arte musical.</li>
+                    <li>Desenvolver e executar um repertório instrumental de excelência.</li>
+                    <li>Inspirar o raciocínio, o equilíbrio e a paz no público.</li>
+                </ul>
+            </div>
+            
+        </div>
+    `;
+}
         function generateApresentacoesPage() { /* (MANTIDO) */ return `
 				<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
 					<p>Assista aos nossos principais shows e apresentações de grande público. Experiências sonoras e visuais completas da Racional Jazz Band.</p>
@@ -864,73 +1021,11 @@ function generateSobrePage() { /* (MANTIDO) */ return `
 				</p>
 			`;
         }
-        
-function generateRepertorioPage() {
-    // MOCK DE DADOS INTERNOS PARA ESTA PÁGINA (GARANTINDO QUE NÃO QUEBRE)
-    const racionais = [
-                { title: 'A Consciência Positiva', time: '3:00', mp3: 'A_Consciencia_Positiva' },
-                { title: 'A Luz do Saber', time: '3:00', mp3: 'A_Luz_do_Saber' },
-                { title: 'A Luz que Mudou o Meu Destino', time: '3:00', mp3: 'A_Luz_que_Mudou_o_Meu_Destino' },
-                { title: 'Apoteose Racional', time: '3:00', mp3: 'Apoteose_Racional' },
-                { title: 'De Onde Veio e Vai', time: '3:00', mp3: 'De_Onde_Veio_e_Vai' },
-                { title: 'Deixa Quem Quiser Falar', time: '3:00', mp3: 'Deixa_Quem_Quiser_Falar' },
-                { title: 'Desencanto Universal', time: '3:00', mp3: 'Desencanto_Universal' },
-                { title: 'Homenagem a Brud', time: '3:00', mp3: 'Homenagem_a_Brud' },
-                { title: 'Jubileu de Ouro', time: '3:00', mp3: 'Jubileu_de_Ouro' },
-                { title: 'Menino Rei', time: '3:00', mp3: 'Menino_Rei' },
-                { title: 'Meu Lugar Não é Aqui', time: '3:00', mp3: 'Meu_Lugar_Nao_e_Aqui' },
-                { title: 'Mundo Racional', time: '3:00', mp3: 'Mundo_Racional' },
-                { title: 'O Homem', time: '3:00', mp3: 'O_Homem' },
-                { title: 'Os Caravaneiros - Em Andamento', time: '3:00', mp3: 'Os_Caravaneiros_Em_Andamento' },
-                { title: 'Oxigênio', time: '3:00', mp3: 'Oxigenio' },
-                { title: 'Paraíso Racional', time: '3:00', mp3: 'Paraiso_Racional' },
-                { title: 'Paz Interior', time: '3:00', mp3: 'Paz_Interior' },
-                { title: 'Salve o Retiro Racional', time: '3:00', mp3: 'Salve_o_Retiro_Racional' },
-                { title: 'Ser Iluminado', time: '3:00', mp3: 'Ser_Iluminado' },
-                { title: 'Viva a Cultura Racional', time: '3:00', mp3: 'Viva_a_Cultura_Racional' },
-            ];
 
-            const diversas = [
-                { title: 'AI QUE SAUDADE', time: '3:45', mp3: 'AI_QUE_SAUDADE' },
-                { title: 'ANUNCIACAO', time: '4:10', mp3: 'ANUNCIACAO' },
-                { title: 'ARIA CANTINELA', time: '3:20', mp3: 'ARIA_CANTINELA' },
-                { title: 'AS FORCAS DA NATUREZA', time: '4:55', mp3: 'AS_FORCAS_DA_NATUREZA' },
-                { title: 'BILLY JEAN', time: '4:50', mp3: 'BILLY_JEAN' },
-                { title: 'CAROLINA SEU JORGE', time: '3:30', mp3: 'CAROLINA_SEU_JORGES' },
-                { title: 'CARUSO', time: '4:20', mp3: 'CARUSO' },
-                { title: 'CHEIA DE MANIAS', time: '3:50', mp3: 'CHEIA_DE_MANIAS' },
-                { title: 'CLAREOU', time: '4:05', mp3: 'CLAREOU' },
-                { title: 'COLO DE MENINA', time: '3:55', mp3: 'COLO_DE_MENINA' },
-                { title: 'CONTE PARTIRO ARRANJO', time: '4:40', mp3: 'CONTE_PARTIRO_ARRANJO' },
-                { title: 'DAQUI PARA SEMPRE', time: '3:15', mp3: 'DAQUI_PARA_SEMPRE' },
-                { title: 'DO JEITO QUE A VIDA QUER', time: '4:00', mp3: 'DO_JEITO_QUE_A_VIDA_QUER' },
-                { title: 'DO SEU LADO', time: '3:35', mp3: 'DO_SEU_LADO' },
-                { title: 'EU SO QUERO UM XODO', time: '3:05', mp3: 'EU_SO_QUERO_UM_XODO' },
-                { title: 'FELICIDADE', time: '3:25', mp3: 'FELICIDADE' },
-                { title: 'FULMINANTE', time: '4:35', mp3: 'FULMINANTE' },
-                { title: 'GAME OF THRONES', time: '3:40', mp3: 'GAME_OF_THRONES' },
-                { title: 'GIRLS JUST WANT TO HAVE FUN', time: '4:00', mp3: 'GIRLS_JUST_WANT_TO_HAVE_FUN' },
-                { title: 'HEAL THE WORLD PARTES', time: '5:00', mp3: 'HEAL_THE_WORLD_PARTES' },
-                { title: 'MENINA CAROLINA', time: '3:10', mp3: 'MENINA_CAROLINA' },
-                { title: 'NAQUELA MESA', time: '3:58', mp3: 'NAQUELA_MESA' },
-                { title: 'O CANTO DAS TRES RACAS', time: '4:25', mp3: 'O_CANTO_DAS_TRES_RACAS' },
-                { title: 'O HOMEM - ROBERTO CARLOS', time: '4:15', mp3: 'O_HOMEM_ROBERTO_CARLOS' },
-                { title: 'O REI LEAO', time: '4:30', mp3: 'O_REI_LEAO' },
-                { title: 'OLHOS COLORIDOS', time: '3:40', mp3: 'OLHOS_COLORIDOS' },
-                { title: 'OURO NEGRO', time: '3:55', mp3: 'OURO_NEGRO' },
-                { title: 'PARABENS JAZZ', time: '3:12', mp3: 'PARABENS_JAZZ' },
-                { title: 'PRECISO ME ENCONTRAR', time: '4:02', mp3: 'PRECISO_ME_ENCONTRAR' },
-                { title: 'QUE NEM MARE', time: '3:28', mp3: 'QUE_NEM_MARE' },
-                { title: 'SWEET CHILD O MINE', time: '5:05', mp3: 'SWEET_CHILD_O_MINE' },
-                { title: 'THE FINAL COUNTDOWN', time: '5:10', mp3: 'THE_FINAL_COUNTDOWN' },
-                { title: 'TITANIUM', time: '4:40', mp3: 'TITANIUM' },
-                { title: 'TROMPETA DE ESPANHA', time: '3:08', mp3: 'TROMPETA_DE_ESPANHA' },
-                { title: 'VILAREJO', time: '3:18', mp3: 'VILAREJO' },
-                { title: 'WHISKY A GO GO', time: '3:33', mp3: 'WHISKY_A_GO_GO' },
-    ].sort((a, b) => a.title.localeCompare(b.title));
+        function generateRepertorioPage() {
 
-    // Função interna para renderizar listas
-    const renderList = (title, songs, isRacional) => `
+            // Função interna para renderizar listas
+            const renderList = (title, songs, isRacional) => `
         <div class="mb-10">
             <h3 class="text-3xl font-extrabold mb-6 ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/90 dark:text-rjb-text-dark/90'} border-b-2 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20'} pb-2 transition-colors duration-500">
                 ${title}
@@ -951,8 +1046,8 @@ function generateRepertorioPage() {
         </div>
     `;
 
-    // Retorno final da página
-    return `
+            // Retorno final da página
+            return `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             ${renderList('Músicas Racionais 🎧', racionais, true)}
             ${renderList('Outros Clássicos 🎷', diversas, false)}
@@ -961,55 +1056,88 @@ function generateRepertorioPage() {
             Nosso repertório está em constante expansão e renovação.
         </p>
     `;
-}
+        }
 
-        function generatePartiturasPage() {
-    // MOCK de dados internos para esta página
-    const sheets = [
-        { name: 'Melodia da Esfera', mp3: 'melodia_esfera.mp3' },
-        { name: 'Vibrações de Outro Mundo', mp3: 'vibra_outro_mundo.mp3' },
-        { name: 'Conhecimento Universal', mp3: 'conhecimento_uni.mp3' },
-    ];
+// index.html (FUNÇÃO generatePartiturasPage - Aprox. Linha 969)
+function generatePartiturasPage() {
+    // 1. Combine e classifique todas as músicas, usando os arrays globais
+    const allSheets = [
+        ...racionais.map(s => ({ ...s, category: 'Música Racional', isRacional: true })),
+        ...diversas.map(s => ({ ...s, category: 'Outros Clássicos', isRacional: false })),
+    ].sort((a, b) => a.title.localeCompare(b.title));
 
+    // 2. Agrupe por categoria para renderização em blocos
+    const sheetsByCategory = allSheets.reduce((acc, sheet) => {
+        (acc[sheet.category] = acc[sheet.category] || []).push(sheet);
+        return acc;
+    }, {});
+
+    // 3. Função de renderização para cada lista
+    const renderSheetList = (categoryTitle, sheets) => {
+        if (!sheets || sheets.length === 0) return '';
+
+        const isRacional = sheets[0].isRacional;
+        const titleClass = isRacional ? 'text-rjb-yellow' : 'text-rjb-text dark:text-rjb-text-dark';
+        const borderColor = isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20';
+
+        return `
+            <div class="mb-10">
+                <h3 class="text-3xl font-extrabold mb-6 ${titleClass} border-b-2 ${borderColor} pb-2 transition-colors duration-500">
+                    ${categoryTitle} (${sheets.length})
+                </h3>
+                <div class="space-y-4">
+                    ${sheets.map((sheet) => `
+                        <div class="p-4 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark/50 flex flex-col md:flex-row justify-between items-center shadow-sm border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/30 dark:border-rjb-text-dark/30'}">
+                            
+                            <div class="mb-3 md:mb-0 md:w-1/3">
+                                <p class="text-lg font-medium text-rjb-text dark:text-rjb-text-dark">${sheet.title}</p>
+                                <p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">${sheet.time} &bull; Referência / Arquivos</p>
+                            </div>
+
+                            <div class="md:w-2/3 flex flex-wrap justify-end space-x-2 space-y-2 md:space-y-0">
+                                
+                                <a href="${R2_BASE_URL}/${sheet.mp3}.mp3" download="${sheet.title.replace(/ /g, '_')}.mp3"
+                                    class="flex items-center space-x-2 bg-rjb-yellow/10 text-rjb-yellow font-semibold py-2 px-3 rounded-lg hover:bg-rjb-yellow/20 transition-colors text-sm transform hover:scale-[1.03]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"></path></svg>
+                                    <span>MP3</span>
+                                </a>
+                                
+                                <a href="${R2_BASE_URL}/${sheet.mp3}.pdf" download="${sheet.title.replace(/ /g, '_')}.pdf"
+                                    class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-3 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-[1.03] shadow-subtle-glow">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                    <span>PDF</span>
+                                </a>
+                                
+                                <a href="${R2_BASE_URL}/${sheet.mp3}.sib" download="${sheet.title.replace(/ /g, '_')}.sib"
+                                    class="flex items-center space-x-2 bg-rjb-text dark:bg-rjb-card-dark text-white dark:text-rjb-text-dark font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 dark:hover:bg-rjb-bg-dark transition-colors text-sm transform hover:scale-[1.03] border border-transparent dark:border-rjb-text-dark/20">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>SIB</span>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    };
+
+
+    // 4. Retorno final da página (Layout em duas colunas)
     return `
         <div class="space-y-6">
             <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8">
-                Área exclusiva para músicos. Aqui você pode fazer o download das partituras nos formatos Sibelius e PDF, além de ouvir a referência em MP3.
+                Área exclusiva para músicos. Faça o download de partituras e referências de áudio para ensaio.
             </p>
-
-            ${sheets.map(sheet => `
-                <div class="p-5 md:p-6 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark flex flex-col md:flex-row justify-between items-center border border-rjb-yellow/30 shadow-md hover:shadow-lg transition-all duration-300">
-                    <div class="mb-4 md:mb-0 md:w-1/3">
-                        <h3 class="text-xl font-bold text-rjb-text dark:text-rjb-text-dark">${sheet.name}</h3>
-                        <p class="text-sm text-rjb-yellow/90">Partituras e Referência</p>
-                    </div>
-
-                    <div class="md:w-1/3 flex justify-center mb-4 md:mb-0">
-                        <audio controls class="w-full max-w-xs p-1 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark transition-colors duration-500">
-                            <source src="/audio/${sheet.mp3}" type="audio/mp3">
-                            Seu navegador não suporta o elemento audio.
-                        </audio>
-                    </div>
-
-                    <div class="md:w-1/3 flex justify-end space-x-4">
-                        <button onclick="showMessage('Download do arquivo .sib para ${sheet.name}')" class="flex items-center space-x-2 bg-rjb-text dark:bg-rjb-card-dark text-white dark:text-rjb-text-dark font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 dark:hover:bg-rjb-bg-dark transition-colors text-sm transform hover:scale-105 border border-transparent dark:border-rjb-text-dark/20">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>.SIB</span>
-                        </button>
-                        <button onclick="showMessage('Download do arquivo .pdf para ${sheet.name}')" class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-4 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-105 shadow-subtle-glow">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>.PDF</span>
-                        </button>
-                    </div>
-                </div>
-            `).join('')}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                ${renderSheetList('Músicas Racionais', sheetsByCategory['Música Racional'] || [])}
+                ${renderSheetList('Outros Clássicos', sheetsByCategory['Outros Clássicos'] || [])}
+            </div>
         </div>
     `;
 }
-
-function generateFotosPage() {
-    // MOCK de dados internos para esta página
-    const photos = [
+        function generateFotosPage() {
+            // MOCK de dados internos para esta página
+            const photos = [
                 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841433.jpg',
                 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534258.jpg',
                 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534262.jpg',
@@ -1022,9 +1150,9 @@ function generateFotosPage() {
                 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534257.jpg',
                 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841431.jpg',
                 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841432.jpg',
-    ];
+            ];
 
-    return `
+            return `
         <div class="space-y-6">
             <p class="text-lg">
                 Uma galeria de momentos capturados em nossos shows, ensaios e eventos.
@@ -1046,17 +1174,17 @@ function generateFotosPage() {
             </p>
         </div>
     `;
-}
+        }
 
-function generateAgendaPage() {
-    // MOCK de dados internos para esta página
-    const events = [
-        { date: '2025-12-30', time: '20:00', title: 'Dia do Sábio', location: 'Retiro Racional - Nova Iguaçu (RJ)', link: '#', dateString: '15 DEZ 2025' },
-        //{ date: '2026-01-20', time: '19:30', title: 'Pocket Show - Jazz na Praça', location: 'Praça Tiradentes, Curitiba (PR)', link: '#', dateString: '20 JAN 2026' },
-        //{ date: '2026-03-05', time: '21:00', title: 'Festival de Jazz de Inverno', location: 'Teatro Pedro II, Ribeirão Preto (SP)', link: '#', dateString: '05 MAR 2026' },
-    ];
+        function generateAgendaPage() {
+            // MOCK de dados internos para esta página
+            const events = [
+                { date: '2025-12-30', time: '20:00', title: 'Dia do Sábio', location: 'Retiro Racional - Nova Iguaçu (RJ)', link: '#', dateString: '30 DEZ 2025' },
+                //{ date: '2026-01-20', time: '19:30', title: 'Pocket Show - Jazz na Praça', location: 'Praça Tiradentes, Curitiba (PR)', link: '#', dateString: '20 JAN 2026' },
+                //{ date: '2026-03-05', time: '21:00', title: 'Festival de Jazz de Inverno', location: 'Teatro Pedro II, Ribeirão Preto (SP)', link: '#', dateString: '05 MAR 2026' },
+            ];
 
-    return `
+            return `
         <div class="space-y-6">
             <p class="text-lg text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
                 Confira a nossa agenda de apresentações para participar de momentos inesquecíveis de música e cultura.
@@ -1075,7 +1203,7 @@ function generateAgendaPage() {
             `).join('')}
         </div>
     `;
-}
+        }
 
         function generateContatoPage() { /* (MANTIDO) */ return `
 				<div class="max-w-xl mx-auto">
@@ -1152,8 +1280,9 @@ function generateAgendaPage() {
                     </div>
                 </form>
             </div>
-        `; }
-        
+        `;
+        }
+
         function generateReportsPage() { /* (NOVA PÁGINA DE LOGIN) */ return `
             <div class="max-w-4xl mx-auto">
         <h2 class="text-4xl font-extrabold text-rjb-yellow mb-8 text-center">Área Administrativa</h2>
@@ -1216,15 +1345,16 @@ function generateAgendaPage() {
             </div>
         </div>
     </div>
-        `; }
-        
+        `;
+        }
+
         // --- FUNÇÃO DE RENDERIZAÇÃO PRINCIPAL (CORRIGIDA) ---
         function renderPage() {
             const content = document.getElementById('main-content');
             let html = '';
 
             let pageTitle = '';
-            
+
             // 1. Define o título da página (CORRIGIDO: Apenas define o título)
             if (subMenuRJB[currentPage]) {
                 pageTitle = subMenuRJB[currentPage];
@@ -1239,7 +1369,7 @@ function generateAgendaPage() {
                     default: pageTitle = 'Página Não Encontrada';
                 }
             }
-            
+
             // 2. Renderiza a Home Page ou o Wrapper de Conteúdo
             if (currentPage === 'home') {
                 html += generateHomePageWrapper();
@@ -1277,13 +1407,13 @@ function generateAgendaPage() {
             content.innerHTML = html;
 
             updateActiveMenu();
-            
+
             // CHAMA O CONTROLE DE ACESSO SOMENTE NA PÁGINA DE RELATÓRIOS
             if (currentPage === 'reports') {
-                setTimeout(renderProtectedReportView, 0); 
+                setTimeout(renderProtectedReportView, 0);
             }
         }
-        
+
         // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
@@ -1337,31 +1467,146 @@ function generateAgendaPage() {
 
     <style>
         /* --- Estilos CSS (MANTIDOS) --- */
-        body { transition: background-color 0.5s ease, color 0.5s ease; min-height: 100vh; }
-        .rjb-logo-text { text-shadow: 0 0 4px rgba(255, 215, 0, 0.8); letter-spacing: -0.05em; }
-        #home-background-section { background-image: url("WhatsApp Image 2025-11-19 at 17.15.58.jpeg"); background-size: cover; background-position: center 40%; background-attachment: fixed; position: relative; padding-top: 10rem; padding-bottom: 10rem; }
-        #home-background-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.88); z-index: 1; transition: background-color 0.5s ease; }
-        .dark #home-background-section::before { background-color: rgba(0, 0, 0, 0.7); }
-        .video-thumbnail-container { position: relative; width: 100%; padding-top: 56.25%; overflow: hidden; cursor: pointer; }
-        .video-thumbnail-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease, opacity 0.3s ease; }
-        .group:hover .video-thumbnail-img { transform: scale(1.05); }
-        .play-icon-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background-color: rgba(0, 0, 0, 0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; border: 2px solid #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        .group:hover .play-icon-overlay { background-color: rgba(255, 215, 0, 0.9); transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); }
-        .play-icon-overlay svg { width: 30px; height: 30px; fill: #FFD700; margin-left: 4px; transition: fill 0.3s ease; }
-        .group:hover .play-icon-overlay svg { fill: #2A2A2A; }
-        .header-rjb { background-color: var(--tw-rjb-card-light); border-bottom: 1px solid #EEEEEE; transition: background-color 0.5s ease, border-color 0.5s ease; }
-        .dark .header-rjb { background-color: var(--tw-rjb-card-dark); border-bottom: 1px solid rgba(255, 215, 0, 0.1); }
-        .nav-link-active { border-bottom: 2px solid #FFD700; padding-bottom: 5px; }
-        .rjb-logo-image { border-radius: 50%; border: 2px solid var(--tw-rjb-yellow); box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); transition: all 0.5s ease; }
-        .dark .rjb-logo-image { border: 2px solid rgba(255, 215, 0, 0.6); box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 5px rgba(255, 215, 0, 0.2) inset; }
-        .play-button.playing svg path { d: path("M6 19h4V5H6v14zm8-14v14h4V5h-4z"); fill-rule: unset; clip-rule: unset; }
-        .message-error { background-color: #D32F2F !important; color: white !important; box-shadow: 0 0 10px rgba(211, 47, 47, 0.7); }
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+            min-height: 100vh;
+        }
+
+        .rjb-logo-text {
+            text-shadow: 0 0 4px rgba(255, 215, 0, 0.8);
+            letter-spacing: -0.05em;
+        }
+
+        #home-background-section {
+            background-image: url("WhatsApp Image 2025-11-19 at 17.15.58.jpeg");
+            background-size: cover;
+            background-position: center 40%;
+            background-attachment: fixed;
+            position: relative;
+            padding-top: 10rem;
+            padding-bottom: 10rem;
+        }
+
+        #home-background-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.88);
+            z-index: 1;
+            transition: background-color 0.5s ease;
+        }
+
+        .dark #home-background-section::before {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .video-thumbnail-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .video-thumbnail-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease, opacity 0.3s ease;
+        }
+
+        .group:hover .video-thumbnail-img {
+            transform: scale(1.05);
+        }
+
+        .play-icon-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: 2px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .group:hover .play-icon-overlay {
+            background-color: rgba(255, 215, 0, 0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        }
+
+        .play-icon-overlay svg {
+            width: 30px;
+            height: 30px;
+            fill: #FFD700;
+            margin-left: 4px;
+            transition: fill 0.3s ease;
+        }
+
+        .group:hover .play-icon-overlay svg {
+            fill: #2A2A2A;
+        }
+
+        .header-rjb {
+            background-color: var(--tw-rjb-card-light);
+            border-bottom: 1px solid #EEEEEE;
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+            z-index: 9999 !important;
+        }
+
+
+        .dark .header-rjb {
+            background-color: var(--tw-rjb-card-dark);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-link-active {
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 5px;
+        }
+
+        .rjb-logo-image {
+            border-radius: 50%;
+            border: 2px solid var(--tw-rjb-yellow);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+            transition: all 0.5s ease;
+        }
+
+        .dark .rjb-logo-image {
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 5px rgba(255, 215, 0, 0.2) inset;
+        }
+
+        .play-button.playing svg path {
+            d: path("M6 19h4V5H6v14zm8-14v14h4V5h-4z");
+            fill-rule: unset;
+            clip-rule: unset;
+        }
+
+        .message-error {
+            background-color: #D32F2F !important;
+            color: white !important;
+            box-shadow: 0 0 10px rgba(211, 47, 47, 0.7);
+        }
     </style>
 </head>
 
 <body class="font-sans bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text transition-colors duration-500">
 
-    <header class="sticky top-0 header-rjb shadow-lg dark:shadow-black/50 z-50">
+    <header class=" top-0 header-rjb shadow-lg dark:shadow-black/50 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <button onclick="navigateTo('home')"
@@ -1412,9 +1657,10 @@ function generateAgendaPage() {
                         class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Agenda</button>
                     <button id="nav-contato" onclick="navigateTo('contato')"
                         class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Contato</button>
-                    
+
                     <button id="nav-relatorios-desktop" onclick="navigateTo('reports')"
-                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Área Administrativa</button>
+                        class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Área
+                        Administrativa</button>
 
                     <button onclick="toggleDarkMode()"
                         class="text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors p-2 rounded-full hover:bg-rjb-yellow/10 focus:outline-none">
@@ -1514,9 +1760,10 @@ function generateAgendaPage() {
                     class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Agenda</button>
                 <button id="nav-contato-mobile" onclick="navigateTo('contato')"
                     class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Contato</button>
-                
+
                 <button id="nav-relatorios-mobile" onclick="navigateTo('reports')"
-                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Área Administrativa</button>
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Área
+                    Administrativa</button>
 
                 <button id="nav-cadastro-mobile" onclick="navigateTo('member-registration')"
                     class="nav-link block w-full text-left mt-2 bg-rjb-yellow text-rjb-text font-bold py-2 px-3 rounded-md text-base hover:bg-yellow-500 transition-colors shadow-subtle-glow">Cadastro</button>
@@ -1524,8 +1771,8 @@ function generateAgendaPage() {
         </div>
     </header>
 
-    <main id="main-content" class="z-10 relative opacity-100 transition-opacity duration-500">
-    </main>
+    <main id="main-content" class="opacity-100 transition-opacity duration-500">
+</main>
 
     <footer
         class="bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow/20 mt-12 py-8 z-20 relative transition-colors duration-500">
@@ -1540,7 +1787,8 @@ function generateAgendaPage() {
                 <button onclick="navigateTo('contato')" class="hover:text-rjb-yellow transition-colors">Termos de
                     Uso</button>
                 <span>|</span>
-                <button onclick="navigateTo('member-registration')" class="hover:text-rjb-yellow transition-colors">Trabalhe
+                <button onclick="navigateTo('member-registration')"
+                    class="hover:text-rjb-yellow transition-colors">Trabalhe
                     Conosco</button>
             </div>
         </div>
@@ -1565,19 +1813,34 @@ function generateAgendaPage() {
             <button onclick="closeVideoModal()"
                 class="absolute -top-10 right-4 text-white hover:text-rjb-yellow text-4xl font-light z-10 p-2 transition-colors">&times;</button>
 
-            <div class="relative w-full pt-[56.25%] bg-black rounded-lg shadow-soft-glow overflow-hidden border border-rjb-yellow/30">
-                <iframe 
-                    id="video-iframe" 
-                    class="absolute top-0 left-0 w-full h-full"
-                    src="" 
-                    title="YouTube video player" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            <div
+                class="relative w-full pt-[56.25%] bg-black rounded-lg shadow-soft-glow overflow-hidden border border-rjb-yellow/30">
+                <iframe id="video-iframe" class="absolute top-0 left-0 w-full h-full" src=""
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowfullscreen>
                 </iframe>
             </div>
         </div>
     </div>
+    <div id="custom-message-box"
+        class="hidden opacity-0 fixed top-5 left-1/2 transform -translate-x-1/2 bg-rjb-yellow text-rjb-text px-6 py-3 rounded-lg shadow-deep-shadow dark:shadow-soft-glow z-[60] transition-opacity duration-300">
+        <p id="message-text" class="font-semibold"></p>
+    </div>
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-rjb-bg-light/90 dark:bg-rjb-bg-dark/90 z-[100] hidden items-center justify-center transition-opacity duration-300 opacity-0">
+        <div class="flex flex-col items-center space-y-4">
+            <svg class="animate-spin h-10 w-10 text-rjb-yellow" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            <p id="loader-message" class="text-lg font-semibold text-rjb-text dark:text-rjb-text-dark">Carregando...</p>
+        </div>
+    </div>
+    
     <div id="custom-message-box"
         class="hidden opacity-0 fixed top-5 left-1/2 transform -translate-x-1/2 bg-rjb-yellow text-rjb-text px-6 py-3 rounded-lg shadow-deep-shadow dark:shadow-soft-glow z-[60] transition-opacity duration-300">
         <p id="message-text" class="font-semibold"></p>
