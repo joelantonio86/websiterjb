@@ -1565,6 +1565,9 @@ function generatePartiturasPage() {
             border-bottom: 1px solid #EEEEEE;
             transition: background-color 0.5s ease, border-color 0.5s ease;
             z-index: 9999 !important;
+            position: fixed; 
+            width: 100%;
+            top: 0;
         }
 
 
@@ -1719,17 +1722,17 @@ function generatePartiturasPage() {
             </div>
         </div>
 
-        <div class="md:hidden hidden absolute w-full bg-rjb-card-light dark:bg-rjb-card-dark border-b border-rjb-yellow/30 pb-3 transition-colors duration-500"
+        <div class="md:hidden hidden absolute w-full bg-rjb-card-light dark:bg-rjb-card-dark border-b border-rjb-yellow/30 pb-3 transition-colors duration-500 z-40"
             id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <button id="nav-home-mobile" onclick="navigateTo('home')"
-                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Home</button>
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/10 hover:text-rjb-yellow transition-colors">Home</button>
                 <button id="nav-sobre-mobile" onclick="navigateTo('sobre')"
-                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Sobre</button>
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/10 hover:text-rjb-yellow transition-colors">Sobre</button>
 
                 <div class="relative nav-item-rjb">
                     <button id="rjb-dropdown-button-mobile"
-                        class="flex items-center justify-between w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors"
+                        class="flex items-center justify-between w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/10 hover:text-rjb-yellow transition-colors"
                         aria-expanded="false">
                         A RJB
                         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -1757,12 +1760,12 @@ function generatePartiturasPage() {
                 </div>
 
                 <button id="nav-agenda-mobile" onclick="navigateTo('agenda')"
-                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Agenda</button>
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/10 hover:text-rjb-yellow transition-colors">Agenda</button>
                 <button id="nav-contato-mobile" onclick="navigateTo('contato')"
-                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Contato</button>
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/10 hover:text-rjb-yellow transition-colors">Contato</button>
 
                 <button id="nav-relatorios-mobile" onclick="navigateTo('reports')"
-                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/50 hover:text-rjb-yellow transition-colors">Área
+                    class="nav-link block w-full text-left px-3 py-2 rounded-md text-base font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gray-100 dark:hover:bg-rjb-bg-dark/10 hover:text-rjb-yellow transition-colors">Área
                     Administrativa</button>
 
                 <button id="nav-cadastro-mobile" onclick="navigateTo('member-registration')"
@@ -1771,7 +1774,7 @@ function generatePartiturasPage() {
         </div>
     </header>
 
-    <main id="main-content" class="opacity-100 transition-opacity duration-500">
+    <main id="main-content" class="opacity-100 transition-opacity duration-500 pt-20">
 </main>
 
     <footer
