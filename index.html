@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script>
+   <script>
         // --- Configuração Tailwind ---
         tailwind.config = {
             darkMode: 'class',
@@ -273,6 +273,38 @@ function toggleLoader(show, message = 'Carregando...') {
                 stopCurrentAudio();
             };
         }
+        
+        // NOVO: Função de Play para URLs Externas (R2)
+        function togglePlayExternal(title, audioUrl) {
+            const button = event.currentTarget;
+            const isPlaying = button.classList.contains('playing');
+
+            if (isPlaying) {
+                stopCurrentAudio();
+                return;
+            }
+
+            stopCurrentAudio();
+
+            // CRÍTICO: Usa a URL de áudio completa que veio como parâmetro
+            currentAudio = new Audio(audioUrl);
+            currentAudio.load();
+
+            playingButton = button;
+            button.classList.add('playing');
+            currentAudio.play();
+
+            showMessage(`Tocando: ${title}`);
+
+            currentAudio.onended = () => {
+                stopCurrentAudio();
+            };
+
+            currentAudio.onerror = () => {
+                showMessage(`Erro ao carregar o áudio de: ${title}. Arquivo ${audioUrl} não encontrado ou inválido.`, true);
+                stopCurrentAudio();
+            };
+        }
 
         function openModal(imageUrl) {
             const modal = document.getElementById('image-modal');
@@ -347,7 +379,7 @@ function toggleLoader(show, message = 'Carregando...') {
                 messageBox.classList.add('hidden');
             }, hideTime);
         }
-// index.html (NOVA FUNÇÃO filterPartituras)
+// index.html (Adicionar no bloco de Funções de Utilidade Geral)
 function filterPartituras() {
     const input = document.getElementById('search-input');
     // Normalize o termo de busca para minúsculas e sem acentos para uma busca robusta
@@ -386,7 +418,7 @@ function filterPartituras() {
         noResultsMessage.remove();
     }
 }
-// index.html (NOVA FUNÇÃO toggleAccordion)
+// index.html (Adicionar no bloco de Funções de Utilidade Geral)
 function toggleAccordion(accordionId) {
     const header = document.getElementById(accordionId + '-header');
     const content = document.getElementById(accordionId + '-content');
@@ -765,35 +797,52 @@ async function fetchAttachmentsReport(token) {
         }
 
         function renderReportData(data) {
-            const reportArea = document.getElementById('member-report-details');
-            // ... (restante da lógica de renderReportData) ...
+            // 1. AÇÃO CRÍTICA: Use a div de detalhes do relatório de membros (#member-report-details), e não a div pai.
+            const reportArea = document.getElementById('member-report-details'); 
+            
+            // Se a div não existir (nunca deve ocorrer após o login), saia.
+            if (!reportArea) return; 
 
-            // Altere o final da função para usar um elemento filho 'member-report-details'
+            // Conteúdo de relatório (Simplificado para evitar quebras, dependente do seu index.js)
+            const totalMembros = data.totalMembers || 0;
+            const membersListHtml = data.allMembers ? data.allMembers.map(m => `
+                <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors">
+                    <td class="p-3 font-medium">${m.name}</td>
+                    <td class="p-3">${m.instrument}</td>
+                    <td class="p-3 hidden sm:table-cell">${m.city}/${m.state}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="3" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
+
+            // 2. PREENCHE APENAS A DIV #member-report-details (mantendo o formulário de anexos e o botão Sair)
             reportArea.innerHTML = `
-        <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
-        <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
-        
-        <button onclick="handleDownloadCSV()" class="bg-rjb-yellow text-rjb-text font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition mb-6 shadow-subtle-glow flex items-center space-x-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            <span>Baixar CSV Completo</span>
-        </button>
-        
-        <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
-                <thead>
-                    <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
-                        <th class="p-3">Nome</th>
-                        <th class="p-3">Instrumento</th>
-                        <th class="p-3 hidden sm:table-cell">Localidade</th>
-                    </tr>
-                </thead>
-                <tbody>${membersListHtml}</tbody>
-            </table>
-        </div>
-    `;
-
-            // Remove o botão "Sair" daqui, ele será colocado no wrapper principal
+                <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
+                <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
+                
+                <button onclick="handleDownloadCSV()" class="bg-rjb-yellow text-rjb-text font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition mb-6 shadow-subtle-glow flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Baixar CSV Completo</span>
+                </button>
+                
+                <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
+                        <thead>
+                            <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
+                                <th class="p-3">Nome</th>
+                                <th class="p-3">Instrumento</th>
+                                <th class="p-3 hidden sm:table-cell">Localidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>${membersListHtml}</tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Opcional: Garante que a área de anexos está limpa antes de carregar (para feedback visual)
+            const attachmentsArea = document.getElementById('attachments-output-area');
+            if (attachmentsArea) {
+                attachmentsArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando anexos...</p>';
+            }
         }
 
   // index.html (NOVA VERSÃO ROBUSTA DE fetchMemberReport)
@@ -997,8 +1046,6 @@ function renderReportData(data) {
 
   // index.html (SUBSTITUIR A FUNÇÃO generateSobrePage())
 
-// index.html (SUBSTITUIR A FUNÇÃO generateSobrePage())
-
 function generateSobrePage() {
     return `
         <div class="space-y-8 text-rjb-text dark:text-rjb-text-dark transition-colors duration-500">
@@ -1070,32 +1117,41 @@ function generateSobrePage() {
 			`;
         }
 
-        function generateRepertorioPage() {
+// index.html (SUBSTITUIR A FUNÇÃO generateRepertorioPage COMPLETA)
+function generateRepertorioPage() {
 
-            // Função interna para renderizar listas
-            const renderList = (title, songs, isRacional) => `
+    // AÇÃO CRÍTICA: Pasta para áudios de execução na página Repertório
+    const MP3_FOLDER = 'diversas/mp3original';
+
+    // Função interna para renderizar listas
+    const renderList = (title, songs, isRacional) => `
         <div class="mb-10">
             <h3 class="text-3xl font-extrabold mb-6 ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/90 dark:text-rjb-text-dark/90'} border-b-2 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20'} pb-2 transition-colors duration-500">
                 ${title}
             </h3>
             <ul class="space-y-3">
-                ${songs.map((song) => `
+                ${songs.map((song) => {
+                    // 1. Constrói o URL de áudio correto apontando para a pasta MP3_FOLDER
+                    const audioUrl = `${R2_BASE_URL}/${MP3_FOLDER}/${song.mp3}.mp3`;
+
+                    return `
                     <li class="flex justify-between items-center p-4 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark/50 hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 transition-colors duration-300 shadow-sm border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/30 dark:border-rjb-text-dark/30'}">
                         <div class="flex items-center space-x-3">
-                            <button onclick="togglePlay('${song.title.trim().replace(/'/g, "\\'")}', '${song.mp3}')" class="play-button text-rjb-yellow hover:text-yellow-600 transition-colors transform hover:scale-105 p-2 rounded-full bg-rjb-yellow/10 hover:bg-rjb-yellow/20 dark:bg-rjb-yellow/5 dark:hover:bg-rjb-yellow/10" data-title="${song.title.trim()}" aria-label="Tocar ${song.title.trim()}">
+                            <button onclick="togglePlayExternal('${song.title.trim().replace(/'/g, "\\'")}', '${audioUrl}')" class="play-button text-rjb-yellow hover:text-yellow-600 transition-colors transform hover:scale-105 p-2 rounded-full bg-rjb-yellow/10 hover:bg-rjb-yellow/20 dark:bg-rjb-yellow/5 dark:hover:bg-rjb-yellow/10" data-title="${song.title.trim()}" aria-label="Tocar ${song.title.trim()}">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                             </button>
                             <span class="text-lg font-medium text-rjb-text dark:text-rjb-text-dark">${song.title}</span>
                         </div>
                         <span class="text-sm ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/70 dark:text-rjb-text-dark/70'}">${song.time}</span>
                     </li>
-                `).join('')}
+                `;
+                }).join('')}
             </ul>
         </div>
     `;
 
-            // Retorno final da página
-            return `
+    // Retorno final da página
+    return `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             ${renderList('Músicas Racionais 🎧', racionais, true)}
             ${renderList('Outros Clássicos 🎷', diversas, false)}
@@ -1104,9 +1160,9 @@ function generateSobrePage() {
             Nosso repertório está em constante expansão e renovação.
         </p>
     `;
-        }
+}
 
-// index.html (FUNÇÃO generatePartiturasPage - VERSÃO COM BUSCA E AMBOS ACORDIONS ABERTOS)
+// index.html (FUNÇÃO generatePartiturasPage - VERSÃO CORRIGIDA PARA R2)
 function generatePartiturasPage() {
     // 1. Combine e classifique todas as músicas, ADICIONANDO A PROPRIEDADE 'FOLDER'
     const allSheets = [
@@ -1130,7 +1186,7 @@ function generatePartiturasPage() {
         const containerId = isRacional ? 'racionais-list' : 'diversas-list'; 
         const accordionId = isRacional ? 'accordion-racionais' : 'accordion-diversas';
         
-        // CORREÇÃO APLICADA: Força o accordion a abrir para AMBAS as listas
+        // Força o accordion a abrir para AMBAS as listas
         const isDefaultOpen = true; 
 
         return `
