@@ -27,6 +27,7 @@ const VALID_INVITE_KEYS = [
 const ADMIN_USERS = [
     { email: 'regente@racionaljazzband.com', password: 'SenhaSuperSecreta123', role: 'regente' },
     { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin' },
+    { email: 'samara.oliver3012@gmail.com', password: 'samoliveiraRJB@1935', role: 'admin' },
 ];
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-987654321'; 
