@@ -1058,7 +1058,7 @@ function generateSobrePage() {
     `;
         }
 
-// index.html (FUNÇÃO generatePartiturasPage - Aprox. Linha 969)
+// index.html (FUNÇÃO generatePartiturasPage - Versão com Estilo Aprimorado)
 function generatePartiturasPage() {
     // 1. Combine e classifique todas as músicas, ADICIONANDO A PROPRIEDADE 'FOLDER'
     const allSheets = [
@@ -1094,13 +1094,14 @@ function generatePartiturasPage() {
                                 <p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">${sheet.time} &bull; Referência / Arquivos</p>
                             </div>
 
-                            <div class="md:w-2/3 flex flex-wrap justify-end space-x-2 space-y-2 md:space-y-0">
+                            <div class="md:w-2/3 flex flex-wrap justify-end space-x-2 space-y-2 md:space-y-0 items-center">
                                 
-                                <a href="${R2_BASE_URL}/${sheet.folder}/mp3/${sheet.mp3}.mp3" download="${sheet.title.replace(/ /g, '_')}.mp3"
-                                    class="flex items-center space-x-2 bg-rjb-yellow/10 text-rjb-yellow font-semibold py-2 px-3 rounded-lg hover:bg-rjb-yellow/20 transition-colors text-sm transform hover:scale-[1.03]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"></path></svg>
-                                    <span>MP3</span>
-                                </a>
+                                <div class="flex items-center space-x-2 bg-rjb-yellow/10 py-1 px-2 rounded-lg text-sm">
+                                    <audio controls class="rjb-audio-player w-48 h-10 md:w-56" preload="none">
+                                        <source src="${R2_BASE_URL}/${sheet.folder}/mp3/${sheet.mp3}.mp3" type="audio/mp3">
+                                        Seu navegador não suporta o elemento de áudio.
+                                    </audio>
+                                </div>
                                 
                                 <a href="${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf" download="${sheet.title.replace(/ /g, '_')}.pdf"
                                     class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-3 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-[1.03] shadow-subtle-glow">
@@ -1604,6 +1605,49 @@ function generatePartiturasPage() {
             color: white !important;
             box-shadow: 0 0 10px rgba(211, 47, 47, 0.7);
         }
+        /* --- Estilos CSS Adicionais para o Player de Áudio --- */
+/* Estilo base para a tag audio */
+.rjb-audio-player {
+    /* Define uma altura consistente e o fundo do player */
+    height: 40px; /* Um pouco mais alto que o padrão de 32px */
+    background-color: var(--tw-rjb-bg-light); /* Fundo claro */
+    border-radius: 9999px; /* Arredonda completamente */
+    padding: 0 10px;
+    border: 1px solid rgba(255, 215, 0, 0.5); /* Borda sutil amarela */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+/* Estilos para o modo escuro */
+.dark .rjb-audio-player {
+    background-color: var(--tw-rjb-card-dark); /* Fundo escuro */
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Estiliza o botão de play/pause (funciona apenas em alguns navegadores, como Chrome) */
+.rjb-audio-player::-webkit-media-controls-play-button {
+    color: var(--tw-rjb-yellow); 
+    background-color: rgba(255, 215, 0, 0.1);
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+/* Estiliza a barra de progresso (funciona apenas em alguns navegadores, como Chrome) */
+.rjb-audio-player::-webkit-media-controls-timeline {
+    border-radius: 10px;
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+/* Estiliza o ponteiro de progresso (funciona apenas em alguns navegadores, como Chrome) */
+.rjb-audio-player::-webkit-media-controls-current-time-display,
+.rjb-audio-player::-webkit-media-controls-time-remaining-display {
+    color: var(--tw-rjb-text);
+}
+.dark .rjb-audio-player::-webkit-media-controls-current-time-display,
+.dark .rjb-audio-player::-webkit-media-controls-time-remaining-display {
+    color: var(--tw-rjb-text-dark);
+}
     </style>
 </head>
 
