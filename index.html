@@ -1073,10 +1073,10 @@ function generateSobrePage() {
 			`;
         }
 
-        function generateRepertorioPage() {
+function generateRepertorioPage() {
 
-            // Função interna para renderizar listas
-            const renderList = (title, songs, isRacional) => `
+    // Função interna para renderizar listas
+    const renderList = (title, songs, isRacional) => `
         <div class="mb-10">
             <h3 class="text-3xl font-extrabold mb-6 ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/90 dark:text-rjb-text-dark/90'} border-b-2 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20'} pb-2 transition-colors duration-500">
                 ${title}
@@ -1085,9 +1085,6 @@ function generateSobrePage() {
                 ${songs.map((song) => `
                     <li class="flex justify-between items-center p-4 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark/50 hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 transition-colors duration-300 shadow-sm border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/30 dark:border-rjb-text-dark/30'}">
                         <div class="flex items-center space-x-3">
-                            <button onclick="togglePlay('${song.title.trim().replace(/'/g, "\\'")}', '${song.mp3}')" class="play-button text-rjb-yellow hover:text-yellow-600 transition-colors transform hover:scale-105 p-2 rounded-full bg-rjb-yellow/10 hover:bg-rjb-yellow/20 dark:bg-rjb-yellow/5 dark:hover:bg-rjb-yellow/10" data-title="${song.title.trim()}" aria-label="Tocar ${song.title.trim()}">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                            </button>
                             <span class="text-lg font-medium text-rjb-text dark:text-rjb-text-dark">${song.title}</span>
                         </div>
                         <span class="text-sm ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/70 dark:text-rjb-text-dark/70'}">${song.time}</span>
@@ -1097,17 +1094,21 @@ function generateSobrePage() {
         </div>
     `;
 
-            // Retorno final da página
-            return `
+    // Retorno final da página - Alterado para uma única coluna no mobile (col-span-2) e duas no desktop
+    return `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            ${renderList('Músicas Racionais 🎧', racionais, true)}
-            ${renderList('Outros Clássicos 🎷', diversas, false)}
+            <div>
+                ${renderList('Músicas Racionais', racionais, true)}
+            </div>
+            <div>
+                ${renderList('Outros Clássicos', diversas, false)}
+            </div>
         </div>
         <p class="text-center mt-12 text-rjb-text/70 dark:text-rjb-text-dark/70 italic">
-            Nosso repertório está em constante expansão e renovação.
+            Para ouvir a referência de áudio ou baixar partituras, acesse a <a onclick="navigateTo('partituras')" class="text-rjb-yellow hover:underline cursor-pointer">Área de Partituras</a>.
         </p>
     `;
-        }
+}
 
 // index.html (FUNÇÃO generatePartiturasPage - VERSÃO COM BUSCA E AMBOS ACORDIONS ABERTOS)
 function generatePartiturasPage() {
