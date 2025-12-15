@@ -42,11 +42,11 @@
         let playingButton = null;
 
         const subMenuRJB = {
-            'apresentacoes': 'A RJB / Apresentações',
-            'bastidores': 'A RJB / Ensaios',
-            'repertorio': 'A RJB / Repertório',
-            'partituras': 'A RJB / Partituras',
-            'fotos': 'A RJB / Fotos',
+            'apresentacoes': 'Apresentações / Nossas apresentações ',
+            'bastidores': 'Ensaios / Pessoas de diversos estados ',
+            'repertorio': 'Repertório/ Músicas originais',
+            'partituras': 'Partituras / Área Exclusiva para Músicos',
+            'fotos': 'Fotos / Fotos de apresentações',
         };
 
         // Dados de Vídeo Centralizados (MANTIDOS)
@@ -350,7 +350,58 @@ function toggleLoader(show, message = 'Carregando...') {
                 messageBox.classList.add('hidden');
             }, hideTime);
         }
+// index.html (NOVA FUNÇÃO filterPartituras)
+function filterPartituras() {
+    const input = document.getElementById('search-input');
+    // Normalize o termo de busca para minúsculas e sem acentos para uma busca robusta
+    const filterText = input.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+    
+    // Seleciona todos os itens em ambas as listas
+    const items = document.querySelectorAll('.sheet-item');
 
+    let totalVisible = 0;
+    
+    items.forEach(item => {
+        // Pega o título, que é o primeiro <p> dentro do item
+        const titleElement = item.querySelector('p:first-child');
+        if (titleElement) {
+            const title = titleElement.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            if (title.includes(filterText)) {
+                item.style.display = 'flex'; // Torna o item visível
+                totalVisible++;
+            } else {
+                item.style.display = 'none'; // Oculta o item
+            }
+        }
+    });
+
+    // Você pode adicionar um feedback visual se nenhum item for encontrado
+    const noResultsMessage = document.getElementById('no-results-message');
+    if (filterText.length > 0 && totalVisible === 0) {
+        if (!noResultsMessage) {
+            const div = document.createElement('div');
+            div.id = 'no-results-message';
+            div.innerHTML = '<p class="text-center text-xl text-red-500 mt-8">Nenhuma música encontrada com esse nome.</p>';
+            document.querySelector('.space-y-6').appendChild(div);
+        }
+    } else if (noResultsMessage) {
+        noResultsMessage.remove();
+    }
+}
+// index.html (NOVA FUNÇÃO toggleAccordion)
+function toggleAccordion(accordionId) {
+    const header = document.getElementById(accordionId + '-header');
+    const content = document.getElementById(accordionId + '-content');
+
+    if (!header || !content) return;
+
+    // Toggle classes no header
+    header.classList.toggle('open');
+    
+    // Toggle classes no conteúdo (accordion-content)
+    content.classList.toggle('open');
+}
         // --- FUNÇÕES DE SUBMISSÃO E LOGIN (NOVAS) ---
 
         async function submitContactForm(event) {
@@ -1058,7 +1109,7 @@ function generateSobrePage() {
     `;
         }
 
-// index.html (FUNÇÃO generatePartiturasPage - Versão com Estilo Aprimorado)
+// index.html (FUNÇÃO generatePartiturasPage - VERSÃO COM BUSCA E AMBOS ACORDIONS ABERTOS)
 function generatePartiturasPage() {
     // 1. Combine e classifique todas as músicas, ADICIONANDO A PROPRIEDADE 'FOLDER'
     const allSheets = [
@@ -1076,47 +1127,62 @@ function generatePartiturasPage() {
     const renderSheetList = (categoryTitle, sheets) => {
         if (!sheets || sheets.length === 0) return '';
 
-        const isRacional = sheets[0].folder === 'racionais'; // Usa a nova propriedade 'folder'
+        const isRacional = sheets[0].folder === 'racionais'; 
         const titleClass = isRacional ? 'text-rjb-yellow' : 'text-rjb-text dark:text-rjb-text-dark';
         const borderColor = isRacional ? 'border-rjb-yellow' : 'border-rjb-text/20 dark:border-rjb-text-dark/20';
+        const containerId = isRacional ? 'racionais-list' : 'diversas-list'; 
+        const accordionId = isRacional ? 'accordion-racionais' : 'accordion-diversas';
+        
+        // CORREÇÃO APLICADA: Força o accordion a abrir para AMBAS as listas
+        const isDefaultOpen = true; 
 
         return `
-            <div class="mb-10">
-                <h3 class="text-3xl font-extrabold mb-6 ${titleClass} border-b-2 ${borderColor} pb-2 transition-colors duration-500">
+            <div class="mb-6">
+                
+                <button id="${accordionId}-header" onclick="toggleAccordion('${accordionId}')" 
+                        class="accordion-header flex justify-between items-center w-full p-4 rounded-lg font-extrabold text-xl md:text-2xl 
+                               ${isDefaultOpen ? 'open' : ''} ${titleClass} bg-rjb-bg-light dark:bg-rjb-card-dark/50 
+                               hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 border-l-4 ${borderColor} transition-colors duration-300 shadow-sm">
                     ${categoryTitle} (${sheets.length})
-                </h3>
-                <div class="space-y-4">
-                    ${sheets.map((sheet) => `
-                        <div class="p-4 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark/50 flex flex-col md:flex-row justify-between items-center shadow-sm border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/30 dark:border-rjb-text-dark/30'}">
-                            
-                            <div class="mb-3 md:mb-0 md:w-1/3">
-                                <p class="text-lg font-medium text-rjb-text dark:text-rjb-text-dark">${sheet.title}</p>
-                                <p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">${sheet.time} &bull; Referência / Arquivos</p>
-                            </div>
+                    <svg class="accordion-header-icon w-6 h-6 transform ${isDefaultOpen ? 'rotate-180' : 'rotate-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
 
-                            <div class="md:w-2/3 flex flex-wrap justify-end space-x-2 space-y-2 md:space-y-0 items-center">
+                <div id="${accordionId}-content" class="accordion-content ${isDefaultOpen ? 'open' : ''} mt-4">
+                    <div id="${containerId}" class="space-y-4">
+                        ${sheets.map((sheet) => `
+                            <div class="sheet-item p-4 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark/50 flex flex-col md:flex-row justify-between items-center shadow-sm border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-rjb-text/30 dark:border-rjb-text-dark/30'}">
                                 
-                                <div class="flex items-center space-x-2 bg-rjb-yellow/10 py-1 px-2 rounded-lg text-sm">
-                                    <audio controls class="rjb-audio-player w-48 h-10 md:w-56" preload="none">
-                                        <source src="${R2_BASE_URL}/${sheet.folder}/mp3/${sheet.mp3}.mp3" type="audio/mp3">
-                                        Seu navegador não suporta o elemento de áudio.
-                                    </audio>
+                                <div class="mb-3 md:mb-0 md:w-1/3">
+                                    <p class="text-lg font-medium text-rjb-text dark:text-rjb-text-dark">${sheet.title}</p>
+                                    <p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">${sheet.time} &bull; Referência / Arquivos</p>
                                 </div>
-                                
-                                <a href="${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf" download="${sheet.title.replace(/ /g, '_')}.pdf"
-                                    class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-3 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-[1.03] shadow-subtle-glow">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                                    <span>PDF</span>
-                                </a>
-                                
-                                <a href="${R2_BASE_URL}/${sheet.folder}/sib/${sheet.mp3}.sib" download="${sheet.title.replace(/ /g, '_')}.sib"
-                                    class="flex items-center space-x-2 bg-rjb-text dark:bg-rjb-card-dark text-white dark:text-rjb-text-dark font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 dark:hover:bg-rjb-bg-dark transition-colors text-sm transform hover:scale-[1.03] border border-transparent dark:border-rjb-text-dark/20">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    <span>SIB</span>
-                                </a>
+
+                                <div class="md:w-2/3 flex flex-wrap justify-end space-x-2 space-y-2 md:space-y-0 items-center">
+                                    
+                                    <div class="flex items-center space-x-2 bg-rjb-yellow/10 py-1 px-2 rounded-lg text-sm">
+                                        <audio controls class="rjb-audio-player w-48 h-10 md:w-56" preload="none">
+                                            <source src="${R2_BASE_URL}/${sheet.folder}/mp3/${sheet.mp3}.mp3" type="audio/mp3">
+                                            Seu navegador não suporta o elemento de áudio.
+                                        </audio>
+                                    </div>
+                                    
+                                    <a href="${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf" download="${sheet.title.replace(/ /g, '_')}.pdf"
+                                        class="flex items-center space-x-2 bg-rjb-yellow text-rjb-text font-semibold py-2 px-3 rounded-lg hover:bg-yellow-500 transition-colors text-sm transform hover:scale-[1.03] shadow-subtle-glow">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                        <span>PDF</span>
+                                    </a>
+                                    
+                                    <a href="${R2_BASE_URL}/${sheet.folder}/sib/${sheet.mp3}.sib" download="${sheet.title.replace(/ /g, '_')}.sib"
+                                        class="flex items-center space-x-2 bg-rjb-text dark:bg-rjb-card-dark text-white dark:text-rjb-text-dark font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 dark:hover:bg-rjb-bg-dark transition-colors text-sm transform hover:scale-[1.03] border border-transparent dark:border-rjb-text-dark/20">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        <span>SIB</span>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
             </div>
         `;
@@ -1129,6 +1195,12 @@ function generatePartiturasPage() {
             <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8">
                 Área exclusiva para músicos. Faça o download de partituras e referências de áudio para ensaio.
             </p>
+
+            <div class="mb-10">
+                <input type="text" id="search-input" onkeyup="filterPartituras()" placeholder="🔎 Digite o nome da música para buscar..." 
+                       class="w-full p-4 rounded-lg bg-rjb-card-light dark:bg-rjb-card-dark border-2 border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all shadow-md placeholder-rjb-text/50 dark:placeholder-rjb-text-dark/50">
+            </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                 ${renderSheetList('Músicas Racionais', sheetsByCategory['Música Racional'] || [])}
                 ${renderSheetList('Outros Clássicos', sheetsByCategory['Outros Clássicos'] || [])}
@@ -1349,71 +1421,71 @@ function generatePartiturasPage() {
         `;
         }
 
-        // --- FUNÇÃO DE RENDERIZAÇÃO PRINCIPAL (CORRIGIDA) ---
-        function renderPage() {
-            const content = document.getElementById('main-content');
-            let html = '';
+     // index.html (SUBSTITUIR A FUNÇÃO renderPage COMPLETA)
+function renderPage() {
+    const content = document.getElementById('main-content');
+    let html = '';
 
-            let pageTitle = '';
+    let pageTitle = '';
 
-            // 1. Define o título da página (CORRIGIDO: Apenas define o título)
-            if (subMenuRJB[currentPage]) {
-                pageTitle = subMenuRJB[currentPage];
-            } else {
-                switch (currentPage) {
-                    case 'home': pageTitle = 'Racional Jazz Band'; break;
-                    case 'sobre': pageTitle = 'Sobre a RJB'; break;
-                    case 'agenda': pageTitle = 'Agenda de Eventos'; break;
-                    case 'contato': pageTitle = 'Fale Conosco'; break;
-                    case 'member-registration': pageTitle = 'Cadastro de Membros'; break;
-                    case 'reports': pageTitle = 'Área Administrativa'; break;
-                    default: pageTitle = 'Página Não Encontrada';
-                }
-            }
-
-            // 2. Renderiza a Home Page ou o Wrapper de Conteúdo
-            if (currentPage === 'home') {
-                html += generateHomePageWrapper();
-            } else {
-                html += `
-					<div class="pt-32 md:pt-40 pb-16 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-						<h1 class="text-6xl md:text-8xl font-extrabold rjb-logo-text text-rjb-yellow mb-4 text-center">
-							${pageTitle.split('/')[0].trim()}
-						</h1>
-						${pageTitle.includes('/') ? `<p class="text-xl dark:text-rjb-text-dark/70 text-rjb-text/70 mb-12 text-center">${pageTitle.split('/')[1].trim()}</p>` : ''}
-						
-						<div class="bg-rjb-card-light dark:bg-rjb-card-dark p-6 md:p-10 rounded-xl shadow-deep-shadow dark:shadow-xl dark:shadow-black/30 z-10 border border-rjb-yellow/10 transition-colors duration-500 text-rjb-text dark:text-rjb-text-dark">
-				`;
-
-                // 3. Renderiza o conteúdo específico da página
-                switch (currentPage) {
-                    case 'sobre': html += generateSobrePage(); break;
-                    case 'apresentacoes': html += generateApresentacoesPage(); break;
-                    case 'bastidores': html += generateBastidoresPage(); break;
-                    case 'repertorio': html += generateRepertorioPage(); break;
-                    case 'partituras': html += generatePartiturasPage(); break;
-                    case 'fotos': html += generateFotosPage(); break;
-                    case 'agenda': html += generateAgendaPage(); break;
-                    case 'contato': html += generateContatoPage(); break;
-                    case 'member-registration': html += generateCadastroPage(); break;
-                    case 'reports': html += generateReportsPage(); break;
-                    default: html += '<p class="text-center text-xl dark:text-rjb-text-dark/80 text-rjb-text/80">Opa! Página não encontrada.</p>';
-                }
-
-                html += `
-						</div>
-					</div>
-				`;
-            }
-            content.innerHTML = html;
-
-            updateActiveMenu();
-
-            // CHAMA O CONTROLE DE ACESSO SOMENTE NA PÁGINA DE RELATÓRIOS
-            if (currentPage === 'reports') {
-                setTimeout(renderProtectedReportView, 0);
-            }
+    // 1. Define o título da página 
+    if (subMenuRJB[currentPage]) {
+        pageTitle = subMenuRJB[currentPage];
+    } else {
+        switch (currentPage) {
+            case 'home': pageTitle = 'Racional Jazz Band'; break;
+            case 'sobre': pageTitle = 'Sobre a RJB'; break;
+            case 'agenda': pageTitle = 'Agenda de Eventos'; break;
+            case 'contato': pageTitle = 'Fale Conosco'; break;
+            case 'member-registration': pageTitle = 'Cadastro de Membros'; break;
+            case 'reports': pageTitle = 'Área Administrativa'; break;
+            default: pageTitle = 'Página Não Encontrada';
         }
+    }
+
+    // 2. Renderiza a Home Page ou o Wrapper de Conteúdo
+    if (currentPage === 'home') {
+        html += generateHomePageWrapper();
+    } else {
+        html += `
+            <div class="pt-20 md:pt-28 pb-16 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-6xl md:text-8xl font-extrabold rjb-logo-text text-rjb-yellow mb-2 text-center">
+                    ${pageTitle.split('/')[0].trim()}
+                </h1>
+                ${pageTitle.includes('/') ? `<p class="text-xl dark:text-rjb-text-dark/70 text-rjb-text/70 mb-8 text-center">${pageTitle.split('/')[1].trim()}</p>` : ''}
+                
+                <div class="bg-rjb-card-light dark:bg-rjb-card-dark p-6 md:p-10 rounded-xl shadow-deep-shadow dark:shadow-xl dark:shadow-black/30 z-10 border border-rjb-yellow/10 transition-colors duration-500 text-rjb-text dark:text-rjb-text-dark">
+        `;
+
+        // 3. Renderiza o conteúdo específico da página
+        switch (currentPage) {
+            case 'sobre': html += generateSobrePage(); break;
+            case 'apresentacoes': html += generateApresentacoesPage(); break;
+            case 'bastidores': html += generateBastidoresPage(); break;
+            case 'repertorio': html += generateRepertorioPage(); break;
+            case 'partituras': html += generatePartiturasPage(); break;
+            case 'fotos': html += generateFotosPage(); break;
+            case 'agenda': html += generateAgendaPage(); break;
+            case 'contato': html += generateContatoPage(); break;
+            case 'member-registration': html += generateCadastroPage(); break;
+            case 'reports': html += generateReportsPage(); break;
+            default: html += '<p class="text-center text-xl dark:text-rjb-text-dark/80 text-rjb-text/80">Opa! Página não encontrada.</p>';
+        }
+
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    content.innerHTML = html;
+
+    updateActiveMenu();
+
+    // CHAMA O CONTROLE DE ACESSO SOMENTE NA PÁGINA DE RELATÓRIOS
+    if (currentPage === 'reports') {
+        setTimeout(renderProtectedReportView, 0);
+    }
+}
 
         // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1644,6 +1716,24 @@ function generatePartiturasPage() {
 .dark .rjb-audio-player::-webkit-media-controls-current-time-display,
 .dark .rjb-audio-player::-webkit-media-controls-time-remaining-display {
     color: var(--tw-rjb-text-dark);
+}
+/* --- Estilos CSS para Acordeão (Collapse) --- */
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Suaviza a animação */
+}
+
+.accordion-content.open {
+    max-height: 5000px; /* Valor grande o suficiente para a transição */
+}
+
+.accordion-header-icon {
+    transition: transform 0.3s ease;
+}
+
+.accordion-header.open .accordion-header-icon {
+    transform: rotate(180deg);
 }
     </style>
 </head>
