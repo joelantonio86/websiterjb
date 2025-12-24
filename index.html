@@ -591,14 +591,7 @@
             const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/attachments/list';
             const attachmentsArea = document.getElementById('attachments-output-area');
 
-            // CORREÇÃO CRÍTICA: Se a área de anexos não existe, saia.
-            if (!attachmentsArea) {
-                console.warn('Área de anexos (#attachments-output-area) não encontrada no DOM.');
-                return;
-            }
-
-            showMessage('Buscando lista de anexos...');
-            attachmentsArea.innerHTML = '';
+            if (!attachmentsArea) return;
 
             try {
                 const response = await fetch(endpointUrl, {
@@ -609,20 +602,29 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    renderAttachmentsData(data);
-                } else {
-                    showMessage(data.message || `Erro ${response.status} ao buscar anexos.`, true);
-                    // Mostrar mensagem de erro dentro da área
-                    attachmentsArea.innerHTML = `<p class="text-center text-red-500">Erro: ${data.message || 'Falha ao carregar anexos.'}</p>`;
-                }
+                    // Renderiza os arquivos com o botão de excluir
+                    if (data.length === 0) {
+                        attachmentsArea.innerHTML = '<p class="text-center opacity-50 text-sm">Nenhum arquivo encontrado.</p>';
+                        return;
+                    }
 
+                    attachmentsArea.innerHTML = data.map(f => `
+                <div class="flex items-center justify-between p-3 bg-rjb-bg-light dark:bg-rjb-bg-dark rounded-lg border border-rjb-yellow/10 mb-2">
+                    <div class="flex flex-col">
+                        <span class="font-medium text-sm truncate max-w-[180px]">${f.name}</span>
+                        <span class="text-[10px] opacity-50">${new Date(f.uploaded).toLocaleString()}</span>
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="${f.downloadUrl}" target="_blank" class="text-rjb-yellow hover:underline text-xs font-bold">BAIXAR</a>
+                        <button onclick="deleteAttachment('${f.name}')" class="text-red-500 hover:text-red-700 text-xs font-bold">EXCLUIR</button>
+                    </div>
+                </div>
+            `).join('');
+                }
             } catch (error) {
-                console.error('ERRO DE CONEXÃO/REDE ao buscar anexos:', error);
-                showMessage('Erro de conexão com a API de anexos.', true);
-                attachmentsArea.innerHTML = `<p class="text-center text-red-500">Erro de rede ao conectar com a API de anexos.</p>`;
+                console.error('Erro ao buscar anexos:', error);
             }
         }
-
         async function handleFileUpload(event) {
             event.preventDefault();
 
@@ -664,7 +666,33 @@
                 showMessage('Erro de conexão com a API de upload.', true);
             }
         }
+        async function deleteAttachment(fileName) {
+            if (!confirm(`Deseja realmente excluir o arquivo: ${fileName}?`)) return;
 
+            const token = localStorage.getItem('adminToken');
+            const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+
+            showLoading(true, 'Excluindo arquivo...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/attachments/delete/${encodeURIComponent(fileName)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Arquivo excluído com sucesso!');
+                    fetchAttachmentsReport(token); // Atualiza a lista automaticamente
+                } else {
+                    const err = await response.json();
+                    showMessage(err.message || 'Erro ao excluir.', true);
+                }
+            } catch (e) {
+                showMessage('Erro de conexão ao excluir.', true);
+            } finally {
+                showLoading(false);
+            }
+        }
         async function handleDeleteFile(fileName) {
             if (!confirm(`Tem certeza que deseja EXCLUIR o arquivo '${fileName}'? Esta ação é irreversível.`)) {
                 return;
@@ -1421,8 +1449,8 @@
         `;
         }
 
-       function generateReportsPage() {
-    return `
+        function generateReportsPage() {
+            return `
     <div class="max-w-4xl mx-auto">
         <h2 class="text-4xl font-extrabold text-rjb-yellow mb-8 text-center">Área Administrativa</h2>
         
@@ -1501,32 +1529,58 @@
             </div>
         </div>
     </div>`;
-}
+        }
         // Variável global temporária para a chave
-
-        let currentGeneratedKey = '';
-
-        function uiGenerateAndPrepare() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-
-            currentGeneratedKey = `RJB-AUTO-${code}`; // Padrão validado pelo Regex no back-end
-
-            const display = document.getElementById('generated-key-display');
-            if (display) {
-                display.value = currentGeneratedKey;
-                // Mostra o botão do WhatsApp
-                const waArea = document.getElementById('whatsapp-share-area');
-                if (waArea) waArea.classList.remove('hidden');
-
-                navigator.clipboard.writeText(currentGeneratedKey);
-                showMessage('Chave gerada e copiada!');
+        // Atalho para compatibilidade com as novas funções
+        function showLoading(show, message = 'Carregando...') {
+            if (typeof toggleLoader === 'function') {
+                toggleLoader(show, message);
+            } else {
+                console.warn('Função toggleLoader não encontrada.');
             }
         }
 
+        let currentGeneratedKey = '';
+
+        async function uiGenerateAndPrepare() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+
+            currentGeneratedKey = `RJB-AUTO-${code}`;
+            const token = localStorage.getItem('adminToken');
+            const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+
+            // 1. Mostra a chave na tela IMEDIATAMENTE (Evita frustração do admin)
+            const display = document.getElementById('generated-key-display');
+            if (display) display.value = currentGeneratedKey;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/generate-key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ inviteKey: currentGeneratedKey })
+                });
+
+                // 2. Só tenta ler o JSON se a resposta for OK (Evita o erro de token '<')
+                if (response.ok) {
+                    document.getElementById('whatsapp-share-area').classList.remove('hidden');
+                    navigator.clipboard.writeText(currentGeneratedKey);
+                    showMessage('Chave gerada e salva com sucesso!');
+                } else {
+                    console.error('Servidor retornou erro:', response.status);
+                    document.getElementById('whatsapp-share-area').classList.remove('hidden');
+                    showMessage('Chave gerada localmente. O servidor pode estar desatualizado.', true);
+                }
+            } catch (e) {
+                console.error('Falha na rede:', e);
+                document.getElementById('whatsapp-share-area').classList.remove('hidden');
+                showMessage('Aviso: Chave gerada offline.', true);
+            }
+        }
         function shareViaWhatsApp() {
             if (!currentGeneratedKey) return;
 
@@ -1579,7 +1633,7 @@
             } else {
                 html += `
             <div class="pt-20 md:pt-28 pb-16 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 class="text-6xl md:text-8xl font-extrabold rjb-logo-text text-rjb-yellow mb-2 text-center">
+                <h1 class="text-4xl md:text-7xl font-extrabold rjb-logo-text text-rjb-yellow mb-2 text-center break-words px-2">
                     ${pageTitle.split('/')[0].trim()}
                 </h1>
                 ${pageTitle.includes('/') ? `<p class="text-xl dark:text-rjb-text-dark/70 text-rjb-text/70 mb-8 text-center">${pageTitle.split('/')[1].trim()}</p>` : ''}
@@ -2097,15 +2151,20 @@
             </div>
         </div>
     </div>
-<div id="custom-message-box" class="hidden opacity-0 fixed top-5 left-1/2 transform -translate-x-1/2 bg-rjb-yellow text-rjb-text px-6 py-3 rounded-lg shadow-deep-shadow z-[60] transition-opacity duration-300">
+    <div id="custom-message-box"
+        class="hidden opacity-0 fixed top-5 left-1/2 transform -translate-x-1/2 bg-rjb-yellow text-rjb-text px-6 py-3 rounded-lg shadow-deep-shadow z-[60] transition-opacity duration-300">
         <p id="message-text" class="font-semibold"></p>
     </div>
 
-    <div id="loading-overlay" class="fixed inset-0 bg-rjb-bg-light/90 dark:bg-rjb-bg-dark/90 z-[100] hidden items-center justify-center transition-opacity duration-300 opacity-0">
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-rjb-bg-light/90 dark:bg-rjb-bg-dark/90 z-[100] hidden items-center justify-center transition-opacity duration-300 opacity-0">
         <div class="flex flex-col items-center space-y-4">
-            <svg class="animate-spin h-10 w-10 text-rjb-yellow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-10 w-10 text-rjb-yellow" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
             </svg>
             <p id="loader-message" class="text-lg font-semibold text-rjb-text dark:text-rjb-text-dark">Carregando...</p>
         </div>
