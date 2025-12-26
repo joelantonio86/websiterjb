@@ -111,7 +111,7 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
     try {
         // Validação básica de obrigatoriedade no servidor
-        if (!name || !instrument || !email || !city || !state || !tefa) {
+        if (!name || !instrument || !email || !city || !state) {
             return res.status(400).json({ status: 400, message: 'Todos os campos são obrigatórios.' });
         }
 
@@ -129,7 +129,7 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
         // Adicionado 'tefa' ao documento salvo no Firestore
         await membersCollection.add({
-            name, instrument, email, city, state, tefa, termsVersion, termsAccepted,
+            name, instrument, email, city, state, tefa: tefa || "", termsVersion, termsAccepted,
             registrationIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
             submittedAt: admin.firestore.FieldValue.serverTimestamp()
         });
@@ -160,15 +160,21 @@ app.get('/api/reports/members', authenticateJWT, async (req, res) => {
 app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => {
     try {
         const snapshot = await membersCollection.get();
-        let csv = 'ID,Nome,Instrumento,Email,Cidade,Estado,Data\n';
+        // Adicionada a coluna TEFA no cabeçalho
+        let csv = 'ID,Nome,TEFA,Instrumento,Email,Cidade,Estado,Data\n'; 
+        
         snapshot.forEach(doc => {
             const d = doc.data();
-            csv += `${doc.id},"${d.name}","${d.instrument}",${d.email},${d.city},${d.state},${d.submittedAt?.toDate().toISOString()}\n`;
+            const date = d.submittedAt ? d.submittedAt.toDate().toISOString() : "";
+            // Incluindo o valor do campo tefa ou vazio se não existir
+            csv += `${doc.id},"${d.name}","${d.tefa || "" || ""}","${d.instrument}",${d.email},${d.city},${d.state},${date}\n`;
         });
+
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename="relatorio_rjb.csv"');
         res.status(200).send(csv);
     } catch (error) {
+        console.error('Erro ao gerar CSV:', error);
         res.status(500).send('Erro ao gerar CSV.');
     }
 });
