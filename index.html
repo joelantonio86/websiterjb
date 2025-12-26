@@ -725,6 +725,50 @@
             }
         }
 
+        let memberToDelete = null;
+
+        function deleteMember(memberId, memberName) {
+            memberToDelete = memberId;
+            document.getElementById('delete-member-name').textContent = memberName;
+            const modal = document.getElementById('delete-confirm-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+
+            document.getElementById('confirm-delete-btn').onclick = () => executeDelete(memberId);
+        }
+
+        async function executeDelete(memberId) {
+            const token = localStorage.getItem('adminToken');
+            const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+
+            closeDeleteModal();
+            toggleLoader(true, 'Excluindo...');
+
+            try {
+                // CORREÇÃO: Verifique se a URL termina exatamente com o ID
+                const response = await fetch(`${API_BASE}/api/admin/delete-member/${memberId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('Membro removido com sucesso!');
+                    fetchMemberReport(token); // Recarrega a lista
+                } else {
+                    const errData = await response.json();
+                    showMessage(errData.message || 'Erro ao excluir.', true);
+                }
+            } catch (e) {
+                console.error('Erro na requisição DELETE:', e);
+                showMessage('Erro de conexão ao tentar excluir.', true);
+            } finally {
+                toggleLoader(false);
+            }
+        }
+
         function renderAttachmentsData(files) {
             const attachmentsArea = document.getElementById('attachments-output-area');
 
@@ -828,47 +872,7 @@
             }
         }
 
-        function renderReportData(data) {
-            const reportArea = document.getElementById('member-report-details');
-            if (!reportArea) return;
 
-            const totalMembros = data.totalMembers || 0;
-            const membersListHtml = data.allMembers ? data.allMembers.map(m => {
-                const dataInscricao = m.submittedAt ? new Date(m.submittedAt).toLocaleDateString('pt-BR') : '---';
-                return `
-            <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors text-sm">
-                <td class="p-3 font-medium">${m.name}</td>
-                <td class="p-3">${m.instrument}</td>
-                <td class="p-3 hidden sm:table-cell">${m.city}/${m.state}</td>
-                <td class="p-3 text-xs text-rjb-yellow font-mono">${m.termsVersion || 'v1.0'}</td>
-                <td class="p-3 text-xs opacity-70">${dataInscricao}</td>
-            </tr>
-        `;
-            }).join('') : '<tr><td colspan="5" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
-
-            reportArea.innerHTML = `
-        <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
-        <p class="text-xl font-semibold mb-6">Total de Membros: <span class="text-rjb-yellow">${totalMembros}</span></p>
-        
-        <button onclick="handleDownloadCSV()" class="bg-rjb-yellow text-rjb-text font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition mb-6 flex items-center space-x-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            <span>Baixar CSV Completo</span>
-        </button>
-        
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg">
-                <thead>
-                    <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
-                        <th class="p-3">Nome</th><th class="p-3">Instrumento</th>
-                        <th class="p-3 hidden sm:table-cell">Local</th>
-                        <th class="p-3">LGPD</th><th class="p-3">Data</th>
-                    </tr>
-                </thead>
-                <tbody>${membersListHtml}</tbody>
-            </table>
-        </div>
-    `;
-        }
         // index.html (NOVA VERSÃO ROBUSTA DE fetchMemberReport)
         async function fetchMemberReport(token) {
             const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
@@ -933,73 +937,89 @@
                 document.getElementById('member-report-details').innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando relatório de membros...</p>';
             }
         }
-
-        // index.html (SUBSTITUIR A FUNÇÃO COMPLETA POR ESTA)
         function renderReportData(data) {
-            // 1. AÇÃO CRÍTICA: Use a div de detalhes do relatório de membros (#member-report-details), e não a div pai.
             const reportArea = document.getElementById('member-report-details');
-
-            // Se a div não existir (nunca deve ocorrer após o login), saia.
             if (!reportArea) return;
 
-            // Conteúdo de relatório (Simplificado para evitar quebras, dependente do seu index.js)
             const totalMembros = data.totalMembers || 0;
-            const membersListHtml = data.allMembers ? data.allMembers.map(m => `
+            const membersListHtml = data.allMembers && data.allMembers.length > 0 ? data.allMembers.map(m => `
         <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors">
             <td class="p-3 font-medium">${m.name}</td>
             <td class="p-3">${m.instrument}</td>
-            <td class="p-3 hidden sm:table-cell">${m.city}/${m.state}</td>
+            <td class="p-3 hidden sm:table-cell">${m.city || ''}/${m.state || ''}</td>
+            <td class="p-3 text-right">
+                <div class="flex justify-end space-x-2">
+                    <button onclick="editMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.instrument.replace(/'/g, "\\'")}', '${m.city || ''}', '${m.state || ''}')" 
+                            class="text-blue-500 hover:text-blue-700 transition-colors p-1" title="Editar">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </button>
+                    <button onclick="deleteMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" 
+                            class="text-red-500 hover:text-red-700 transition-colors p-1" title="Excluir">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            </td>
         </tr>
-    `).join('') : '<tr><td colspan="3" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
+    `).join('') : '<tr><td colspan="4" class="p-3 text-center">Nenhum membro cadastrado.</td></tr>';
 
-            // 2. PREENCHE APENAS A DIV #member-report-details (mantendo o formulário de anexos e o botão Sair)
             reportArea.innerHTML = `
         <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Relatório de Membros</h3>
         <p class="text-xl font-semibold mb-6">Total de Membros Cadastrados: <span class="text-rjb-yellow">${totalMembros}</span></p>
-        
         <button onclick="handleDownloadCSV()" class="bg-rjb-yellow text-rjb-text font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition mb-6 shadow-subtle-glow flex items-center space-x-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            <span>Baixar CSV Completo</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Baixar CSV</span>
         </button>
-        
-        <h4 class="text-xl font-semibold mt-8 mb-3">Lista Detalhada</h4>
         <div class="overflow-x-auto">
             <table class="min-w-full text-left bg-rjb-card-light dark:bg-rjb-card-dark rounded-lg shadow-lg">
                 <thead>
                     <tr class="bg-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark/90">
-                        <th class="p-3">Nome</th>
-                        <th class="p-3">Instrumento</th>
-                        <th class="p-3 hidden sm:table-cell">Localidade</th>
+                        <th class="p-3">Nome</th><th class="p-3">Instrumento</th><th class="p-3">Localidade</th><th class="p-3 text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody>${membersListHtml}</tbody>
             </table>
         </div>
     `;
-
-            // Opcional: Garante que a área de anexos está limpa antes de carregar (para feedback visual)
-            const attachmentsArea = document.getElementById('attachments-output-area');
-            if (attachmentsArea) {
-                attachmentsArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando anexos...</p>';
-            }
         }
+        async function submitEditMember(event) {
+            event.preventDefault();
 
-        // FUNÇÃO DE FALLBACK ROBUSTO PARA MINIATURAS (MANTIDO)
-        function handleVideoFallback(img, videoId) {
-            let fallbackLevel = parseInt(img.getAttribute('data-fallback-level')) || 0;
-            const urls = [
-                `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-                `https://img.youtube.com/vi/${videoId}/default.jpg`
-            ];
+            const memberId = document.getElementById('edit-member-id').value;
+            const updatedData = {
+                name: document.getElementById('edit-member-name').value,
+                instrument: document.getElementById('edit-member-instrument').value,
+                city: document.getElementById('edit-member-city').value,
+                state: document.getElementById('edit-member-state').value.toUpperCase()
+            };
 
-            if (fallbackLevel < urls.length) {
-                img.setAttribute('data-fallback-level', fallbackLevel + 1);
-                img.src = urls[fallbackLevel];
-            } else {
-                img.onerror = null;
-                img.style.backgroundColor = '#1E1E1E';
-                img.style.opacity = '0.5';
+            const token = localStorage.getItem('adminToken');
+            const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+
+            closeEditModal();
+            toggleLoader(true, 'Salvando alterações...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/update-member/${memberId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (response.ok) {
+                    showMessage('Cadastro atualizado com sucesso!');
+                    fetchMemberReport(token);
+                } else {
+                    const err = await response.json();
+                    showMessage(err.message || 'Erro ao atualizar dados.', true);
+                }
+            } catch (e) {
+                console.error('Erro na requisição PUT:', e);
+                showMessage('Erro de conexão com o servidor.', true);
+            } finally {
+                toggleLoader(false);
             }
         }
 
@@ -1591,6 +1611,27 @@
 
             window.open(whatsappUrl, '_blank');
         }
+
+        function editMember(memberId, currentName, currentInstrument, currentCity = '', currentState = '') {
+            document.getElementById('edit-member-id').value = memberId;
+            document.getElementById('edit-member-name').value = currentName;
+            document.getElementById('edit-member-instrument').value = currentInstrument;
+            document.getElementById('edit-member-city').value = currentCity;
+            document.getElementById('edit-member-state').value = currentState;
+
+            const modal = document.getElementById('edit-member-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-member-modal').classList.add('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.add('hidden');
+        }
+
         function uiGenerateNewKey() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -2174,7 +2215,71 @@
         class="hidden opacity-0 fixed top-5 left-1/2 transform -translate-x-1/2 bg-rjb-yellow text-rjb-text px-6 py-3 rounded-lg shadow-deep-shadow dark:shadow-soft-glow z-[60] transition-opacity duration-300">
         <p id="message-text" class="font-semibold"></p>
     </div>
+    <div id="edit-member-modal" onclick="closeEditModal()"
+        class="fixed inset-0 bg-black bg-opacity-80 z-[90] hidden flex items-center justify-center transition-opacity duration-300 opacity-0">
+        <div onclick="event.stopPropagation()"
+            class="w-full max-w-md mx-auto p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-soft-glow border border-rjb-yellow/30 relative">
+            <button onclick="closeEditModal()"
+                class="absolute top-4 right-4 text-rjb-text/50 dark:text-rjb-text-dark/50 hover:text-rjb-yellow transition-colors text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-rjb-yellow mb-6">Editar Membro</h3>
+            <form id="edit-member-form" onsubmit="submitEditMember(event)">
+                <input type="hidden" id="edit-member-id">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 opacity-70">Nome Completo</label>
+                        <input type="text" id="edit-member-name" required
+                            class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 opacity-70">Instrumento / Área</label>
+                        <input type="text" id="edit-member-instrument" required
+                            class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 opacity-70">Cidade</label>
+                            <input type="text" id="edit-member-city" required
+                                class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 opacity-70">Estado (UF)</label>
+                            <input type="text" id="edit-member-state" required maxlength="2"
+                                class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button type="button" onclick="closeEditModal()"
+                            class="flex-1 py-3 rounded-lg border border-rjb-yellow/50 font-bold hover:bg-rjb-yellow/10 transition-colors">Cancelar</button>
+                        <button type="submit"
+                            class="flex-1 py-3 rounded-lg bg-rjb-yellow text-rjb-text font-bold hover:bg-yellow-500 shadow-subtle-glow transition-all">Salvar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <div id="delete-confirm-modal" onclick="closeDeleteModal()"
+        class="fixed inset-0 bg-black bg-opacity-80 z-[95] hidden flex items-center justify-center transition-opacity duration-300 opacity-0">
+        <div onclick="event.stopPropagation()"
+            class="w-full max-w-sm mx-auto p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl border border-red-500/30 text-center">
+            <div class="text-red-500 mb-4">
+                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Confirmar Exclusão</h3>
+            <p class="text-sm opacity-70 mb-6">Deseja excluir <span id="delete-member-name" class="font-bold"></span>?
+            </p>
+            <div class="flex space-x-3">
+                <button onclick="closeDeleteModal()"
+                    class="flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 font-bold">Cancelar</button>
+                <button id="confirm-delete-btn"
+                    class="flex-1 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700">Excluir</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

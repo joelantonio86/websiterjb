@@ -20,6 +20,8 @@ const ADMIN_USERS = [
     { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin' },
     { email: 'samara.oliver3012@gmail.com', password: 'samoliveiraRJB@1935', role: 'admin' },
     { email: 'adersontm@hotmail.com', password: 'R8mQ4ZpA', role: 'admin' },
+    { email: 'teste@hotmail.com', password: '123456', role: 'admin' },
+    { email: 'clarinetabest@hotmail.com', password: 'u7#K9pZ$', role: 'admin' },
 ];
 
 const app = express();
@@ -211,6 +213,37 @@ app.post('/', limiter, async (req, res) => {
         res.status(200).send('Mensagem enviada!');
     } catch (error) {
         res.status(500).send('Erro ao enviar e-mail.');
+    }
+});
+
+// Rota para excluir um membro cadastrado (index.js)
+app.delete('/api/admin/delete-member/:id', authenticateJWT, async (req, res) => {
+    try {
+        const memberId = req.params.id; //
+        await membersCollection.doc(memberId).delete(); //
+        res.status(200).json({ status: 200, message: 'Membro excluído com sucesso.' }); //
+    } catch (error) {
+        console.error('Erro ao excluir membro:', error);
+        res.status(500).json({ message: 'Erro interno ao excluir membro.' }); //
+    }
+});
+
+// Rota para editar dados de um membro (Protegida)
+app.put('/api/admin/update-member/:id', authenticateJWT, async (req, res) => {
+    try {
+        const memberId = req.params.id;
+        const updatedData = req.body;
+
+        // Impedir a alteração de campos sensíveis ou automáticos, se desejar
+        delete updatedData.id;
+        delete updatedData.submittedAt;
+
+        await membersCollection.doc(memberId).update(updatedData);
+
+        res.status(200).json({ status: 200, message: 'Dados atualizados com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao atualizar membro:', error);
+        res.status(500).json({ message: 'Erro ao atualizar dados no servidor.' });
     }
 });
 
