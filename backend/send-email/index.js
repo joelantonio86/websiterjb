@@ -106,12 +106,12 @@ app.post('/api/admin/login', limiter, (req, res) => {
 
 app.post('/api/register-member', limiter, async (req, res) => {
     // Adicionado 'tefa' à desestruturação
-    const { inviteKey, name, instrument, email, city, state, tefa, termsVersion, termsAccepted } = req.body;
+    const { inviteKey, name, instrument, email, phone,   city, state, tefa, termsVersion, termsAccepted } = req.body;
     const keyUpper = inviteKey?.toUpperCase();
 
     try {
         // Validação básica de obrigatoriedade no servidor
-        if (!name || !instrument || !email || !city || !state) {
+        if (!name || !instrument || !email || !city || !state || !phone) {
             return res.status(400).json({ status: 400, message: 'Todos os campos são obrigatórios.' });
         }
 
@@ -129,7 +129,7 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
         // Adicionado 'tefa' ao documento salvo no Firestore
         await membersCollection.add({
-            name, instrument, email, city, state, tefa: tefa || "", termsVersion, termsAccepted,
+            name, instrument, email, city, state, phone, tefa: tefa || "", phone, termsVersion, termsAccepted,
             registrationIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
             submittedAt: admin.firestore.FieldValue.serverTimestamp()
         });
@@ -161,13 +161,13 @@ app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => {
     try {
         const snapshot = await membersCollection.get();
         // Adicionada a coluna TEFA no cabeçalho
-        let csv = 'ID,Nome,TEFA,Instrumento,Email,Cidade,Estado,Data\n'; 
+        let csv = 'ID,Nome,TEFA,Instrumento,Email,Contato,Cidade,Estado,Data\n'; 
         
         snapshot.forEach(doc => {
             const d = doc.data();
             const date = d.submittedAt ? d.submittedAt.toDate().toISOString() : "";
             // Incluindo o valor do campo tefa ou vazio se não existir
-            csv += `${doc.id},"${d.name}","${d.tefa || "" || ""}","${d.instrument}",${d.email},${d.city},${d.state},${date}\n`;
+            csv += `${doc.id},"${d.name}","${d.tefa || ""}","${d.instrument}","${d.email}","${d.phone || ""}","${d.city}","${d.state}",${date}\n`;
         });
 
         res.setHeader('Content-Type', 'text/csv');
