@@ -20,7 +20,7 @@ const ADMIN_USERS = [
     { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin' },
     { email: 'samara.oliver3012@gmail.com', password: 'samoliveiraRJB@1935', role: 'admin' },
     { email: 'adersontm@hotmail.com', password: 'R8mQ4ZpA', role: 'admin' },
-    { email: 'teste@hotmail.com', password: '123456', role: 'admin' },
+    { email: 'teste@hotmail.com', password: '123456Joel', role: 'admin' },
     { email: 'clarinetabest@hotmail.com', password: 'u7#K9pZ$', role: 'admin' },
 ];
 
@@ -102,11 +102,19 @@ app.post('/api/admin/login', limiter, (req, res) => {
 
 // --- 6. Rotas de Membros e Cadastro (Uso Único Implementado) ---
 
+// --- No arquivo index.js, localize a rota app.post('/api/register-member' ---
+
 app.post('/api/register-member', limiter, async (req, res) => {
-    const { inviteKey, name, instrument, email, city, state, termsVersion, termsAccepted } = req.body;
+    // Adicionado 'tefa' à desestruturação
+    const { inviteKey, name, instrument, email, city, state, tefa, termsVersion, termsAccepted } = req.body;
     const keyUpper = inviteKey?.toUpperCase();
 
     try {
+        // Validação básica de obrigatoriedade no servidor
+        if (!name || !instrument || !email || !city || !state || !tefa) {
+            return res.status(400).json({ status: 400, message: 'Todos os campos são obrigatórios.' });
+        }
+
         let isMasterKey = VALID_INVITE_KEYS.includes(keyUpper);
         let keyDocRef = keysCollection.doc(keyUpper);
 
@@ -119,8 +127,9 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
         if (termsAccepted !== true) return res.status(400).json({ message: 'Aceite os termos LGPD.' });
 
+        // Adicionado 'tefa' ao documento salvo no Firestore
         await membersCollection.add({
-            name, instrument, email, city, state, termsVersion, termsAccepted,
+            name, instrument, email, city, state, tefa, termsVersion, termsAccepted,
             registrationIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
             submittedAt: admin.firestore.FieldValue.serverTimestamp()
         });

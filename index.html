@@ -480,22 +480,44 @@
         async function submitMemberRegistration(event) {
             event.preventDefault();
 
-            const inviteKey = document.getElementById('reg-invite-key').value;
-            const name = document.getElementById('reg-name').value;
-            const instrument = document.getElementById('reg-instrument').value;
-            const email = document.getElementById('reg-email').value;
-            const city = document.getElementById('reg-city').value;
-            const state = document.getElementById('reg-state').value;
-            // Captura a versão do termo e o status do checkbox
+            // 1. Captura de todos os valores do formulário (incluindo o novo campo TEFA)
+            const inviteKey = document.getElementById('reg-invite-key').value.trim();
+            const name = document.getElementById('reg-name').value.trim();
+            const tefa = document.getElementById('reg-tefa').value.trim(); // Novo campo
+            const instrument = document.getElementById('reg-instrument').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const city = document.getElementById('reg-city').value.trim();
+            const state = document.getElementById('reg-state').value.trim().toUpperCase();
             const termsVersion = document.getElementById('reg-terms-version').value;
             const termsAccepted = document.getElementById('terms').checked;
 
+            // 2. Tratamento/Validação: Todos os campos são obrigatórios
+            if (!inviteKey || !name || !tefa || !instrument || !email || !city || !state) {
+                showMessage('Por favor, preencha todos os campos obrigatórios.', true);
+                return;
+            }
+
+            // Validação adicional para o TEFA (apenas números)
+            if (!/^\d+$/.test(tefa)) {
+                showMessage('O campo TEFA deve conter apenas números.', true);
+                return;
+            }
+
             const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/register-member';
 
-            showMessage('Enviando inscrição...');
+            // Ativa o loader visual
+            toggleLoader(true, 'Enviando sua inscrição...');
 
             const memberData = {
-                inviteKey: inviteKey, name: name, instrument: instrument, email: email, city: city, state: state, termsVersion: termsVersion, termsAccepted: termsAccepted
+                inviteKey,
+                name,
+                tefa, // Enviando o campo TEFA para o backend
+                instrument,
+                email,
+                city,
+                state,
+                termsVersion,
+                termsAccepted
             };
 
             try {
@@ -512,14 +534,18 @@
                     document.getElementById('member-registration-form').reset();
                 } else {
                     console.error('Erro no Backend:', response.status, result.message);
-                    showMessage(`Falha na inscrição. Erro ${response.status}. Detalhes: ${result.message || 'Erro desconhecido.'}`, true);
+                    showMessage(`Falha na inscrição: ${result.message || 'Erro desconhecido.'}`, true);
                 }
 
             } catch (error) {
                 console.error('ERRO DE CONEXÃO/REDE:', error);
-                showMessage('Erro de conexão. O serviço de cadastro de membros pode estar offline.', true);
+                showMessage('Erro de conexão. O serviço de cadastro pode estar offline.', true);
+            } finally {
+                // Desativa o loader idependente do resultado
+                toggleLoader(false);
             }
         }
+
 
         // index.html (SUBSTITUIR A FUNÇÃO handleAdminLogin)
         async function handleAdminLogin(event) {
@@ -1408,65 +1434,67 @@
 
         function generateCadastroPage() {
             return `
-            <div class="max-w-xl mx-auto">
-                <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8 text-center">
-                    Se você é músico, colaborador ou deseja se juntar à Racional Jazz Band, preencha o formulário abaixo utilizando a <strong>Chave de Convite</strong> fornecida pela equipe.
-                </p>
-                <form id="member-registration-form" onsubmit="submitMemberRegistration(event);">
-                    <input type="hidden" id="reg-terms-version" name="termsVersion" value="Termo de Consentimento v1.0 - Ciclo 2026">
-                    <div class="space-y-4">
-                        <div>
-                            <label for="reg-invite-key" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Chave de Convite (Obrigatório)</label>
-                            <input type="text" id="reg-invite-key" name="inviteKey" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: RJB-MEMBER-2025">
-                        </div>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="reg-name" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Nome</label>
-                                <input type="text" id="reg-name" name="name" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all">
-                            </div>
-                            <div>
-                                <label for="reg-instrument" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Instrumento / Área de Colaboração</label>
-                                <input type="text" id="reg-instrument" name="instrument" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: Saxofone, Design, Logística">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="reg-email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Email</label>
-                            <input type="email" id="reg-email" name="email" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all">
-                        </div>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="reg-city" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Cidade</label>
-                                <input type="text" id="reg-city" name="city" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: Curitiba">
-                            </div>
-                            <div>
-                                <label for="reg-state" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Estado (UF)</label>
-                                <input type="text" id="reg-state" name="state" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Ex: PR">
-                            </div>
-                        </div>
-<div class="p-4 rounded-lg bg-gray-50 dark:bg-rjb-bg-dark/30 border border-gray-200 dark:border-rjb-yellow/10 transition-colors duration-500">
-    <div class="flex items-start space-x-3">
-        <div class="flex items-center h-5">
-            <input id="terms" name="terms" type="checkbox" required 
-                class="w-4 h-4 text-rjb-yellow bg-white dark:bg-rjb-bg-dark border-gray-300 dark:border-rjb-yellow/30 rounded focus:ring-rjb-yellow cursor-pointer transition-all">
-        </div>
-        <label for="terms" class="text-xs text-rjb-text/70 dark:text-rjb-text-dark/60 leading-relaxed cursor-pointer select-none">
-            Estou ciente e autorizo o uso da minha imagem (foto e vídeo) para fins de divulgação da 
-            <span class="font-semibold text-rjb-text dark:text-rjb-text-dark">Racional Jazz Band</span> 
-            e da Cultura Racional em canais oficiais e mídias parceiras, conforme as diretrizes de privacidade.
-        </label>
-    </div>
-</div>
-  
-
-                        <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
-                            Enviar Inscrição
-                        </button>
+    <div class="max-w-xl mx-auto">
+        <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-8 text-center">
+            Preencha todos os campos abaixo para completar sua inscrição.
+        </p>
+        <form id="member-registration-form" onsubmit="submitMemberRegistration(event);">
+            <input type="hidden" id="reg-terms-version" name="termsVersion" value="Termo de Consentimento v1.0 - Ciclo 2026">
+            <div class="space-y-4">
+                <div>
+                    <label for="reg-invite-key" class="block text-sm font-medium opacity-70 mb-1">Chave de Convite</label>
+                    <input type="text" id="reg-invite-key" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="reg-name" class="block text-sm font-medium opacity-70 mb-1">Nome</label>
+                        <input type="text" id="reg-name" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
                     </div>
-                </form>
+                    <div>
+                        <label for="reg-tefa" class="block text-sm font-medium opacity-70 mb-1">Nº TEFA (Somente números)</label>
+                        <input type="text" id="reg-tefa" required inputmode="numeric" pattern="[0-9]*" 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" placeholder="Ex: 1234">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="reg-instrument" class="block text-sm font-medium opacity-70 mb-1">Instrumento / Área</label>
+                    <input type="text" id="reg-instrument" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                </div>
+
+                <div>
+                    <label for="reg-email" class="block text-sm font-medium opacity-70 mb-1">Email</label>
+                    <input type="email" id="reg-email" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="reg-city" class="block text-sm font-medium opacity-70 mb-1">Cidade</label>
+                        <input type="text" id="reg-city" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                    </div>
+                    <div>
+                        <label for="reg-state" class="block text-sm font-medium opacity-70 mb-1">Estado (UF)</label>
+                        <input type="text" id="reg-state" required maxlength="2" class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-lg bg-gray-50 dark:bg-rjb-bg-dark/30 border border-gray-200 dark:border-rjb-yellow/10">
+                    <div class="flex items-start space-x-3">
+                        <input id="terms" type="checkbox" required class="w-4 h-4 mt-1 text-rjb-yellow cursor-pointer">
+                        <label for="terms" class="text-xs text-rjb-text/70 dark:text-rjb-text-dark/60 cursor-pointer">
+                            Autorizo o uso da minha imagem e dados conforme os termos.
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition shadow-soft-glow">
+                    Enviar Inscrição
+                </button>
             </div>
-        `;
+        </form>
+    </div>`;
         }
 
         function generateReportsPage() {
