@@ -24,6 +24,7 @@ const ADMIN_USERS = [
     { email: 'clarinetabest@hotmail.com', password: 'u7#K9pZ$', role: 'admin' },
     { email: 'anapaulacmarciano@gmail.com', password: 'a8@J7uC$', role: 'admin' },
     { email: 'edilashirley@gmail.com', password: 'b5!T3gC$', role: 'admin' },
+    { email: 'vivian.colombo@hotmail.com', password: 'V3%u1An$', role: 'admin' },
 ];
 
 const app = express();
