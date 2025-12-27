@@ -99,7 +99,7 @@ app.post('/api/admin/login', limiter, (req, res) => {
     const { email, password } = req.body;
     const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
     if (!user) return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
-    
+
     const token = jwt.sign({ userId: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
     res.status(200).json({ status: 200, message: 'Login OK', token, role: user.role });
 });
@@ -109,12 +109,10 @@ app.post('/api/admin/login', limiter, (req, res) => {
 // --- No arquivo index.js, localize a rota app.post('/api/register-member' ---
 
 app.post('/api/register-member', limiter, async (req, res) => {
-    // Adicionado 'tefa' à desestruturação
-    const { inviteKey, name, instrument, email, phone,   city, state, tefa, termsVersion, termsAccepted } = req.body;
+    const { inviteKey, name, instrument, email, phone, city, state, tefa, termsVersion, termsAccepted } = req.body;
     const keyUpper = inviteKey?.toUpperCase();
 
     try {
-        // Validação básica de obrigatoriedade no servidor
         if (!name || !instrument || !email || !city || !state || !phone) {
             return res.status(400).json({ status: 400, message: 'Todos os campos são obrigatórios.' });
         }
@@ -131,9 +129,9 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
         if (termsAccepted !== true) return res.status(400).json({ message: 'Aceite os termos LGPD.' });
 
-        // Adicionado 'tefa' ao documento salvo no Firestore
+        // Salva o membro no Firestore
         await membersCollection.add({
-            name, instrument, email, city, state, phone, tefa: tefa || "", phone, termsVersion, termsAccepted,
+            name, instrument, email, city, state, phone, tefa: tefa || "", termsVersion, termsAccepted,
             registrationIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
             submittedAt: admin.firestore.FieldValue.serverTimestamp()
         });
@@ -142,9 +140,38 @@ app.post('/api/register-member', limiter, async (req, res) => {
             await keyDocRef.update({ used: true, usedBy: email, usedAt: admin.firestore.FieldValue.serverTimestamp() });
         }
 
-        res.status(200).json({ status: 200, message: `Inscrição de ${name} concluída!` });
+        // --- ENVIO DE E-MAILS ---
+        const transporter = nodemailer.createTransport({ 
+            service: 'gmail', 
+            auth: { user: SENDER_EMAIL, pass: SENDER_PASS } 
+        });
+
+        // 1. E-mail de Boas-Vindas para o Membro
+        const memberMailOptions = {
+            from: `"Racional Jazz Band" <${SENDER_EMAIL}>`,
+            to: email,
+            subject: 'Confirmação de Inscrição - RJB',
+            text: `Olá ${name}!\n\nSua inscrição na Racional Jazz Band foi concluída com sucesso.\n\nInstrumento: ${instrument}\nCidade: ${city}/${state}\n\nEm breve entraremos em contato para mais informações. Seja bem-vindo(a)!`
+        };
+
+        // 2. Notificação para a Administração da Banda
+        const adminMailOptions = {
+            from: `"Sistema RJB" <${SENDER_EMAIL}>`,
+            to: TARGET_EMAIL,
+            subject: `Novo Cadastro: ${name}`,
+            text: `Um novo membro se cadastrou!\n\nNome: ${name}\nInstrumento: ${instrument}\nE-mail: ${email}\nTelefone: ${phone}\nLocal: ${city}/${state}\nChave utilizada: ${inviteKey}`
+        };
+
+        // Dispara os e-mails
+        await Promise.all([
+            transporter.sendMail(memberMailOptions),
+            transporter.sendMail(adminMailOptions)
+        ]);
+
+        res.status(200).json({ status: 200, message: `Inscrição de ${name} concluída com sucesso!` });
     } catch (error) {
-        res.status(500).json({ status: 500, message: 'Erro ao processar cadastro.' });
+        console.error('Erro no cadastro:', error);
+        res.status(500).json({ status: 500, message: 'Erro ao processar cadastro ou enviar e-mail.' });
     }
 });
 
@@ -165,8 +192,8 @@ app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => {
     try {
         const snapshot = await membersCollection.get();
         // Adicionada a coluna TEFA no cabeçalho
-        let csv = 'ID,Nome,TEFA,Instrumento,Email,Contato,Cidade,Estado,Data\n'; 
-        
+        let csv = 'ID,Nome,TEFA,Instrumento,Email,Contato,Cidade,Estado,Data\n';
+
         snapshot.forEach(doc => {
             const d = doc.data();
             const date = d.submittedAt ? d.submittedAt.toDate().toISOString() : "";

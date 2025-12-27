@@ -196,7 +196,10 @@
             setTimeout(() => {
                 currentPage = page;
                 renderPage();
-
+                // --- ADICIONE ESTA LINHA ABAIXO ---
+                // Se for a home, remove o hash. Se for cadastro, usa um nome amigável.
+                const hashName = (page === 'member-registration') ? 'cadastro' : page;
+                window.location.hash = (page === 'home') ? '' : hashName;
                 content.classList.remove('opacity-0');
 
                 const menu = document.getElementById('mobile-menu');
@@ -995,48 +998,48 @@
     `;
         }
 
-async function submitEditMember(event) {
-    event.preventDefault();
-    const memberId = document.getElementById('edit-member-id').value;
-    const updatedData = {
-        name: document.getElementById('edit-member-name').value,
-        tefa: document.getElementById('edit-member-tefa').value,
-        phone: document.getElementById('edit-member-phone').value, // Novo
-        instrument: document.getElementById('edit-member-instrument').value,
-        city: document.getElementById('edit-member-city').value,
-        state: document.getElementById('edit-member-state').value.toUpperCase()
-    };
+        async function submitEditMember(event) {
+            event.preventDefault();
+            const memberId = document.getElementById('edit-member-id').value;
+            const updatedData = {
+                name: document.getElementById('edit-member-name').value,
+                tefa: document.getElementById('edit-member-tefa').value,
+                phone: document.getElementById('edit-member-phone').value, // Novo
+                instrument: document.getElementById('edit-member-instrument').value,
+                city: document.getElementById('edit-member-city').value,
+                state: document.getElementById('edit-member-state').value.toUpperCase()
+            };
 
-    const token = localStorage.getItem('adminToken');
-    const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+            const token = localStorage.getItem('adminToken');
+            const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
 
-    closeEditModal();
-    toggleLoader(true, 'Salvando alterações...');
+            closeEditModal();
+            toggleLoader(true, 'Salvando alterações...');
 
-    try {
-        const response = await fetch(`${API_BASE}/api/admin/update-member/${memberId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(updatedData)
-        });
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/update-member/${memberId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updatedData)
+                });
 
-        if (response.ok) {
-            showMessage('Cadastro atualizado com sucesso!');
-            fetchMemberReport(token);
-        } else {
-            const err = await response.json();
-            showMessage(err.message || 'Erro ao atualizar dados.', true);
+                if (response.ok) {
+                    showMessage('Cadastro atualizado com sucesso!');
+                    fetchMemberReport(token);
+                } else {
+                    const err = await response.json();
+                    showMessage(err.message || 'Erro ao atualizar dados.', true);
+                }
+            } catch (e) {
+                console.error('Erro na requisição PUT:', e);
+                showMessage('Erro de conexão com o servidor.', true);
+            } finally {
+                toggleLoader(false);
+            }
         }
-    } catch (e) {
-        console.error('Erro na requisição PUT:', e);
-        showMessage('Erro de conexão com o servidor.', true);
-    } finally {
-        toggleLoader(false);
-    }
-}
 
         function generateVideoCard(video) {
             const thumbnailUrl = `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
@@ -1645,7 +1648,10 @@ async function submitEditMember(event) {
         function shareViaWhatsApp() {
             if (!currentGeneratedKey) return;
 
-            const message = `Olá! Sou da Racional Jazz Band. 🎷\n\nAqui está sua chave de acesso para o cadastro oficial:\n\n*Chave:* ${currentGeneratedKey}\n\nPor favor, complete seu cadastro no link abaixo:\nhttps://rjb-music.web.app\n\n_(Lembre-se de aceitar os termos de imagem conforme a LGPD)_`;
+            // Defina aqui o seu domínio oficial do GitHub Pages
+            const siteUrl = "https://www.racionaljazzband.com.br/#cadastro";
+
+            const message = `Olá!  Racional Jazz Band te enviando uma mensagem. 🎷\n\nAqui está sua chave de acesso para o cadastro oficial:\n\n*Chave:* ${currentGeneratedKey}\n\nPor favor, complete seu cadastro no link abaixo:\n${siteUrl}\n\n_(Lembre-se de aceitar os termos de imagem conforme a LGPD)_`;
 
             const encodedMsg = encodeURIComponent(message);
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMsg}`;
@@ -1758,6 +1764,14 @@ async function submitEditMember(event) {
         // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
+            // --- LÓGICA DE ROTEAMENTO INICIAL ---
+            const currentHash = window.location.hash.replace('#', '');
+            if (currentHash === 'cadastro') {
+                currentPage = 'member-registration';
+            } else if (currentHash && currentHash !== '') {
+                // Verifica se o hash corresponde a uma página válida (opcional)
+                currentPage = currentHash;
+            }
             renderPage();
 
             // Lógica de menu móvel (MANTIDA)
@@ -1833,6 +1847,14 @@ async function submitEditMember(event) {
                 citySelect.innerHTML = '<option value="">Erro ao carregar</option>';
             }
         }
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '');
+            const targetPage = (hash === 'cadastro') ? 'member-registration' : (hash || 'home');
+
+            if (currentPage !== targetPage) {
+                navigateTo(targetPage);
+            }
+        });
     </script>
 
     <style>
