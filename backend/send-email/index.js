@@ -11,7 +11,7 @@ const multer = require('multer');
 // --- 1. Constantes e Ambiente (Preservadas do Original) ---
 const SENDER_EMAIL = process.env.GMAIL_USER;
 const SENDER_PASS = process.env.GMAIL_PASS;
-const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com, racionaljazzbandoficial@gmail.com';
+const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com, racionaljazzbandoficial@gmail.com, andressamqxs@gmail.com';
 const VALID_INVITE_KEYS = ['RJB-MEMBER-2025', 'RJB-TESTE-999'];
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-987654321';
 
