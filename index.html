@@ -1651,7 +1651,11 @@
             // Defina aqui o seu domínio oficial do GitHub Pages
             const siteUrl = "https://www.racionaljazzband.com.br/#cadastro";
 
-            const message = `Olá! Aqui é da RJB. 🎷Já iniciamos a transição para o cadastro via site!Acesse: ${siteUrl}Use a chave: **${currentGeneratedKey}**Obs: Lembre-se de aceitar os termos de imagem (LGPD) ao finalizar.`;
+            const message = `Olá! Aqui é da RJB. 🎷\n\n` +
+                `Já iniciamos a transição para o cadastro via site!\n\n` +
+                `Acesse: ${siteUrl}\n` +
+                `Use a chave: \`${currentGeneratedKey}\`\n\n` +
+                `_Obs: Lembre-se de aceitar os termos de imagem (LGPD) ao finalizar._`;
 
             const encodedMsg = encodeURIComponent(message);
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMsg}`;
