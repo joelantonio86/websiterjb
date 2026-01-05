@@ -47,6 +47,8 @@
         let sortDirection = true; // true = crescente, false = decrescente
         let currentSortColumn = 'name';
         let memberFilters = { name: '', instrument: '', location: '' };
+        let lastFetchedData = null; // Cache dos dados dos membros
+        let searchDebounceTimer = null; // Timer para debounce de busca
 
         const subMenuRJB = {
             'apresentacoes': 'Apresentações / Nossas apresentações ',
@@ -56,20 +58,54 @@
             'fotos': 'Fotos / Fotos de apresentações',
         };
 
-        // Dados de Vídeo Centralizados (MANTIDOS)
-        const APRESENTACOES_VIDEOS = [
-            { title: 'Canto das três Raças - Retiro Racional', date: '04/OUT/2025', id: '9n4l2zXi_yE' },
-            { title: 'Oxigênio - Retiro Racional', date: '04/NOV/2017', id: 'U5vlHEpb82Q' },
-            { title: 'Do seu lado - Retiro Racional', date: '04/OUT/2025', id: 'ZWNoul_SB0c' },
+        // Estrutura de vídeos organizados por apresentação/data
+        const APRESENTACOES_BY_EVENT = [
+            {
+                date: '2025-10-04',
+                dateFormatted: '04 de Outubro de 2025',
+                eventTitle: 'Apresentação - Retiro Racional',
+                location: 'Retiro Racional - Nova Iguaçu (RJ)',
+                videos: [
+                    { title: 'Canto das três Raças - Retiro Racional', id: '9n4l2zXi_yE' },
+                    { title: 'Do seu lado - Retiro Racional', id: 'ZWNoul_SB0c' },
+                ]
+            },
+            {
+                date: '2017-11-04',
+                dateFormatted: '04 de Novembro de 2017',
+                eventTitle: 'Apresentação - Retiro Racional',
+                location: 'Retiro Racional - Nova Iguaçu (RJ)',
+                videos: [
+                    { title: 'Oxigênio - Retiro Racional', id: 'U5vlHEpb82Q' },
+                ]
+            },
+            // Adicione mais apresentações aqui seguindo o mesmo formato
         ];
 
-        const BASTIDORES_VIDEOS = [
-            { title: 'O Dever de Fazer Propaganda Deste Conhecimento', date: '04/OUT/2025', id: 'aCdnUJeLzRQ' },
-            { title: 'Whisky à go-go', date: '15/DEZ/2025', id: 'Cnj23NucMnY' },
-            { title: 'Titanium', date: '04/OUT/2025', id: '73XEtc64fdw' },
-            { title: 'Titanium - Guitarra', date: '04/OUT/2025', id: 'pXIKPmZB0IM' },
-            { title: 'Trompeta da Espanha', date: '04/OUT/2025', id: 'RF7dOiaO5cw' },
-            { title: 'Anunciação - Guitarra', date: '04/OUT/2025', id: 'THH7BrWbC6o' },
+        const BASTIDORES_BY_EVENT = [
+            {
+                date: '2025-12-15',
+                dateFormatted: '15 de Dezembro de 2025',
+                eventTitle: 'Ensaios e Práticas',
+                location: 'Retiro Racional - Nova Iguaçu (RJ)',
+                videos: [
+                    { title: 'Whisky à go-go', id: 'Cnj23NucMnY' },
+                ]
+            },
+            {
+                date: '2025-10-04',
+                dateFormatted: '04 de Outubro de 2025',
+                eventTitle: 'Ensaios e Práticas',
+                location: 'Retiro Racional - Nova Iguaçu (RJ)',
+                videos: [
+                    { title: 'O Dever de Fazer Propaganda Deste Conhecimento', id: 'aCdnUJeLzRQ' },
+                    { title: 'Titanium', id: '73XEtc64fdw' },
+                    { title: 'Titanium - Guitarra', id: 'pXIKPmZB0IM' },
+                    { title: 'Trompeta da Espanha', id: 'RF7dOiaO5cw' },
+                    { title: 'Anunciação - Guitarra', id: 'THH7BrWbC6o' },
+                ]
+            },
+            // Adicione mais ensaios aqui seguindo o mesmo formato
         ];
         // index.html: DADOS E VARIÁVEIS GLOBAIS
         // Substitua o placeholder pela URL pública do seu bucket R2
@@ -748,14 +784,52 @@
 
         let memberToDelete = null;
 
+        let memberToDeleteName = '';
+        
         function deleteMember(memberId, memberName) {
             memberToDelete = memberId;
+            memberToDeleteName = memberName;
             document.getElementById('delete-member-name').textContent = memberName;
             const modal = document.getElementById('delete-confirm-modal');
+            const confirmInput = document.getElementById('confirm-delete-name');
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            const errorMsg = document.getElementById('confirm-delete-error');
+            
+            // Limpa o campo de confirmação
+            if (confirmInput) {
+                confirmInput.value = '';
+                confirmInput.oninput = function() {
+                    const matches = this.value.trim().toLowerCase() === memberName.toLowerCase();
+                    confirmBtn.disabled = !matches;
+                    if (matches) {
+                        errorMsg.classList.add('hidden');
+                        this.classList.remove('border-red-500');
+                        this.classList.add('border-green-500');
+                    } else if (this.value.trim() !== '') {
+                        errorMsg.classList.remove('hidden');
+                        this.classList.remove('border-green-500');
+                        this.classList.add('border-red-500');
+                    } else {
+                        errorMsg.classList.add('hidden');
+                        this.classList.remove('border-red-500', 'border-green-500');
+                    }
+                };
+            }
+            
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.onclick = () => {
+                    if (confirmInput && confirmInput.value.trim().toLowerCase() === memberName.toLowerCase()) {
+                        executeDelete(memberId);
+                    }
+                };
+            }
+            
             modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.add('opacity-100'), 10);
-
-            document.getElementById('confirm-delete-btn').onclick = () => executeDelete(memberId);
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                if (confirmInput) confirmInput.focus();
+            }, 10);
         }
 
         async function executeDelete(memberId) {
@@ -835,45 +909,153 @@
     `;
         }
 
-        function handleDownloadCSV() {
+        async function handleDownloadCSV() {
             const token = localStorage.getItem('adminToken');
-            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members/csv';
+            const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
 
             if (!token) {
                 showMessage('Erro: Você não está logado.', true);
                 return;
             }
 
-            showMessage('Iniciando download do relatório CSV...');
+            showMessage('Gerando relatório CSV...');
 
-            fetch(endpointUrl, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-                .then(response => {
+            try {
+                let data;
+                
+                // Se temos dados em cache, usa-os. Caso contrário, busca da API
+                if (lastFetchedData) {
+                    data = lastFetchedData;
+                } else {
+                    const response = await fetch(endpointUrl, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
                     if (!response.ok) {
-                        return response.json().then(error => { throw new Error(error.message || 'Falha na requisição.'); });
+                        throw new Error('Falha ao buscar dados da API');
                     }
-                    // Cria um link temporário para forçar o download do blob
-                    return response.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'rjb_members_report.csv';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    showMessage('Download CSV iniciado com sucesso!');
-                })
-                .catch(error => {
-                    console.error('ERRO AO BAIXAR CSV:', error);
-                    showMessage(`Falha ao baixar o arquivo: ${error.message}`, true);
+
+                    data = await response.json();
+                }
+
+                // Aplica os filtros ativos
+                const filteredMembers = getFilteredMembers(data);
+                
+                // Calcula números sequenciais baseados na data de cadastro (usando dados originais)
+                const originalMembers = data.allMembers || [];
+                const sequenceMap = calculateSequentialNumbers(originalMembers);
+                
+                // Função auxiliar para formatar data
+                const formatDate = (submittedAt) => {
+                    if (!submittedAt) return '';
+                    try {
+                        let date;
+                        if (submittedAt.toDate && typeof submittedAt.toDate === 'function') {
+                            date = submittedAt.toDate();
+                        } else if (submittedAt.seconds) {
+                            date = new Date(submittedAt.seconds * 1000);
+                        } else if (typeof submittedAt === 'string') {
+                            date = new Date(submittedAt);
+                        } else if (submittedAt instanceof Date) {
+                            date = submittedAt;
+                        } else {
+                            return '';
+                        }
+                        return date.toLocaleDateString('pt-BR', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    } catch (e) {
+                        return '';
+                    }
+                };
+
+                // Função auxiliar para escapar campos CSV
+                const escapeCSV = (field) => {
+                    if (field === null || field === undefined) return '';
+                    const str = String(field);
+                    // Se contém vírgula, aspas ou quebra de linha, precisa ser envolvido em aspas
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                };
+
+                // Ordena os membros filtrados pela sequência numérica
+                const sortedMembers = [...filteredMembers].sort((a, b) => {
+                    const seqA = sequenceMap[a.id] || 999999;
+                    const seqB = sequenceMap[b.id] || 999999;
+                    return seqA - seqB;
                 });
+
+                // Verifica se há filtros ativos
+                const hasFilters = memberFilters.name || memberFilters.instrument || memberFilters.location;
+                
+                // Cabeçalho do CSV
+                let csv = '\ufeff'; // BOM para UTF-8 (Excel)
+                csv += 'Relatório de Membros - Racional Jazz Band\n';
+                csv += `Data de Exportação: ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n`;
+                csv += `Total de Membros: ${filteredMembers.length}\n`;
+                
+                if (hasFilters) {
+                    const filterParts = [];
+                    if (memberFilters.name) filterParts.push(`Nome: ${memberFilters.name}`);
+                    if (memberFilters.instrument) filterParts.push(`Instrumento: ${memberFilters.instrument}`);
+                    if (memberFilters.location) filterParts.push(`Localidade: ${memberFilters.location}`);
+                    csv += `Filtros Aplicados: ${filterParts.join(' | ')}\n`;
+                }
+                
+                csv += '\n'; // Linha em branco
+                
+                // Cabeçalho das colunas
+                csv += 'Nº,ID,Nome,TEFA,Instrumento,Email,Telefone,Cidade,Estado,Localidade Completa,Data de Cadastro\n';
+                
+                // Dados dos membros
+                sortedMembers.forEach(member => {
+                    const seq = sequenceMap[member.id] || '';
+                    const location = `${member.city || ''}/${member.state || ''}`.trim();
+                    const date = formatDate(member.submittedAt);
+                    
+                    csv += [
+                        seq,
+                        member.id || '',
+                        escapeCSV(member.name || ''),
+                        escapeCSV(member.tefa || ''),
+                        escapeCSV(member.instrument || ''),
+                        escapeCSV(member.email || ''),
+                        escapeCSV(member.phone || ''),
+                        escapeCSV(member.city || ''),
+                        escapeCSV(member.state || ''),
+                        escapeCSV(location),
+                        escapeCSV(date)
+                    ].join(',') + '\n';
+                });
+
+                // Cria o blob e faz o download
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                const fileName = hasFilters 
+                    ? `rjb_relatorio_filtrado_${new Date().toISOString().split('T')[0]}.csv`
+                    : `rjb_relatorio_${new Date().toISOString().split('T')[0]}.csv`;
+                
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                
+                showMessage(`CSV baixado com sucesso! ${filteredMembers.length} membro(s) exportado(s).`);
+            } catch (error) {
+                console.error('Erro ao gerar CSV:', error);
+                showMessage('Erro ao gerar arquivo CSV.', true);
+            }
         }
 
         function renderProtectedReportView() {
@@ -900,7 +1082,7 @@
             const reportArea = document.getElementById('member-report-details');
 
             if (reportArea) {
-                reportArea.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Buscando dados protegidos...</p>';
+                reportArea.innerHTML = generateSkeletonScreen('members');
             } else {
                 return;
             }
@@ -959,94 +1141,441 @@
             }
         }
 
-        function renderReportData(data) {
-            const reportArea = document.getElementById('member-report-details');
-            if (!reportArea) return;
+        // Funções auxiliares para obter valores únicos
+        function getUniqueInstruments(members) {
+            const instruments = new Set();
+            members.forEach(m => {
+                if (m.instrument && m.instrument.trim()) {
+                    instruments.add(m.instrument.trim());
+                }
+            });
+            return Array.from(instruments).sort();
+        }
 
-            const totalMembros = data.totalMembers || 0;
+        function getUniqueLocations(members) {
+            const locations = new Set();
+            members.forEach(m => {
+                const location = `${m.city || ''}/${m.state || ''}`.trim();
+                if (location && location !== '/') {
+                    locations.add(location);
+                }
+            });
+            return Array.from(locations).sort();
+        }
 
-            const membersListHtml = data.allMembers && data.allMembers.length > 0 ? data.allMembers.map(m => `
-            <tr class="border-b dark:border-rjb-card-dark hover:bg-rjb-bg-light dark:hover:bg-rjb-card-dark/50 transition-colors">
-                <td class="p-2 md:p-3 font-medium text-sm md:text-base">${m.name}</td>
-                <td class="p-2 md:p-3 text-rjb-yellow font-mono text-xs md:text-sm">${m.tefa || '---'}</td>
-                <td class="p-2 md:p-3 text-xs md:text-sm">${m.instrument}</td>
-                <td class="p-2 md:p-3 hidden sm:table-cell text-xs md:text-sm">${m.city || ''}/${m.state || ''}</td>
-                <td class="p-2 md:p-3 hidden lg:table-cell font-mono text-xs md:text-sm">${m.phone || '---'}</td>
-                <td class="p-2 md:p-3 text-right">
-                    <div class="flex justify-end space-x-2">
-                        <button onclick="editMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.instrument.replace(/'/g, "\\'")}', '${m.city || ''}', '${m.state || ''}', '${m.tefa || ''}', '${m.phone || ''}')"
-                            class="text-blue-500 hover:text-blue-700 transition-colors p-1" title="Editar">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                        <button onclick="deleteMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" class="text-red-500 hover:text-red-700 p-1">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
+        // Função para calcular número sequencial baseado na data de cadastro
+        function calculateSequentialNumbers(members) {
+            if (!members || members.length === 0) return {};
+            
+            // Função auxiliar para converter data do Firestore
+            const getDate = (submittedAt) => {
+                if (!submittedAt) return new Date(0);
+                // Se for um objeto Timestamp do Firestore
+                if (submittedAt.toDate && typeof submittedAt.toDate === 'function') {
+                    return submittedAt.toDate();
+                }
+                // Se for uma string ISO
+                if (typeof submittedAt === 'string') {
+                    return new Date(submittedAt);
+                }
+                // Se for um objeto Date
+                if (submittedAt instanceof Date) {
+                    return submittedAt;
+                }
+                // Se for um objeto com seconds (Timestamp do Firestore serializado)
+                if (submittedAt.seconds) {
+                    return new Date(submittedAt.seconds * 1000);
+                }
+                return new Date(0);
+            };
+            
+            // Cria uma cópia e ordena por data de cadastro (mais antigo primeiro)
+            const sorted = [...members].sort((a, b) => {
+                const dateA = getDate(a.submittedAt);
+                const dateB = getDate(b.submittedAt);
+                // Se as datas forem iguais, ordena por ID para manter consistência
+                if (dateA.getTime() === dateB.getTime()) {
+                    return (a.id || '').localeCompare(b.id || '');
+                }
+                return dateA - dateB;
+            });
+            
+            // Cria um mapa de ID para número sequencial
+            const sequenceMap = {};
+            sorted.forEach((member, index) => {
+                sequenceMap[member.id] = index + 1;
+            });
+            
+            return sequenceMap;
+        }
+
+        // Função auxiliar para atualizar estilo do select baseado no valor
+        function updateSelectStyle(selectId, value) {
+            const select = document.getElementById(selectId);
+            if (select) {
+                if (value) {
+                    select.classList.remove('text-gray-500', 'dark:text-gray-400');
+                    select.classList.add('text-gray-900', 'dark:text-gray-100');
+                } else {
+                    select.classList.remove('text-gray-900', 'dark:text-gray-100');
+                    select.classList.add('text-gray-500', 'dark:text-gray-400');
+                }
+            }
+        }
+
+        // Função auxiliar para obter dados filtrados (usada pelo PDF)
+        function getFilteredMembers(data) {
+            if (!data || !data.allMembers) return [];
+            
+            let filtered = [...data.allMembers];
+            
+            // Aplicar Filtros com tratamento para nulos
+            filtered = filtered.filter(m => {
+                const name = (m.name || "").toLowerCase();
+                const instrument = (m.instrument || "").toLowerCase();
+                const location = `${m.city || ''}/${m.state || ''}`.trim();
+                
+                const nameMatch = !memberFilters.name || name.includes(memberFilters.name.toLowerCase());
+                const instrumentMatch = !memberFilters.instrument || instrument === memberFilters.instrument.toLowerCase();
+                const locationMatch = !memberFilters.location || location === memberFilters.location;
+                
+                return nameMatch && instrumentMatch && locationMatch;
+            });
+            
+            return filtered;
+        }
+
+   function renderReportData(data) {
+    const reportArea = document.getElementById('member-report-details');
+    if (!reportArea) return;
+
+    const totalMembros = data.totalMembers || 0;
+    
+    // Usa dados originais (não filtrados) para popular os selects
+    const originalMembers = (lastFetchedData && lastFetchedData.allMembers) ? lastFetchedData.allMembers : (data.allMembers || []);
+    
+    // Calcula números sequenciais baseados na data de cadastro
+    const sequenceMap = calculateSequentialNumbers(originalMembers);
+
+    // Versão Mobile: Cards melhorados
+    const membersCardsHtml = data.allMembers && data.allMembers.length > 0 ? data.allMembers.map((m, index) => {
+        const sequenceNumber = sequenceMap[m.id] || '---';
+        return `
+        <div class="lg:hidden bg-white dark:bg-rjb-card-dark rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in overflow-hidden" style="animation-delay: ${index * 50}ms">
+            <!-- Cabeçalho do Card -->
+            <div class="mb-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-rjb-yellow/30 to-rjb-yellow/20 text-rjb-yellow font-bold text-sm border-2 border-rjb-yellow/40 shadow-sm">
+                            ${sequenceNumber}
+                        </span>
                     </div>
-                </td>
-            </tr>
-    `).join('') : '<tr><td colspan="6" class="p-4 text-center">Nenhum membro encontrado.</td></tr>';
-
-            reportArea.innerHTML = `
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 border-b border-rjb-yellow/30 pb-4">
-            <div class="text-center sm:text-left">
-                <h3 class="text-2xl font-bold text-rjb-yellow">Relatório de Membros</h3>
-                <p class="text-sm font-semibold">Total Cadastrado: <span class="text-rjb-yellow text-lg">${totalMembros}</span></p>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <h3 class="font-bold text-rjb-text dark:text-rjb-text-dark text-lg leading-tight break-words mb-2">
+                            ${m.name}
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                            <span class="text-sm text-gray-600 dark:text-gray-400 font-medium break-words">${m.instrument}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="flex gap-2 w-full sm:w-auto">
-                <button onclick="handleDownloadCSV()" class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 text-sm transition-all shadow-md">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    CSV
-                </button>
-                <button onclick="downloadPDF()" class="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 text-sm transition-all shadow-md">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    PDF
-                </button>
-                <button onclick="clearFilters()" class="flex-1 sm:flex-none bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 text-sm transition-all shadow-md">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            <!-- Informações do Card -->
+            <div class="space-y-3 mb-4">
+                <!-- TEFA -->
+                <div class="flex items-center">
+                    <span class="inline-flex items-center justify-center bg-gradient-to-br from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:text-rjb-yellow text-xs font-bold px-3 py-1.5 rounded-full border border-rjb-yellow/30" style="color: #8B6914;">
+                        TEFA: ${m.tefa || '---'}
+                    </span>
+                </div>
+                
+                <!-- Localização -->
+                <div class="flex items-start gap-2">
+                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    Limpar
+                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium break-words flex-1">${m.city || ''}/${m.state || ''}</span>
+                </div>
+                
+                <!-- WhatsApp -->
+                ${m.phone ? `
+                <div class="flex items-center gap-2">
+                    <a href="https://wa.me/55${(m.phone || '').replace(/\D/g, '')}" target="_blank" 
+                       class="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors text-sm font-medium">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        <span class="break-all">${m.phone}</span>
+                    </a>
+                </div>
+                ` : ''}
+            </div>
+            
+            <!-- Botões de ação na última linha -->
+            <div class="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <button onclick="editMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.instrument.replace(/'/g, "\\'")}', '${m.city || ''}', '${m.state || ''}', '${m.tefa || ''}', '${m.phone || ''}')"
+                    class="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all shadow-sm flex-shrink-0" title="Editar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button onclick="deleteMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" 
+                    class="p-2 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 transition-all shadow-sm flex-shrink-0" title="Excluir">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        </div>
+    `;
+    }).join('') : generateEmptyState('members', 'mobile');
+
+    // Versão Desktop: Tabela otimizada
+    const membersListHtml = data.allMembers && data.allMembers.length > 0 ? data.allMembers.map((m, index) => {
+        const sequenceNumber = sequenceMap[m.id] || '---';
+        return `
+        <tr class="hidden lg:table-row border-b border-gray-100 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-rjb-yellow/5 hover:to-transparent transition-all duration-300 group animate-fade-in" style="animation-delay: ${index * 50}ms">
+            <td class="p-3 px-4 text-center">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-rjb-yellow/30 to-rjb-yellow/20 text-rjb-yellow font-bold text-sm border-2 border-rjb-yellow/40 shadow-sm">
+                    ${sequenceNumber}
+                </span>
+            </td>
+            <td class="p-3 px-4">
+                <span class="font-semibold text-rjb-text dark:text-rjb-text-dark text-sm leading-relaxed break-words" style="word-break: break-word; line-height: 1.5;">${m.name}</span>
+            </td>
+            <td class="p-3 px-4">
+                <div class="flex items-start gap-1.5">
+                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 font-medium leading-relaxed break-words" style="word-break: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-height: 3em;">${m.instrument}</span>
+                </div>
+            </td>
+            <td class="p-3 px-4">
+                <span class="inline-flex items-center justify-center bg-gradient-to-br from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:text-rjb-yellow text-xs font-bold px-2.5 py-1 rounded-full border border-rjb-yellow/30 shadow-sm" style="color: #8B6914;">
+                    ${m.tefa || '---'}
+                </span>
+            </td>
+            <td class="p-3 px-4">
+                <div class="flex items-start gap-1.5">
+                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed break-words" style="word-break: break-word; line-height: 1.5;">${m.city || ''}/${m.state || ''}</span>
+                </div>
+            </td>
+            <td class="p-3 px-4">
+                ${m.phone ? (() => {
+                    const phoneMatch = m.phone.match(/\((\d+)\)\s*(.+)/);
+                    const areaCode = phoneMatch ? phoneMatch[1] : '';
+                    const phoneNumber = phoneMatch ? phoneMatch[2] : m.phone.replace(/\([^)]*\)\s*/, '');
+                    return `
+                <a href="https://wa.me/55${(m.phone || '').replace(/\D/g, '')}" target="_blank" 
+                   class="inline-block font-mono text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors">
+                    <div class="flex items-center gap-1.5 mb-0.5">
+                        <svg class="w-4 h-4 group-hover/link:scale-110 transition-transform flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        <span class="hover:underline">${areaCode ? `(${areaCode})` : ''}</span>
+                    </div>
+                    <div class="pl-5.5">
+                        <span class="hover:underline">${phoneNumber}</span>
+                    </div>
+                </a>
+                `;
+                })() : '<span class="text-gray-400 text-sm">---</span>'}
+            </td>
+            <td class="p-3 pr-4 text-right">
+                <div class="flex flex-col items-end gap-1 opacity-100">
+                    <button onclick="editMember('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${m.instrument.replace(/'/g, "\\'")}', '${m.city || ''}', '${m.state || ''}', '${m.tefa || ''}', '${m.phone || ''}')"
+                        class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all shadow-sm flex-shrink-0" title="Editar">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </button>
+                    <button onclick="deleteMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" 
+                        class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 transition-all shadow-sm flex-shrink-0" title="Excluir">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `;
+    }).join('') : generateEmptyState('members', 'desktop');
+
+    reportArea.innerHTML = `
+        <div class="bg-gradient-to-br from-white via-gray-50 to-rjb-yellow/5 dark:from-rjb-bg-dark dark:via-rjb-bg-dark/90 dark:to-rjb-yellow/5 p-6 sm:p-8 lg:p-10 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 border border-gray-200/50 dark:border-rjb-yellow/10 shadow-lg backdrop-blur-sm">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6">
+                <div class="flex items-center gap-3 sm:gap-4 w-full lg:w-auto">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-rjb-yellow to-rjb-yellow/80 flex items-center justify-center shadow-lg flex-shrink-0">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg sm:text-xl lg:text-2xl font-black text-rjb-text dark:text-rjb-text-dark uppercase tracking-tight mb-1 truncate">Membros Cadastrados</h3>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-gradient-to-r from-rjb-yellow/20 to-rjb-yellow/10 text-rjb-yellow border border-rjb-yellow/30">
+                                <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="whitespace-nowrap">Total: ${totalMembros}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-3 sm:gap-4 w-full lg:w-auto">
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+                        <div class="relative flex-grow w-full sm:min-w-[200px] lg:min-w-[250px]">
+                             <span class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </span>
+                            <input type="text" placeholder="Buscar por nome..." value="${memberFilters.name}" 
+                                class="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md" 
+                                oninput="debounceSearch(() => { memberFilters.name = this.value; processAndRenderMembers(lastFetchedData); })">
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+                        <div class="relative flex-grow w-full sm:min-w-[150px]">
+                            <span class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                            </span>
+                            <select id="filter-instrument" 
+                                class="pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!memberFilters.instrument ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}"
+                                onchange="memberFilters.instrument = this.value; processAndRenderMembers(lastFetchedData); updateSelectStyle('filter-instrument', this.value);">
+                                <option value="" ${!memberFilters.instrument ? 'selected' : ''} class="text-gray-500">Filtrar por instrumento...</option>
+                                ${getUniqueInstruments(originalMembers).map(inst => 
+                                    `<option value="${inst}" ${memberFilters.instrument === inst ? 'selected' : ''} class="text-gray-900 dark:text-gray-100">${inst}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div class="relative flex-grow w-full sm:min-w-[150px]">
+                            <span class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </span>
+                            <select id="filter-location" 
+                                class="pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!memberFilters.location ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}"
+                                onchange="memberFilters.location = this.value; processAndRenderMembers(lastFetchedData); updateSelectStyle('filter-location', this.value);">
+                                <option value="" ${!memberFilters.location ? 'selected' : ''} class="text-gray-500">Filtrar por localidade...</option>
+                                ${getUniqueLocations(originalMembers).map(loc => 
+                                    `<option value="${loc}" ${memberFilters.location === loc ? 'selected' : ''} class="text-gray-900 dark:text-gray-100">${loc}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botões de Ação - Nova linha separada -->
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button onclick="handleDownloadCSV()" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 text-sm font-medium flex-1 sm:flex-none sm:min-w-[100px]" title="Exportar CSV">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    <span>CSV</span>
+                </button>
+                <button onclick="downloadPDF()" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 text-sm font-medium flex-1 sm:flex-none sm:min-w-[100px]" title="Exportar PDF">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>PDF</span>
+                </button>
+                <button onclick="clearFilters()" class="inline-flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95 text-sm font-medium flex-1 sm:flex-none sm:min-w-[100px]" title="Limpar Filtros">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <span>Limpar</span>
                 </button>
             </div>
         </div>
 
-        <div class="overflow-x-auto rounded-lg border border-rjb-yellow/10">
-            <table class="w-full text-left border-collapse bg-rjb-card-light dark:bg-rjb-card-dark">
+        <!-- Versão Mobile: Cards -->
+        <div class="lg:hidden space-y-3">
+            ${membersCardsHtml}
+        </div>
+
+        <!-- Versão Desktop: Tabela otimizada sem scroll -->
+        <div class="hidden lg:block rounded-xl border border-gray-200/50 dark:border-rjb-yellow/10 shadow-xl bg-white dark:bg-rjb-card-dark backdrop-blur-sm">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark/90 text-xs uppercase font-bold">
-                        <th class="p-2 md:p-3 cursor-pointer" onclick="handleSort('name')">
-                            <div class="flex flex-col">
-                                <span>Nome ${currentSortColumn === 'name' ? (sortDirection ? '↑' : '↓') : '↕'}</span>
-                                <input type="text" placeholder="Filtrar..." value="${memberFilters.name}" 
-                                    class="w-full mt-1 p-1 text-[10px] rounded border border-gray-300 dark:bg-rjb-bg-dark font-normal" 
-                                    onclick="event.stopPropagation()" 
-                                    oninput="memberFilters.name = this.value; processAndRenderMembers(lastFetchedData)">
+                    <tr class="bg-gradient-to-br from-amber-300 via-amber-300/95 to-amber-300/90 text-rjb-text dark:text-rjb-text-dark text-xs uppercase font-black tracking-wider shadow-lg relative">
+                        <th class="p-3 px-4 text-center rounded-tl-xl relative whitespace-nowrap" style="width: 60px;">
+                            <div class="flex items-center justify-center">
+                                <span class="text-white drop-shadow-sm text-xs">Nº</span>
                             </div>
                         </th>
-                        <th class="p-2 md:p-3">TEFA</th>
-                        <th class="p-2 md:p-3 cursor-pointer hover:bg-rjb-yellow/10 transition-colors" onclick="handleSort('instrument')">
-                            Inst. ${currentSortColumn === 'instrument' ? (sortDirection ? '↑' : '↓') : '↕'}
-                            <input type="text" placeholder="Filtrar..." value="${memberFilters.instrument}"
-                                class="block w-full mt-1 p-1 text-[10px] rounded border border-gray-300 dark:bg-rjb-bg-dark font-normal"
-                                onclick="event.stopPropagation()" oninput="memberFilters.instrument = this.value; processAndRenderMembers(lastFetchedData)">
+                        <th class="p-3 px-4 cursor-pointer group relative transition-all duration-300 hover:bg-rjb-yellow/20 hover:shadow-inner" onclick="handleSort('name')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-white drop-shadow-sm text-xs">Membro</span>
+                                <div class="flex flex-col items-center justify-center">
+                                    ${currentSortColumn === 'name' ? `
+                                    <svg class="w-3 h-3 text-white ${sortDirection ? '' : 'transform rotate-180'}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    ` : `
+                                    <svg class="w-3 h-3 text-white/50" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z"></path>
+                                    </svg>
+                                    `}
+                                </div>
+                            </div>
                         </th>
-                        <th class="p-2 md:p-3 hidden sm:table-cell cursor-pointer hover:bg-rjb-yellow/10 transition-colors" onclick="handleSort('location')">
-                            Localidade ${currentSortColumn === 'location' ? (sortDirection ? '↑' : '↓') : '↕'}
-                            <input type="text" placeholder="Filtrar..." value="${memberFilters.location}"
-                                class="block w-full mt-1 p-1 text-[10px] rounded border border-gray-300 dark:bg-rjb-bg-dark font-normal"
-                                onclick="event.stopPropagation()" oninput="memberFilters.location = this.value; processAndRenderMembers(lastFetchedData)">
+                        <th class="p-3 px-4 cursor-pointer group relative transition-all duration-300 hover:bg-rjb-yellow/20 hover:shadow-inner" onclick="handleSort('instrument')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-white drop-shadow-sm text-xs">Instrumento</span>
+                                <div class="flex flex-col items-center justify-center">
+                                    ${currentSortColumn === 'instrument' ? `
+                                    <svg class="w-3 h-3 text-white ${sortDirection ? '' : 'transform rotate-180'}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    ` : `
+                                    <svg class="w-3 h-3 text-white/50" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z"></path>
+                                    </svg>
+                                    `}
+                                </div>
+                            </div>
                         </th>
-                        <th class="p-2 md:p-3 hidden lg:table-cell">Telefone</th>
-                        <th class="p-2 md:p-3 text-right">Ações</th>
+                        <th class="p-3 px-4 relative whitespace-nowrap" style="width: 90px;">
+                            <div class="flex items-center">
+                                <span class="text-white drop-shadow-sm text-xs">TEFA</span>
+                            </div>
+                        </th>
+                        <th class="p-3 px-4 cursor-pointer group relative transition-all duration-300 hover:bg-rjb-yellow/20 hover:shadow-inner" onclick="handleSort('location')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-white drop-shadow-sm text-xs">Localidade</span>
+                                <div class="flex flex-col items-center justify-center">
+                                    ${currentSortColumn === 'location' ? `
+                                    <svg class="w-3 h-3 text-white ${sortDirection ? '' : 'transform rotate-180'}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    ` : `
+                                    <svg class="w-3 h-3 text-white/50" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M5 12a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L5 6.414V12zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z"></path>
+                                    </svg>
+                                    `}
+                                </div>
+                            </div>
+                        </th>
+                        <th class="p-3 px-4 relative">
+                            <div class="flex items-center">
+                                <span class="text-white drop-shadow-sm text-xs">WhatsApp</span>
+                            </div>
+                        </th>
+                        <th class="p-3 pr-4 text-right rounded-tr-xl relative" style="width: 70px;">
+                            <div class="flex items-center justify-end">
+                                <span class="text-white drop-shadow-sm text-xs">Gerenciar</span>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
-                <tbody class="text-rjb-text dark:text-rjb-text-dark/80">${membersListHtml}</tbody>
+                <tbody class="text-rjb-text dark:text-rjb-text-dark/80 divide-y divide-gray-100 dark:divide-gray-700/50">${membersListHtml}</tbody>
             </table>
         </div>
     `;
-        }
-
+    
+    // Atualiza estilos dos selects após renderização
+    setTimeout(() => {
+        updateSelectStyle('filter-instrument', memberFilters.instrument);
+        updateSelectStyle('filter-location', memberFilters.location);
+    }, 100);
+}
         async function submitEditMember(event) {
             event.preventDefault();
             const memberId = document.getElementById('edit-member-id').value;
@@ -1095,12 +1624,12 @@
             return `
         <div class="group relative rounded-xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-soft-glow hover:scale-[1.02] border border-rjb-yellow/10 bg-gray-50 dark:bg-rjb-card-dark/50">
             <div class="video-thumbnail-container" onclick="openVideoModal('${video.id}')">
-                <img src="${thumbnailUrl}" alt="${video.title}" class="video-thumbnail-img" data-fallback-level="0" onerror="handleVideoFallback(this, '${video.id}')">
+                <img src="${thumbnailUrl}" alt="${video.title}" loading="lazy" class="video-thumbnail-img" data-fallback-level="0" onerror="handleVideoFallback(this, '${video.id}')">
                 <div class="play-icon-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="white"></path></svg></div>
             </div>
-            <div class="p-4">
-                <h3 class="text-lg font-bold text-rjb-text dark:text-rjb-text-dark leading-tight mb-1">${video.title}</h3>
-                <p class="text-rjb-yellow text-sm font-mono">${video.date}</p>
+            <div class="p-3 sm:p-4">
+                <h3 class="text-base sm:text-lg font-bold text-rjb-text dark:text-rjb-text-dark leading-tight mb-1 break-words">${video.title}</h3>
+                <p class="text-rjb-yellow text-xs sm:text-sm font-mono">${video.date}</p>
             </div>
         </div>
     `;
@@ -1202,29 +1731,149 @@
         </div>
     `;
         }
-        function generateApresentacoesPage() { /* (MANTIDO) */ return `
-				<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
-					<p>Assista aos nossos principais shows e apresentações de grande público. Experiências sonoras e visuais completas da Racional Jazz Band.</p>
+        function generateApresentacoesPage() {
+            // Ordena eventos por data (mais recente primeiro)
+            const sortedEvents = [...APRESENTACOES_BY_EVENT].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            return `
+				<div class="space-y-8">
+					<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
+						<p>Assista aos nossos principais shows e apresentações de grande público. Experiências sonoras e visuais completas da Racional Jazz Band, organizadas por data.</p>
+					</div>
+					
+					${sortedEvents.map((event, eventIndex) => `
+						<div class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl border border-rjb-yellow/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+							<!-- Cabeçalho do Evento -->
+							<div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 p-3 sm:p-4 md:p-6 border-b border-rjb-yellow/20">
+								<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+									<div class="flex-1 min-w-0">
+										<h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 break-words">
+											${event.eventTitle}
+										</h3>
+										<div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+											<div class="flex items-center gap-1.5">
+												<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+												</svg>
+												<span class="font-medium break-words">${event.dateFormatted}</span>
+											</div>
+											<div class="flex items-center gap-1.5">
+												<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+												</svg>
+												<span class="break-words">${event.location}</span>
+											</div>
+										</div>
+									</div>
+									<div class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-rjb-yellow/20 dark:bg-rjb-yellow/10 rounded-lg flex-shrink-0">
+										<svg class="w-4 h-4 sm:w-5 sm:h-5 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+										</svg>
+										<span class="text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark whitespace-nowrap">
+											${event.videos.length} ${event.videos.length === 1 ? 'vídeo' : 'vídeos'}
+										</span>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Grid de Vídeos -->
+							<div class="p-3 sm:p-4 md:p-6">
+								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+									${event.videos.map(video => generateVideoCard({ ...video, date: event.dateFormatted })).join('')}
+								</div>
+							</div>
+						</div>
+					`).join('')}
+					
+					${sortedEvents.length === 0 ? `
+						<div class="text-center py-12">
+							<svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+							</svg>
+							<p class="text-gray-400 dark:text-gray-500 text-lg">Nenhum vídeo cadastrado ainda.</p>
+						</div>
+					` : ''}
+					
+					<p class="text-center mt-8 text-rjb-text/70 dark:text-rjb-text-dark/70">
+						Assista a mais performances no nosso canal oficial do YouTube.
+					</p>
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-					${APRESENTACOES_VIDEOS.map(generateVideoCard).join('')}
-				</div>
-				<p class="text-center mt-12 text-rjb-text/70 dark:text-rjb-text-dark/70">
-					Assista a mais performances no nosso canal oficial do YouTube.
-				</p>
 			`;
         }
 
-        function generateBastidoresPage() { /* (MANTIDO) */ return `
-				<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
-					<p>Acompanhe o processo criativo, os ensaios e a dedicação dos músicos da Racional Jazz Band. Veja a música sendo feita, nota por nota, em vídeos exclusivos dos bastidores e entrevistas com a equipe.</p>
+        function generateBastidoresPage() {
+            // Ordena eventos por data (mais recente primeiro)
+            const sortedEvents = [...BASTIDORES_BY_EVENT].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            return `
+				<div class="space-y-8">
+					<div class="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8">
+						<p>Acompanhe o processo criativo, os ensaios e a dedicação dos músicos da Racional Jazz Band. Veja a música sendo feita, nota por nota, em vídeos exclusivos dos bastidores e entrevistas com a equipe, organizados por data.</p>
+					</div>
+					
+					${sortedEvents.map((event, eventIndex) => `
+						<div class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl border border-rjb-yellow/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+							<!-- Cabeçalho do Evento -->
+							<div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 p-3 sm:p-4 md:p-6 border-b border-rjb-yellow/20">
+								<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+									<div class="flex-1 min-w-0">
+										<h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 break-words">
+											${event.eventTitle}
+										</h3>
+										<div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+											<div class="flex items-center gap-1.5">
+												<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+												</svg>
+												<span class="font-medium break-words">${event.dateFormatted}</span>
+											</div>
+											<div class="flex items-center gap-1.5">
+												<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+												</svg>
+												<span class="break-words">${event.location}</span>
+											</div>
+										</div>
+									</div>
+									<div class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-rjb-yellow/20 dark:bg-rjb-yellow/10 rounded-lg flex-shrink-0">
+										<svg class="w-4 h-4 sm:w-5 sm:h-5 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+										</svg>
+										<span class="text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark whitespace-nowrap">
+											${event.videos.length} ${event.videos.length === 1 ? 'vídeo' : 'vídeos'}
+										</span>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Grid de Vídeos -->
+							<div class="p-3 sm:p-4 md:p-6">
+								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+									${event.videos.map(video => generateVideoCard({ ...video, date: event.dateFormatted })).join('')}
+								</div>
+							</div>
+						</div>
+					`).join('')}
+					
+					${sortedEvents.length === 0 ? `
+						<div class="text-center py-12">
+							<svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+							</svg>
+							<p class="text-gray-400 dark:text-gray-500 text-lg">Nenhum vídeo cadastrado ainda.</p>
+						</div>
+					` : ''}
+					
+					<p class="text-center mt-8 text-rjb-text/70 dark:text-rjb-text-dark/70">
+						Assista a mais vídeos de bastidores e entrevistas no nosso canal oficial do YouTube.
+					</p>
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-					${BASTIDORES_VIDEOS.map(generateVideoCard).join('')}
-				</div>
-				<p class="text-center mt-12 text-rjb-text/70 dark:text-rjb-text-dark/70">
-					Assista a mais vídeos de bastidores e entrevistas no nosso canal oficial do YouTube.
-				</p>
 			`;
         }
 
@@ -1375,43 +2024,134 @@
         </div>
     `;
         }
+        // Estrutura de fotos organizadas por apresentação/data
+        const PHOTOS_BY_EVENT = [
+            {
+                date: '2025-12-30',
+                dateFormatted: '30 de Dezembro de 2025',
+                eventTitle: 'Ensaios e Apresentações',
+                location: 'Retiro Racional - Nova Iguaçu (RJ)',
+                photos: [
+                    // Adicione aqui as URLs das fotos do dia 30/12/2025
+                    // Exemplo:
+                    // 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/nova-foto-1.jpg',
+                    // 'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/nova-foto-2.jpg',
+                ]
+            },
+            {
+                date: '2025-10-04',
+                dateFormatted: '04 de Outubro de 2025',
+                eventTitle: 'Ensaios e Apresentações',
+                location: 'Retiro Racional - Nova Iguaçu (RJ)',
+                photos: [
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841433.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534258.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534262.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534265.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534263.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534264.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534261.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534260.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534259.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534257.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841431.jpg',
+                    'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841432.jpg',
+                ]
+            },
+            // Adicione mais apresentações aqui seguindo o mesmo formato:
+            // {
+            //     date: 'YYYY-MM-DD',
+            //     dateFormatted: 'DD de Mês de YYYY',
+            //     eventTitle: 'Nome do Evento',
+            //     location: 'Local do Evento',
+            //     photos: [
+            //         'url1.jpg',
+            //         'url2.jpg',
+            //     ]
+            // },
+        ];
+
         function generateFotosPage() {
-            // MOCK de dados internos para esta página
-            const photos = [
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841433.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534258.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534262.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534265.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534263.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534264.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534261.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534260.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534259.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019629915397534257.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841431.jpg',
-                'https://pub-d3a0bbd0657549f8bdee48c70041537b.r2.dev/images/5019431831505841432.jpg',
-            ];
+            // Ordena eventos por data (mais recente primeiro)
+            const sortedEvents = [...PHOTOS_BY_EVENT].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
 
             return `
-        <div class="space-y-6">
-            <p class="text-lg">
-                Uma galeria de momentos capturados em nossos shows, ensaios e eventos.
+        <div class="space-y-8">
+            <p class="text-lg text-rjb-text/80 dark:text-rjb-text-dark/80">
+                Uma galeria de momentos capturados em nossos shows, ensaios e eventos, organizados por apresentação.
             </p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-xl border border-rjb-yellow/10 transition-colors duration-500">
-                ${photos.map((url, index) => `
-                    <div onclick="openModal('${url}')" class="group relative overflow-hidden rounded-lg shadow-md aspect-square transition-shadow duration-500 hover:shadow-soft-glow cursor-pointer">
-                        <img src="${url}" alt="Foto da Apresentação ${index + 1}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:rotate-1">
-                        <div class="absolute inset-0 bg-rjb-yellow/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
-                            <span class="text-rjb-text dark:text-rjb-text-dark text-3xl opacity-0 group-hover:opacity-100 transition-opacity delay-200">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            </span>
+            
+            ${sortedEvents.map((event, eventIndex) => `
+                <div class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl border border-rjb-yellow/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+                    <!-- Cabeçalho do Evento -->
+                    <div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 p-3 sm:p-4 md:p-6 border-b border-rjb-yellow/20">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 break-words">
+                                    ${event.eventTitle}
+                                </h3>
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span class="font-medium">${event.dateFormatted}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <span>${event.location}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-rjb-yellow/20 dark:bg-rjb-yellow/10 rounded-lg flex-shrink-0">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark whitespace-nowrap">
+                                    ${event.photos.length} ${event.photos.length === 1 ? 'foto' : 'fotos'}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                `).join('')}
-            </div>
-            <p class="pt-4 text-sm italic text-rjb-text/60 dark:text-rjb-text-dark/60">
-                Essa turma é linda não é? :)
-            </p>
+                    
+                    <!-- Grid de Fotos -->
+                    <div class="p-3 sm:p-4 md:p-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+                            ${event.photos.map((url, photoIndex) => `
+                                <div onclick="openModal('${url}')" 
+                                    class="group relative overflow-hidden rounded-lg shadow-md aspect-square transition-all duration-300 hover:shadow-soft-glow cursor-pointer transform hover:scale-[1.02]">
+                                    <img src="${url}" 
+                                        alt="${event.eventTitle} - Foto ${photoIndex + 1}" 
+                                        loading="lazy" 
+                                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:rotate-1">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="absolute inset-0 bg-rjb-yellow/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <span class="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity delay-200 transform group-hover:scale-110">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+            
+            ${sortedEvents.length === 0 ? `
+                <div class="text-center py-12">
+                    <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-gray-400 dark:text-gray-500 text-lg">Nenhuma foto cadastrada ainda.</p>
+                </div>
+            ` : ''}
         </div>
     `;
         }
@@ -1453,16 +2193,43 @@
 					<form id="contact-form" onsubmit="submitContactForm(event);">
 						<div class="space-y-4">
 							<div>
-								<label for="name" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Nome Completo</label>
-								<input type="text" id="name" name="name" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Seu nome">
+								<label for="name" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1 flex items-center gap-1">
+									Nome Completo
+									<svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+									</svg>
+								</label>
+								<input type="text" id="name" name="name" required 
+									onblur="validateField(this, 'name')"
+									oninput="validateFieldRealTime(this, 'name'); clearFieldError(this)"
+									class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Seu nome">
+								<p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
 							</div>
 							<div>
-								<label for="email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Email</label>
-								<input type="email" id="email" name="email" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="seu.email@exemplo.com">
+								<label for="email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1 flex items-center gap-1">
+									Email
+									<svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+									</svg>
+								</label>
+								<input type="email" id="email" name="email" required 
+									onblur="validateField(this, 'email')"
+									oninput="validateFieldRealTime(this, 'email'); clearFieldError(this)"
+									class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="seu.email@exemplo.com">
+								<p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
 							</div>
 							<div>
-								<label for="message" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Mensagem</label>
-								<textarea id="message" name="message" rows="4" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Sua mensagem..."></textarea>
+								<label for="message" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1 flex items-center gap-1">
+									Mensagem
+									<svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+									</svg>
+								</label>
+								<textarea id="message" name="message" rows="4" required 
+									onblur="validateField(this, 'message')"
+									oninput="validateFieldRealTime(this, 'message'); clearFieldError(this)"
+									class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all" placeholder="Sua mensagem..."></textarea>
+								<p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
 							</div>
 							<button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
 								Enviar Mensagem
@@ -1483,46 +2250,113 @@
             <input type="hidden" id="reg-terms-version" name="termsVersion" value="Termo de Consentimento v1.0 - Ciclo 2026">
             <div class="space-y-4">
                 <div>
-                    <label for="reg-invite-key" class="block text-sm font-medium opacity-70 mb-1">Chave de Convite</label>
-                    <input type="text" id="reg-invite-key" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                    <label for="reg-invite-key" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                        Chave de Convite
+                        <span class="group relative">
+                            <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-2 text-xs text-white bg-gray-800 rounded-lg shadow-lg z-50">
+                                Chave única fornecida pela administração para cadastro
+                            </span>
+                        </span>
+                    </label>
+                    <input type="text" id="reg-invite-key" required 
+                        onblur="validateField(this, 'inviteKey')"
+                        oninput="clearFieldError(this)"
+                        class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                    <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="reg-name" class="block text-sm font-medium opacity-70 mb-1">Nome</label>
-                        <input type="text" id="reg-name" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        <label for="reg-name" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                            Nome Completo
+                            <svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </label>
+                        <input type="text" id="reg-name" required 
+                            onblur="validateField(this, 'name')"
+                            oninput="validateFieldRealTime(this, 'name'); clearFieldError(this)"
+                            class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                     </div>
                     <div>
-                        <label for="reg-tefa" class="block text-sm font-medium opacity-70 mb-1">Nº TEFA (Opcional - somente números)</label>
+                        <label for="reg-tefa" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                            Nº TEFA (Opcional)
+                            <span class="group relative">
+                                <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 p-2 text-xs text-white bg-gray-800 rounded-lg shadow-lg z-50">
+                                    Número TEFA - somente números são permitidos
+                                </span>
+                            </span>
+                        </label>
                         <input type="text" id="reg-tefa" inputmode="numeric" pattern="[0-9]*" 
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, ''); validateFieldRealTime(this, 'tefa'); clearFieldError(this)"
+                            onblur="validateField(this, 'tefa')"
                             class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" placeholder="Ex: 1234">
+                        <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                     </div>
                 </div>
 
                 <div>
-                    <label for="reg-instrument" class="block text-sm font-medium opacity-70 mb-1">Instrumento / Área de Colaboração</label>
-                    <input type="text" id="reg-instrument" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" placeholder="Ex: Sax Alto, Trompete, Trombone">
+                    <label for="reg-instrument" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                        Instrumento / Área de Colaboração
+                        <svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </label>
+                    <input type="text" id="reg-instrument" required 
+                        onblur="validateField(this, 'instrument')"
+                        oninput="validateFieldRealTime(this, 'instrument'); clearFieldError(this)"
+                        class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" placeholder="Ex: Sax Alto, Trompete, Trombone">
+                    <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="reg-email" class="block text-sm font-medium opacity-70 mb-1">Email</label>
-                        <input type="email" id="reg-email" required class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        <label for="reg-email" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                            Email
+                            <svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </label>
+                        <input type="email" id="reg-email" required 
+                            onblur="validateField(this, 'email')"
+                            oninput="validateFieldRealTime(this, 'email'); clearFieldError(this)"
+                            class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                     </div>
                     <div>
-                        <label for="reg-phone" class="block text-sm font-medium opacity-70 mb-1">Contato (WhatsApp)</label>
+                        <label for="reg-phone" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                            Contato (WhatsApp)
+                            <svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </label>
                         <input type="tel" id="reg-phone" required 
                             placeholder="(00) 00000-0000"
-                            oninput="this.value = this.value.replace(/\\D/g, '').replace(/^(\\d{2})(\\d)/g, '($1) $2').replace(/(\\d{5})(\\d)/, '$1-$2').substring(0, 15)"
+                            oninput="this.value = this.value.replace(/\\D/g, '').replace(/^(\\d{2})(\\d)/g, '($1) $2').replace(/(\\d{5})(\\d)/, '$1-$2').substring(0, 15); validateFieldRealTime(this, 'phone'); clearFieldError(this)"
+                            onblur="validateField(this, 'phone')"
                             class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
+                        <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="reg-state" class="block text-sm font-medium opacity-70 mb-1">Estado (UF)</label>
-                        <select id="reg-state" required onchange="fetchCities(this.value)"
+                        <label for="reg-state" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                            Estado (UF)
+                            <svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </label>
+                        <select id="reg-state" required 
+                            onchange="fetchCities(this.value); validateFieldRealTime(this, 'state'); clearFieldError(this)"
+                            onblur="validateField(this, 'state')"
                             class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
                             <option value="">Selecione o Estado</option>
                             <option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapá</option>
@@ -1537,11 +2371,19 @@
                         </select>
                     </div>
                     <div>
-                        <label for="reg-city" class="block text-sm font-medium opacity-70 mb-1">Cidade</label>
+                        <label for="reg-city" class="block text-sm font-medium opacity-70 mb-1 flex items-center gap-1">
+                            Cidade
+                            <svg class="w-4 h-4 text-green-500 hidden field-valid-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </label>
                         <select id="reg-city" required disabled
+                            onchange="validateFieldRealTime(this, 'city'); clearFieldError(this)"
+                            onblur="validateField(this, 'city')"
                             class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all disabled:opacity-50">
                             <option value="">Selecione o Estado primeiro</option>
                         </select>
+                        <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
                     </div>
                 </div>
 
@@ -1592,51 +2434,51 @@
         
         <div id="report-output-area" class="hidden mt-10 space-y-10">
             
-            <div class="p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
-                <h3 class="text-2xl font-bold text-rjb-yellow mb-4">Gerenciamento de Convites</h3>
-                <div class="space-y-4">
-                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+            <div class="p-4 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
+                <h3 class="text-xl sm:text-2xl font-bold text-rjb-yellow mb-3 sm:mb-4">Gerenciamento de Convites</h3>
+                <div class="space-y-3 sm:space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-3">
                         <input type="text" id="generated-key-display" readonly 
-                               class="w-full sm:w-2/3 p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark font-mono font-bold text-center"
+                               class="w-full sm:w-2/3 p-2.5 sm:p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark font-mono font-bold text-center text-sm sm:text-base"
                                placeholder="--- CLIQUE PARA GERAR ---">
                         <button onclick="uiGenerateAndPrepare()" 
-                                class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2 px-4 rounded-lg hover:bg-yellow-500 transition shadow-subtle-glow">
+                                class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2.5 sm:py-2 px-4 rounded-lg hover:bg-yellow-500 transition shadow-subtle-glow text-sm sm:text-base">
                             Gerar Nova Chave
                         </button>
                     </div>
                     
                     <div id="whatsapp-share-area" class="hidden">
                         <button onclick="shareViaWhatsApp()" 
-                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 transition-all">
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-3 rounded-lg flex items-center justify-center gap-2 transition-all text-sm sm:text-base">
                             <span>Enviar via WhatsApp</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div id="member-report-details" class="p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
-                <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando relatório de membros...</p>
+            <div id="member-report-details" class="p-4 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
+                ${generateSkeletonScreen('members')}
             </div>
 
-            <div class="p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
-                <h3 class="text-2xl font-bold text-rjb-yellow mb-4 border-b border-rjb-yellow/50 pb-2">Gerenciamento de Anexos</h3>
-                <form id="file-upload-form" onsubmit="handleFileUpload(event);" class="mb-6 p-4 border border-dashed border-rjb-yellow/50 rounded-lg">
-                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+            <div class="p-4 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
+                <h3 class="text-xl sm:text-2xl font-bold text-rjb-yellow mb-3 sm:mb-4 border-b border-rjb-yellow/50 pb-2">Gerenciamento de Anexos</h3>
+                <form id="file-upload-form" onsubmit="handleFileUpload(event);" class="mb-4 sm:mb-6 p-3 sm:p-4 border border-dashed border-rjb-yellow/50 rounded-lg">
+                    <div class="flex flex-col sm:flex-row gap-3">
                         <input type="file" id="attachment-file" name="file" required 
-                               class="w-full sm:w-2/3 p-2 border border-rjb-yellow/30 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
-                        <button type="submit" class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2 px-4 rounded-lg hover:bg-yellow-500 transition">
+                               class="w-full sm:w-2/3 p-2 sm:p-3 text-sm border border-rjb-yellow/30 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <button type="submit" class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2.5 sm:py-3 px-4 rounded-lg hover:bg-yellow-500 transition text-sm sm:text-base">
                             Upload
                         </button>
                     </div>
                 </form>
 
-                <div id="attachments-output-area" class="space-y-3">
-                    <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando anexos...</p>
+                <div id="attachments-output-area" class="space-y-2 sm:space-y-3">
+                    ${generateSkeletonScreen('attachments')}
                 </div>
             </div>
 
-            <div class="flex justify-end">
-                <button onclick="adminLogout()" class="bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow text-rjb-yellow font-bold py-2 px-6 rounded-lg hover:bg-rjb-yellow/10 transition">
+            <div class="flex justify-center sm:justify-end">
+                <button onclick="adminLogout()" class="w-full sm:w-auto bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow text-rjb-yellow font-bold py-2.5 sm:py-2 px-4 sm:px-6 rounded-lg hover:bg-rjb-yellow/10 transition text-sm sm:text-base">
                     Sair da Área Administrativa
                 </button>
             </div>
@@ -1730,8 +2572,269 @@
             document.getElementById('edit-member-modal').classList.add('hidden');
         }
 
+        // Funções de validação em tempo real
+        function validateFieldRealTime(field, fieldType) {
+            const value = field.value.trim();
+            const errorElement = field.parentElement.querySelector('.field-error');
+            const validIcon = field.parentElement.querySelector('label .field-valid-icon');
+            
+            if (!value) {
+                if (validIcon) validIcon.classList.add('hidden');
+                return false;
+            }
+            
+            let isValid = false;
+            let errorMessage = '';
+            
+            switch(fieldType) {
+                case 'name':
+                    isValid = value.length >= 3;
+                    errorMessage = isValid ? '' : 'Nome deve ter pelo menos 3 caracteres';
+                    break;
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    isValid = emailRegex.test(value);
+                    errorMessage = isValid ? '' : 'Email inválido';
+                    break;
+                case 'phone':
+                    const phoneDigits = value.replace(/\D/g, '');
+                    isValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
+                    errorMessage = isValid ? '' : 'Telefone deve ter 10 ou 11 dígitos';
+                    break;
+                case 'tefa':
+                    isValid = value === '' || /^\d+$/.test(value);
+                    errorMessage = isValid ? '' : 'TEFA deve conter apenas números';
+                    break;
+                case 'instrument':
+                    isValid = value.length >= 2;
+                    errorMessage = isValid ? '' : 'Instrumento deve ter pelo menos 2 caracteres';
+                    break;
+                case 'message':
+                    isValid = value.length >= 10;
+                    errorMessage = isValid ? '' : 'Mensagem deve ter pelo menos 10 caracteres';
+                    break;
+                case 'state':
+                case 'city':
+                    isValid = value !== '' && value !== null;
+                    errorMessage = isValid ? '' : 'Este campo é obrigatório';
+                    break;
+                default:
+                    isValid = value.length > 0;
+            }
+            
+            if (isValid) {
+                field.classList.remove('border-red-500', 'border-red-300');
+                field.classList.add('border-green-500', 'dark:border-green-400');
+                if (errorElement) {
+                    errorElement.classList.add('hidden');
+                    errorElement.textContent = '';
+                }
+                if (validIcon) validIcon.classList.remove('hidden');
+            } else {
+                field.classList.remove('border-green-500', 'dark:border-green-400');
+                field.classList.add('border-red-500', 'dark:border-red-300');
+                if (errorElement) {
+                    errorElement.classList.remove('hidden');
+                    errorElement.textContent = errorMessage;
+                }
+                if (validIcon) validIcon.classList.add('hidden');
+            }
+            
+            return isValid;
+        }
+        
+        function validateField(field, fieldType) {
+            return validateFieldRealTime(field, fieldType);
+        }
+        
+        function clearFieldError(field) {
+            const errorElement = field.parentElement.querySelector('.field-error');
+            if (errorElement && !errorElement.textContent) {
+                field.classList.remove('border-red-500', 'border-red-300');
+            }
+        }
+
         function closeDeleteModal() {
-            document.getElementById('delete-confirm-modal').classList.add('hidden');
+            const modal = document.getElementById('delete-confirm-modal');
+            const confirmInput = document.getElementById('confirm-delete-name');
+            const errorMsg = document.getElementById('confirm-delete-error');
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            
+            if (confirmInput) {
+                confirmInput.value = '';
+                confirmInput.classList.remove('border-red-500', 'border-green-500');
+            }
+            if (errorMsg) errorMsg.classList.add('hidden');
+            if (confirmBtn) confirmBtn.disabled = true;
+            
+            modal.classList.add('hidden');
+            modal.classList.remove('opacity-100');
+        }
+
+        // Função para gerar empty states melhorados
+        function generateEmptyState(type, view = 'desktop') {
+            if (type === 'members') {
+                const hasFilters = memberFilters.name || memberFilters.instrument || memberFilters.location;
+                const message = hasFilters 
+                    ? 'Nenhum membro encontrado com os filtros aplicados.' 
+                    : 'Nenhum membro cadastrado ainda.';
+                const action = hasFilters 
+                    ? '<button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-rjb-yellow text-rjb-text font-semibold rounded-lg hover:bg-yellow-500 transition-colors">Limpar Filtros</button>'
+                    : '';
+                
+                if (view === 'mobile') {
+                    return `
+                        <div class="lg:hidden p-12 text-center">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                                    <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-lg font-semibold mb-2">${message}</p>
+                                    ${hasFilters ? '<p class="text-gray-500 dark:text-gray-500 text-sm mb-4">Tente ajustar os filtros de busca.</p>' : ''}
+                                </div>
+                                ${action}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <tr class="hidden lg:table-row">
+                            <td colspan="7" class="p-12 text-center">
+                                <div class="flex flex-col items-center gap-4">
+                                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400 text-lg font-semibold mb-2">${message}</p>
+                                        ${hasFilters ? '<p class="text-gray-500 dark:text-gray-500 text-sm mb-4">Tente ajustar os filtros de busca.</p>' : ''}
+                                    </div>
+                                    ${action}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            return '<div class="p-8 text-center text-gray-400">Nenhum resultado encontrado.</div>';
+        }
+
+        // Função para gerar skeleton screens
+        function generateSkeletonScreen(type) {
+            if (type === 'members') {
+                return `
+                    <div class="space-y-4 animate-pulse">
+                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                        <div class="space-y-3">
+                            ${Array(3).fill(0).map(() => `
+                                <div class="flex items-center gap-4">
+                                    <div class="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                                    <div class="flex-1 space-y-2">
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                                        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'attachments') {
+                return `
+                    <div class="space-y-3 animate-pulse">
+                        ${Array(3).fill(0).map(() => `
+                            <div class="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <div class="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            return '<div class="animate-pulse"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></div>';
+        }
+
+        // Funções de validação em tempo real
+        function validateFieldRealTime(field, fieldType) {
+            const value = field.value.trim();
+            const errorElement = field.parentElement.querySelector('.field-error');
+            const validIcon = field.parentElement.querySelector('label .field-valid-icon');
+            
+            if (!value) {
+                if (validIcon) validIcon.classList.add('hidden');
+                return false;
+            }
+            
+            let isValid = false;
+            let errorMessage = '';
+            
+            switch(fieldType) {
+                case 'name':
+                    isValid = value.length >= 3;
+                    errorMessage = isValid ? '' : 'Nome deve ter pelo menos 3 caracteres';
+                    break;
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    isValid = emailRegex.test(value);
+                    errorMessage = isValid ? '' : 'Email inválido';
+                    break;
+                case 'phone':
+                    const phoneDigits = value.replace(/\D/g, '');
+                    isValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
+                    errorMessage = isValid ? '' : 'Telefone deve ter 10 ou 11 dígitos';
+                    break;
+                case 'tefa':
+                    isValid = value === '' || /^\d+$/.test(value);
+                    errorMessage = isValid ? '' : 'TEFA deve conter apenas números';
+                    break;
+                case 'instrument':
+                    isValid = value.length >= 2;
+                    errorMessage = isValid ? '' : 'Instrumento deve ter pelo menos 2 caracteres';
+                    break;
+                case 'message':
+                    isValid = value.length >= 10;
+                    errorMessage = isValid ? '' : 'Mensagem deve ter pelo menos 10 caracteres';
+                    break;
+                default:
+                    isValid = value.length > 0;
+            }
+            
+            if (isValid) {
+                field.classList.remove('border-red-500', 'border-red-300');
+                field.classList.add('border-green-500', 'dark:border-green-400');
+                if (errorElement) {
+                    errorElement.classList.add('hidden');
+                    errorElement.textContent = '';
+                }
+                if (validIcon) validIcon.classList.remove('hidden');
+            } else {
+                field.classList.remove('border-green-500', 'dark:border-green-400');
+                field.classList.add('border-red-500', 'dark:border-red-300');
+                if (errorElement) {
+                    errorElement.classList.remove('hidden');
+                    errorElement.textContent = errorMessage;
+                }
+                if (validIcon) validIcon.classList.add('hidden');
+            }
+            
+            return isValid;
+        }
+        
+        function validateField(field, fieldType) {
+            return validateFieldRealTime(field, fieldType);
+        }
+        
+        function clearFieldError(field) {
+            const errorElement = field.parentElement.querySelector('.field-error');
+            if (errorElement && !errorElement.textContent) {
+                field.classList.remove('border-red-500', 'border-red-300');
+            }
         }
 
         function uiGenerateNewKey() {
@@ -1746,6 +2849,41 @@
             // Opcional: Copia automaticamente para a área de transferência
             navigator.clipboard.writeText(finalKey);
             showMessage('Chave gerada e copiada para o WhatsApp!');
+        }
+
+        // Função para gerar breadcrumbs
+        function generateBreadcrumbs(page) {
+            const breadcrumbMap = {
+                'sobre': [{ name: 'Home', page: 'home' }, { name: 'Sobre', page: 'sobre' }],
+                'apresentacoes': [{ name: 'Home', page: 'home' }, { name: 'A RJB', page: null }, { name: 'Apresentações', page: 'apresentacoes' }],
+                'bastidores': [{ name: 'Home', page: 'home' }, { name: 'A RJB', page: null }, { name: 'Ensaios', page: 'bastidores' }],
+                'repertorio': [{ name: 'Home', page: 'home' }, { name: 'A RJB', page: null }, { name: 'Repertório', page: 'repertorio' }],
+                'partituras': [{ name: 'Home', page: 'home' }, { name: 'A RJB', page: null }, { name: 'Partituras', page: 'partituras' }],
+                'fotos': [{ name: 'Home', page: 'home' }, { name: 'A RJB', page: null }, { name: 'Fotos', page: 'fotos' }],
+                'agenda': [{ name: 'Home', page: 'home' }, { name: 'Agenda', page: 'agenda' }],
+                'contato': [{ name: 'Home', page: 'home' }, { name: 'Contato', page: 'contato' }],
+                'member-registration': [{ name: 'Home', page: 'home' }, { name: 'Cadastro', page: 'member-registration' }],
+                'reports': [{ name: 'Home', page: 'home' }, { name: 'Área Administrativa', page: 'reports' }],
+            };
+            
+            const breadcrumbs = breadcrumbMap[page] || [{ name: 'Home', page: 'home' }];
+            
+            return `
+                <nav class="mb-6 flex items-center space-x-2 text-sm" aria-label="Breadcrumb">
+                    ${breadcrumbs.map((crumb, index) => {
+                        const isLast = index === breadcrumbs.length - 1;
+                        return `
+                            <div class="flex items-center space-x-2">
+                                ${index > 0 ? '<span class="text-rjb-text/40 dark:text-rjb-text-dark/40">/</span>' : ''}
+                                ${crumb.page && !isLast ? 
+                                    `<button onclick="navigateTo('${crumb.page}')" class="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors">${crumb.name}</button>` :
+                                    `<span class="${isLast ? 'text-rjb-yellow font-semibold' : 'text-rjb-text/50 dark:text-rjb-text-dark/50'}">${crumb.name}</span>`
+                                }
+                            </div>
+                        `;
+                    }).join('')}
+                </nav>
+            `;
         }
 
         // index.html (SUBSTITUIR A FUNÇÃO renderPage COMPLETA)
@@ -1774,8 +2912,12 @@
             if (currentPage === 'home') {
                 html += generateHomePageWrapper();
             } else {
+                // Gera breadcrumbs
+                const breadcrumbs = generateBreadcrumbs(currentPage);
+                
                 html += `
             <div class="pt-20 md:pt-28 pb-16 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                ${breadcrumbs}
                 <h1 class="text-4xl md:text-7xl font-extrabold rjb-logo-text text-rjb-yellow mb-2 text-center break-words px-2">
                     ${pageTitle.split('/')[0].trim()}
                 </h1>
@@ -1913,45 +3055,154 @@
             const doc = new jsPDF('l', 'mm', 'a4'); // Modo paisagem
 
             const token = localStorage.getItem('adminToken');
-            // ENDEREÇO CORRETO DA SUA API (Backend)
             const endpointUrl = 'https://rjb-email-sender-215755766100.europe-west1.run.app/api/reports/members';
 
             showMessage('Gerando arquivo PDF...');
 
             try {
-                const response = await fetch(endpointUrl, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                let data;
+                
+                // Se temos dados em cache, usa-os. Caso contrário, busca da API
+                if (lastFetchedData) {
+                    data = lastFetchedData;
+                } else {
+                    const response = await fetch(endpointUrl, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
 
-                // Se o token estiver vencido ou der erro, avisa o usuário
-                if (!response.ok) {
-                    throw new Error('Falha ao buscar dados da API');
+                    if (!response.ok) {
+                        throw new Error('Falha ao buscar dados da API');
+                    }
+
+                    data = await response.json();
                 }
 
-                const data = await response.json();
-
-                const tableRows = data.allMembers.map(m => [
-                    m.name,
+                // Aplica os filtros ativos
+                const filteredMembers = getFilteredMembers(data);
+                
+                // Calcula números sequenciais baseados na data de cadastro (usando dados originais)
+                const originalMembers = data.allMembers || [];
+                const sequenceMap = calculateSequentialNumbers(originalMembers);
+                
+                // Ordena os membros filtrados pela sequência numérica
+                const sortedMembers = [...filteredMembers].sort((a, b) => {
+                    const seqA = sequenceMap[a.id] || 999999;
+                    const seqB = sequenceMap[b.id] || 999999;
+                    return seqA - seqB;
+                });
+                
+                // Verifica se há filtros ativos
+                const hasFilters = memberFilters.name || memberFilters.instrument || memberFilters.location;
+                
+                // Configuração de cores e estilos
+                const primaryColor = [255, 215, 0]; // Amarelo RJB
+                const darkColor = [42, 42, 42]; // Texto escuro
+                const lightGray = [245, 245, 245]; // Fundo claro
+                
+                // Cabeçalho do documento
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, doc.internal.pageSize.getWidth(), 30, 'F');
+                
+                doc.setTextColor(...darkColor);
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('Relatório de Membros', 14, 15);
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                doc.text('Racional Jazz Band', 14, 22);
+                
+                // Informações do relatório
+                let yPos = 35;
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                
+                const exportDate = new Date().toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                doc.text(`Data de Exportação: ${exportDate}`, 14, yPos);
+                doc.text(`Total de Membros: ${filteredMembers.length}`, 14, yPos + 5);
+                
+                if (hasFilters) {
+                    const filterParts = [];
+                    if (memberFilters.name) filterParts.push(`Nome: ${memberFilters.name}`);
+                    if (memberFilters.instrument) filterParts.push(`Instrumento: ${memberFilters.instrument}`);
+                    if (memberFilters.location) filterParts.push(`Localidade: ${memberFilters.location}`);
+                    doc.text(`Filtros Aplicados: ${filterParts.join(' | ')}`, 14, yPos + 10);
+                    yPos += 5;
+                }
+                
+                // Prepara os dados da tabela
+                const tableRows = sortedMembers.map(m => [
+                    sequenceMap[m.id] || '---',
+                    m.name || '---',
                     m.tefa || '---',
-                    m.instrument,
-                    `${m.city || ''}/${m.state || ''}`,
+                    m.instrument || '---',
+                    `${m.city || ''}/${m.state || ''}`.trim() || '---',
                     m.phone || '---'
                 ]);
 
-                doc.setFontSize(18);
-                doc.text("Relatorio de Membros - Racional Jazz Band", 14, 15);
-
+                // Gera a tabela
                 doc.autoTable({
-                    startY: 22,
-                    head: [['Nome', 'TEFA', 'Instrumento', 'Localidade', 'Telefone']],
+                    startY: yPos + 8,
+                    head: [['Nº', 'Nome', 'TEFA', 'Instrumento', 'Localidade', 'Telefone']],
                     body: tableRows,
-                    theme: 'grid',
-                    headStyles: { fillColor: [255, 215, 0], textColor: [42, 42, 42] }
+                    theme: 'striped',
+                    headStyles: { 
+                        fillColor: primaryColor, 
+                        textColor: darkColor,
+                        fontStyle: 'bold',
+                        fontSize: 10
+                    },
+                    bodyStyles: {
+                        textColor: darkColor,
+                        fontSize: 9
+                    },
+                    alternateRowStyles: {
+                        fillColor: lightGray
+                    },
+                    margin: { top: yPos + 8, left: 14, right: 14 },
+                    styles: {
+                        cellPadding: 3,
+                        overflow: 'linebreak',
+                        cellWidth: 'wrap'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 15 }, // Nº
+                        1: { cellWidth: 50 }, // Nome
+                        2: { cellWidth: 25 }, // TEFA
+                        3: { cellWidth: 40 }, // Instrumento
+                        4: { cellWidth: 45 }, // Localidade
+                        5: { cellWidth: 40 }  // Telefone
+                    }
                 });
 
-                doc.save(`rjb_relatorio_${new Date().toISOString().split('T')[0]}.pdf`);
-                showMessage('PDF baixado com sucesso!');
+                // Rodapé
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(
+                        `Página ${i} de ${pageCount} - Racional Jazz Band`,
+                        doc.internal.pageSize.getWidth() / 2,
+                        doc.internal.pageSize.getHeight() - 10,
+                        { align: 'center' }
+                    );
+                }
+
+                const fileName = hasFilters 
+                    ? `rjb_relatorio_filtrado_${new Date().toISOString().split('T')[0]}.pdf`
+                    : `rjb_relatorio_${new Date().toISOString().split('T')[0]}.pdf`;
+                
+                doc.save(fileName);
+                showMessage(`PDF baixado com sucesso! ${filteredMembers.length} membro(s) exportado(s).`);
             } catch (error) {
                 console.error('Erro ao gerar PDF:', error);
                 showMessage('Erro de conexão ou sessão expirada.', true);
@@ -1961,18 +3212,8 @@
         function processAndRenderMembers(data) {
             if (!data || !data.allMembers) return;
 
-            let filtered = [...data.allMembers];
-
-            // Aplicar Filtros com tratamento para nulos
-            filtered = filtered.filter(m => {
-                const name = (m.name || "").toLowerCase();
-                const instrument = (m.instrument || "").toLowerCase();
-                const location = `${m.city || ""} ${m.state || ""}`.toLowerCase();
-
-                return name.includes(memberFilters.name.toLowerCase()) &&
-                    instrument.includes(memberFilters.instrument.toLowerCase()) &&
-                    location.includes(memberFilters.location.toLowerCase());
-            });
+            // Usa a função auxiliar para obter dados filtrados
+            let filtered = getFilteredMembers(data);
 
             // Aplicar Ordenação robusta
             filtered.sort((a, b) => {
@@ -2009,6 +3250,10 @@
         function clearFilters() {
             // Reseta o objeto de filtros para o estado original
             memberFilters = { name: '', instrument: '', location: '' };
+
+            // Atualiza os estilos dos selects
+            updateSelectStyle('filter-instrument', '');
+            updateSelectStyle('filter-location', '');
 
             // Se tivermos os dados em cache, renderiza tudo limpo
             if (lastFetchedData) {
@@ -2126,8 +3371,21 @@
         }
 
         .nav-link-active {
-            border-bottom: 2px solid #FFD700;
+            border-bottom: 3px solid #FFD700;
             padding-bottom: 5px;
+            font-weight: 700;
+            color: #FFD700 !important;
+            position: relative;
+        }
+        
+        .nav-link-active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
         }
 
         .rjb-logo-image {
@@ -2224,6 +3482,221 @@
         .accordion-header.open .accordion-header-icon {
             transform: rotate(180deg);
         }
+
+        /* --- Animações para a tabela de membros --- */
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* Melhorias de hover para linhas da tabela */
+        tbody tr {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        tbody tr:hover {
+            transform: translateX(4px);
+            box-shadow: -4px 0 0 0 rgba(255, 215, 0, 0.3);
+        }
+
+        /* Estilos para os selects de filtro */
+        #filter-instrument, #filter-location {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .dark #filter-instrument, .dark #filter-location {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%9ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        }
+
+        #filter-instrument:focus, #filter-location:focus {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23FFD700' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        }
+
+        /* Estilos modernos para cabeçalho da tabela desktop */
+        @media (min-width: 1024px) {
+            thead tr {
+                position: relative;
+            }
+            
+            thead tr::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+            }
+            
+            thead th {
+                position: relative;
+            }
+            
+            thead th:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 20%;
+                bottom: 20%;
+                width: 1px;
+                background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            }
+            
+            thead th:hover {
+                transform: translateY(-1px);
+            }
+            
+            thead th.cursor-pointer {
+                position: relative;
+            }
+            
+            thead th.cursor-pointer::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            thead th.cursor-pointer:hover::before {
+                opacity: 1;
+            }
+        }
+
+
+        /* Melhorias Mobile para Área Administrativa */
+        @media (max-width: 640px) {
+            /* Scroll suave na tabela */
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+            
+            /* Melhor toque em botões mobile */
+            button, a[role="button"] {
+                -webkit-tap-highlight-color: rgba(255, 215, 0, 0.2);
+                touch-action: manipulation;
+            }
+            
+            /* Ajuste de padding em cards mobile */
+            #member-report-details,
+            #report-output-area > div {
+                padding: 1rem !important;
+            }
+            
+            /* Tabela com scroll horizontal melhorado */
+            table {
+                font-size: 0.875rem;
+            }
+            
+            /* Botões de ação sempre visíveis em mobile */
+            tbody tr td:last-child .flex {
+                opacity: 1 !important;
+            }
+        }
+
+        /* Melhorias para tablets */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            #member-report-details,
+            #report-output-area > div {
+                padding: 1.25rem !important;
+            }
+        }
+
+        /* Estilos para validação de campos */
+        input.border-green-500,
+        textarea.border-green-500 {
+            border-color: #10b981 !important;
+        }
+        
+        input.border-red-500,
+        textarea.border-red-500 {
+            border-color: #ef4444 !important;
+        }
+        
+        .field-valid-icon {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Skeleton screen animations */
+        @keyframes skeleton-pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .animate-pulse {
+            animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Melhorias para tabela desktop - quebra de linha e espaçamento */
+        @media (min-width: 1024px) {
+            /* Remove scroll horizontal */
+            .hidden.lg\\:block {
+                overflow-x: visible !important;
+            }
+            
+            /* Permite quebra de linha na coluna instrumento com limite de 2 linhas */
+            table tbody td:nth-child(3) span {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                word-break: break-word;
+                line-height: 1.5;
+                max-height: 3em;
+            }
+            
+            /* Nome aparece completo (sem limite) */
+            table tbody td:nth-child(2) span {
+                word-break: break-word;
+                line-height: 1.5;
+            }
+            
+            /* Garante que a coluna de gerenciar não ultrapasse */
+            table tbody td:last-child {
+                min-width: 60px;
+                max-width: 70px;
+            }
+            
+            /* Aumenta altura mínima das linhas para acomodar quebra de linha */
+            table tbody tr {
+                min-height: 60px;
+            }
+            
+            /* Ajusta padding vertical das células para melhor espaçamento */
+            table tbody td {
+                vertical-align: top;
+                padding-top: 0.875rem;
+                padding-bottom: 0.875rem;
+            }
+        }
     </style>
 </head>
 
@@ -2280,6 +3753,7 @@
                         class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Agenda</button>
                     <button id="nav-contato" onclick="navigateTo('contato')"
                         class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Contato</button>
+                    
 
                     <button id="nav-relatorios-desktop" onclick="navigateTo('reports')"
                         class="nav-link text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5">Área
@@ -2536,14 +4010,27 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-xl font-bold mb-2">Confirmar Exclusão</h3>
-            <p class="text-sm opacity-70 mb-6">Deseja excluir <span id="delete-member-name" class="font-bold"></span>?
+            <h3 class="text-xl font-bold mb-2 text-red-600 dark:text-red-400">Confirmar Exclusão</h3>
+            <p class="text-sm opacity-70 mb-4">Esta ação não pode ser desfeita. Deseja realmente excluir o membro:</p>
+            <p class="text-base font-bold mb-4 text-rjb-text dark:text-rjb-text-dark bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                <span id="delete-member-name"></span>
             </p>
+            <div class="mb-4">
+                <label for="confirm-delete-name" class="block text-sm font-medium mb-2 text-rjb-text dark:text-rjb-text-dark">
+                    Digite o nome completo para confirmar:
+                </label>
+                <input type="text" id="confirm-delete-name" 
+                    class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-red-300 dark:border-red-600 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-red-500 transition-all"
+                    placeholder="Digite o nome completo do membro">
+                <p id="confirm-delete-error" class="hidden text-xs text-red-600 dark:text-red-400 mt-1">Os nomes não coincidem</p>
+            </div>
             <div class="flex space-x-3">
                 <button onclick="closeDeleteModal()"
-                    class="flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 font-bold">Cancelar</button>
-                <button id="confirm-delete-btn"
-                    class="flex-1 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700">Excluir</button>
+                    class="flex-1 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancelar</button>
+                <button id="confirm-delete-btn" disabled
+                    class="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    Excluir Permanentemente
+                </button>
             </div>
         </div>
     </div>
