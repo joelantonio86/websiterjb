@@ -12,29 +12,71 @@ const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 
 // --- 1. Constantes e Ambiente (Preservadas do Original) ---
+// Validar variáveis de ambiente críticas
 const SENDER_EMAIL = process.env.GMAIL_USER;
 const SENDER_PASS = process.env.GMAIL_PASS;
 const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com, racionaljazzbandoficial@gmail.com, andressamqxs@gmail.com';
 const VALID_INVITE_KEYS = ['RJB-MEMBER-2025', 'RJB-TESTE-999'];
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-987654321';
 
+// Validar variáveis críticas (mas não bloquear se faltarem - algumas rotas podem não precisar)
+if (!SENDER_EMAIL || !SENDER_PASS) {
+    console.warn('⚠️  AVISO: GMAIL_USER ou GMAIL_PASS não configurados. Funcionalidades de e-mail podem não funcionar.');
+}
+if (!JWT_SECRET || JWT_SECRET === 'chave-secreta-muito-forte-da-rjb-987654321') {
+    console.warn('⚠️  AVISO: JWT_SECRET usando valor padrão. Configure uma chave secreta forte em produção.');
+}
+
 // Carregar usuários administradores de variáveis de ambiente
-// Se ADMIN_USERS não estiver definido nas variáveis de ambiente, usa valores padrão (fallback)
 let ADMIN_USERS = [];
 try {
     if (process.env.ADMIN_USERS) {
-        ADMIN_USERS = JSON.parse(process.env.ADMIN_USERS);
+        // Validar se a string não está vazia ou truncada
+        const adminUsersStr = process.env.ADMIN_USERS.trim();
+        if (!adminUsersStr || adminUsersStr.length < 10) {
+            console.error('❌ ERRO: ADMIN_USERS parece estar vazio ou truncado.');
+            console.error('📝 Valor recebido:', adminUsersStr.substring(0, 100) + '...');
+            throw new Error('ADMIN_USERS está vazio ou truncado. Verifique a configuração no Cloud Run.');
+        }
+        
+        // Tentar fazer parse do JSON
+        try {
+            ADMIN_USERS = JSON.parse(adminUsersStr);
+        } catch (parseError) {
+            console.error('❌ ERRO: Falha ao fazer parse do JSON de ADMIN_USERS.');
+            console.error('📝 Erro de parse:', parseError.message);
+            console.error('📝 Primeiros 200 caracteres do valor:', adminUsersStr.substring(0, 200));
+            throw new Error(`Erro ao fazer parse do JSON de ADMIN_USERS: ${parseError.message}. Verifique se o JSON está válido.`);
+        }
+        
+        // Validar se é um array e tem pelo menos um usuário
+        if (!Array.isArray(ADMIN_USERS)) {
+            throw new Error('ADMIN_USERS deve ser um array JSON.');
+        }
+        if (ADMIN_USERS.length === 0) {
+            throw new Error('ADMIN_USERS está vazio. Configure pelo menos um usuário administrador.');
+        }
+        
+        // Validar estrutura de cada usuário
+        for (let i = 0; i < ADMIN_USERS.length; i++) {
+            const user = ADMIN_USERS[i];
+            if (!user.email || !user.password || !user.role) {
+                throw new Error(`Usuário ${i + 1} no ADMIN_USERS está incompleto. Cada usuário deve ter: email, password, role.`);
+            }
+        }
+        
+        console.log(`✅ ADMIN_USERS carregado com sucesso: ${ADMIN_USERS.length} usuário(s) configurado(s).`);
     } else {
         // ⚠️ SEGURANÇA: NUNCA deixe senhas hardcoded no código!
-        // Configure ADMIN_USERS via variáveis de ambiente (.env ou Cloud Run)
         console.error('❌ ERRO DE SEGURANÇA: ADMIN_USERS não definido nas variáveis de ambiente!');
         console.error('⚠️  Configure a variável ADMIN_USERS no arquivo .env ou nas variáveis de ambiente do Cloud Run.');
         console.error('📖 Consulte README-SECURITY.md para instruções de configuração.');
         throw new Error('ADMIN_USERS não configurado. Configure via variáveis de ambiente para segurança. Consulte README-SECURITY.md');
     }
 } catch (error) {
-    console.error('❌ Erro ao carregar ADMIN_USERS das variáveis de ambiente:', error);
-    throw new Error('Erro ao carregar configuração de usuários administradores. Verifique a variável ADMIN_USERS.');
+    console.error('❌ Erro ao carregar ADMIN_USERS das variáveis de ambiente:', error.message);
+    console.error('📋 Variáveis de ambiente disponíveis:', Object.keys(process.env).filter(k => k.includes('ADMIN') || k.includes('GMAIL') || k.includes('JWT') || k.includes('GCS')).join(', '));
+    throw new Error(`Erro ao carregar configuração de usuários administradores: ${error.message}`);
 }
 
 const app = express();
@@ -53,16 +95,26 @@ const limiter = rateLimit({
 });
 
 // --- 3. Inicialização de Serviços (Firebase e GCS) ---
-if (!admin.apps.length) {
-    admin.initializeApp({});
-}
-const db = admin.firestore();
-const membersCollection = db.collection('members');
-const keysCollection = db.collection('inviteKeys'); // Coleção para controle de chaves únicas
+let db, membersCollection, keysCollection, bucket, BUCKET_NAME;
+try {
+    if (!admin.apps.length) {
+        admin.initializeApp({});
+        console.log('✅ Firebase Admin inicializado com sucesso.');
+    }
+    db = admin.firestore();
+    membersCollection = db.collection('members');
+    keysCollection = db.collection('inviteKeys'); // Coleção para controle de chaves únicas
 
-const storage = new Storage();
-const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
-const bucket = storage.bucket(BUCKET_NAME);
+    const storage = new Storage();
+    BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
+    bucket = storage.bucket(BUCKET_NAME);
+    console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
+} catch (error) {
+    console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
+    console.error('📋 Detalhes do erro:', error.message);
+    // Lançar erro aqui porque o sistema precisa do Firebase para funcionar
+    throw new Error(`Erro crítico ao inicializar serviços: ${error.message}`);
+}
 
 const upload = multer({
     storage: multer.memoryStorage(),
