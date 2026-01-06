@@ -6,6 +6,11 @@
 password.env
 generate-admin-users.js
 
+# Arquivos de documentação sensível
+README-SECURITY.md
+REFACTORING-PLAN.md
+TROUBLESHOOTING-CLOUD-RUN.md
+
 # Node modules
 node_modules/
 npm-debug.log*
