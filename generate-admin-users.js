@@ -8,7 +8,7 @@
 
 const adminUsers = [
     { email: 'regente@racionaljazzband.com', password: 'SenhaSuperSecreta123', role: 'regente' },
-    { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin' },
+    { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin-financeiro' },
     { email: 'samara.oliver3012@gmail.com', password: 'financeiroRJB@1935', role: 'admin-financeiro' },
     { email: 'adersontm@hotmail.com', password: 'R8mQ4ZpA', role: 'admin' },
     { email: 'teste@hotmail.com', password: '123456Joel', role: 'admin' },
