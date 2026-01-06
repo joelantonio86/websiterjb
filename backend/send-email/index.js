@@ -315,7 +315,13 @@ app.get('/api/finance/contributions', authenticateJWT, requireFinanceAccess, asy
     try {
         const snapshot = await contributionsCollection.orderBy('month', 'desc').get();
         const data = [];
-        snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+        snapshot.forEach(doc => {
+            const contribution = { id: doc.id, ...doc.data() };
+            // Garantir que month e year sejam números
+            if (contribution.month) contribution.month = parseInt(contribution.month);
+            if (contribution.year) contribution.year = parseInt(contribution.year);
+            data.push(contribution);
+        });
         res.status(200).json({ contributions: data });
     } catch (error) {
         console.error('Erro ao buscar contribuições:', error);
@@ -617,6 +623,10 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
 
         // Constante: Valor mensal obrigatório de contribuição
         const MONTHLY_CONTRIBUTION_AMOUNT = 20.00;
+        // Valor total anual obrigatório para 2026
+        const ANNUAL_AMOUNT_2026 = 240.00; // 12 meses × R$ 20,00
+        // Ano base para cálculo de pendências (zerar pendências anteriores)
+        const BASE_YEAR = 2026;
         
         // Processar dados
         const report = members.map(member => {
@@ -646,54 +656,93 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
             
             const lastPaidMonth = paidMonths.length > 0 ? paidMonths[0] : null;
             
-            // Total pago
+            // Total pago (todos os depósitos, para histórico)
             const totalPaid = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
             
-            // Calcular meses desde o cadastro até hoje
-            const now = new Date();
-            const startYear = memberStartDate.getFullYear();
-            const startMonth = memberStartDate.getMonth() + 1; // Janeiro = 1
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1;
+            // Total pago apenas de 2026 em diante (para cálculo de pendência de 2026)
+            // Considera depósitos de 2026 em diante
+            const totalPaid2026FromDeposits = memberDeposits
+                .filter(d => {
+                    if (!d.depositDate) return false;
+                    let depositDate;
+                    if (d.depositDate.toDate && typeof d.depositDate.toDate === 'function') {
+                        depositDate = d.depositDate.toDate();
+                    } else if (d.depositDate.seconds) {
+                        depositDate = new Date(d.depositDate.seconds * 1000);
+                    } else if (typeof d.depositDate === 'string') {
+                        depositDate = new Date(d.depositDate);
+                    } else {
+                        return false;
+                    }
+                    return depositDate.getFullYear() >= BASE_YEAR;
+                })
+                .reduce((sum, d) => sum + (d.amount || 0), 0);
             
-            // Total de meses desde o cadastro até hoje (inclusive)
-            let totalMonthsSinceJoin = 0;
-            if (startYear === currentYear) {
-                totalMonthsSinceJoin = currentMonth - startMonth + 1;
-            } else {
-                totalMonthsSinceJoin = (12 - startMonth + 1) + (currentYear - startYear - 1) * 12 + currentMonth;
-            }
+            // Considera também contribuições marcadas como "paid" de 2026 em diante
+            const totalPaid2026FromContributions = memberContributions
+                .filter(c => {
+                    if (c.status !== 'paid') return false;
+                    const year = parseInt(c.year);
+                    return year >= BASE_YEAR;
+                })
+                .reduce((sum, c) => sum + (c.amount || 0), 0);
+            
+            // Total pago de 2026 em diante (soma de depósitos e contribuições)
+            const totalPaid2026 = totalPaid2026FromDeposits + totalPaid2026FromContributions;
             
             // Criar conjunto de meses pagos (formato "YYYY-MM")
+            // Garantir que month e year sejam números para comparação correta
             const paidMonthsSet = new Set();
             memberContributions
                 .filter(c => c.status === 'paid')
                 .forEach(c => {
-                    paidMonthsSet.add(`${c.year}-${c.month}`);
+                    const year = parseInt(c.year);
+                    const month = parseInt(c.month);
+                    paidMonthsSet.add(`${year}-${month}`);
                 });
             
-            // Calcular meses pendentes desde o cadastro
+            // Calcular meses pendentes (apenas a partir de 2026)
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            
             let pendingMonths = [];
-            for (let y = startYear; y <= currentYear; y++) {
-                const startM = (y === startYear) ? startMonth : 1;
-                const endM = (y === currentYear) ? currentMonth : 12;
+            
+            // Zerar pendências anteriores a 2026 - considerar apenas 2026 em diante
+            // Todos os membros começam com a mesma base em 2026
+            if (currentYear >= BASE_YEAR) {
+                // Calcular meses pendentes apenas de 2026 em diante
+                const startYear = BASE_YEAR;
+                const endYear = currentYear;
                 
-                for (let m = startM; m <= endM; m++) {
-                    if (!paidMonthsSet.has(`${y}-${m}`)) {
-                        pendingMonths.push({ month: m, year: y });
+                for (let y = startYear; y <= endYear; y++) {
+                    const startM = 1; // Sempre começa em janeiro
+                    const endM = (y === currentYear) ? currentMonth : 12;
+                    
+                    for (let m = startM; m <= endM; m++) {
+                        // Garantir comparação correta convertendo para string no mesmo formato
+                        if (!paidMonthsSet.has(`${y}-${m}`)) {
+                            pendingMonths.push({ month: m, year: y });
+                        }
                     }
                 }
             }
             
-            // Valor total pendente baseado no valor mensal obrigatório
-            const totalPendingAmount = pendingMonths.length * MONTHLY_CONTRIBUTION_AMOUNT;
+            // Calcular valor pendente baseado no valor anual de 2026 (R$ 240,00)
+            // Valor Pendente = R$ 240,00 - Total Pago (apenas de 2026 em diante)
+            // Se Total Pago 2026 >= R$ 240,00, então Valor Pendente = 0
+            let totalPending = ANNUAL_AMOUNT_2026 - totalPaid2026;
+            if (totalPending < 0) {
+                totalPending = 0; // Não pode ser negativo
+            }
             
-            // Contribuições pendentes registradas manualmente
+            // Se não há pagamentos de 2026, o valor pendente deve ser R$ 240,00
+            if (totalPaid2026 === 0) {
+                totalPending = ANNUAL_AMOUNT_2026;
+            }
+            
+            // Contribuições pendentes registradas manualmente (para referência)
             const pendingContributions = memberContributions.filter(c => c.status === 'pending');
-            const manualPendingAmount = pendingContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
-            
-            // Usar o maior valor entre o cálculo automático e o manual
-            const totalPending = Math.max(totalPendingAmount, manualPendingAmount);
 
             return {
                 memberId: member.id,
@@ -703,8 +752,16 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                 totalPending,
                 pendingMonths: pendingMonths.length,
                 pendingContributions: pendingContributions.length,
-                expectedMonthlyAmount: MONTHLY_CONTRIBUTION_AMOUNT
+                expectedMonthlyAmount: MONTHLY_CONTRIBUTION_AMOUNT,
+                annualAmount2026: ANNUAL_AMOUNT_2026
             };
+        });
+
+        // Ordenar por nome alfabeticamente
+        report.sort((a, b) => {
+            const nameA = (a.memberName || '').toLowerCase().trim();
+            const nameB = (b.memberName || '').toLowerCase().trim();
+            return nameA.localeCompare(nameB, 'pt-BR');
         });
 
         res.status(200).json({ report });

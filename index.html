@@ -48,6 +48,8 @@
         let currentSortColumn = 'name';
         let memberFilters = { name: '', instrument: '', location: '' };
         let lastFetchedData = null; // Cache dos dados dos membros
+        let currentMemberPage = 1; // Página atual da paginação de membros
+        const MEMBERS_PER_PAGE = 10; // Membros por página
         let searchDebounceTimer = null; // Timer para debounce de busca
 
         const subMenuRJB = {
@@ -978,10 +980,6 @@
                 // Aplica os filtros ativos
                 const filteredMembers = getFilteredMembers(data);
                 
-                // Calcula números sequenciais baseados na data de cadastro (usando dados originais)
-                const originalMembers = data.allMembers || [];
-                const sequenceMap = calculateSequentialNumbers(originalMembers);
-                
                 // Função auxiliar para formatar data
                 const formatDate = (submittedAt) => {
                     if (!submittedAt) return '';
@@ -1021,12 +1019,8 @@
                     return str;
                 };
 
-                // Ordena os membros filtrados pela sequência numérica
-                const sortedMembers = [...filteredMembers].sort((a, b) => {
-                    const seqA = sequenceMap[a.id] || 999999;
-                    const seqB = sequenceMap[b.id] || 999999;
-                    return seqA - seqB;
-                });
+                // Ordena os membros filtrados alfabeticamente (para CSV)
+                const sortedMembers = [...filteredMembers].sort(sortAlphabetically);
 
                 // Verifica se há filtros ativos
                 const hasFilters = memberFilters.name || memberFilters.instrument || memberFilters.location;
@@ -1050,9 +1044,9 @@
                 // Cabeçalho das colunas
                 csv += 'Nº,ID,Nome,TEFA,Instrumento,Email,Telefone,Cidade,Estado,Localidade Completa,Data de Cadastro\n';
                 
-                // Dados dos membros
-                sortedMembers.forEach(member => {
-                    const seq = sequenceMap[member.id] || '';
+                // Dados dos membros (numeração crescente em ordem alfabética)
+                sortedMembers.forEach((member, index) => {
+                    const seq = index + 1; // Numeração crescente
                     const location = `${member.city || ''}/${member.state || ''}`.trim();
                     const date = formatDate(member.submittedAt);
                     
@@ -1329,13 +1323,11 @@
     
     // Usa dados originais (não filtrados) para popular os selects
     const originalMembers = (lastFetchedData && lastFetchedData.allMembers) ? lastFetchedData.allMembers : (data.allMembers || []);
-    
-    // Calcula números sequenciais baseados na data de cadastro
-    const sequenceMap = calculateSequentialNumbers(originalMembers);
 
     // Versão Mobile: Cards melhorados
+    // Numeração baseada na ordem alfabética (índice + 1)
     const membersCardsHtml = data.allMembers && data.allMembers.length > 0 ? data.allMembers.map((m, index) => {
-        const sequenceNumber = sequenceMap[m.id] || '---';
+        const sequenceNumber = (data.currentPage - 1) * MEMBERS_PER_PAGE + index + 1;
         return `
         <div class="lg:hidden bg-white dark:bg-rjb-card-dark rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in overflow-hidden" style="animation-delay: ${index * 50}ms">
             <!-- Cabeçalho do Card -->
@@ -1408,8 +1400,9 @@
     }).join('') : generateEmptyState('members', 'mobile');
 
     // Versão Desktop: Tabela otimizada
+    // Numeração baseada na ordem alfabética (índice + 1)
     const membersListHtml = data.allMembers && data.allMembers.length > 0 ? data.allMembers.map((m, index) => {
-        const sequenceNumber = sequenceMap[m.id] || '---';
+        const sequenceNumber = (data.currentPage - 1) * MEMBERS_PER_PAGE + index + 1;
         return `
         <tr class="hidden lg:table-row border-b border-gray-100 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-rjb-yellow/5 hover:to-transparent transition-all duration-300 group animate-fade-in" style="animation-delay: ${index * 50}ms">
             <td class="p-3 px-4 text-center">
@@ -1479,6 +1472,9 @@
     `;
     }).join('') : generateEmptyState('members', 'desktop');
 
+    // Gerar controles de paginação
+    const paginationHTML = generateMemberPaginationControls(data.totalPages || 1, data.totalFiltered || data.allMembers?.length || 0);
+
     reportArea.innerHTML = `
         <div class="bg-gradient-to-br from-white via-gray-50 to-rjb-yellow/5 dark:from-rjb-bg-dark dark:via-rjb-bg-dark/90 dark:to-rjb-yellow/5 p-6 sm:p-8 lg:p-10 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 border border-gray-200/50 dark:border-rjb-yellow/10 shadow-lg backdrop-blur-sm">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6">
@@ -1510,7 +1506,7 @@
                             </span>
                             <input type="text" placeholder="Buscar por nome..." value="${memberFilters.name}" 
                                 class="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md" 
-                                oninput="debounceSearch(() => { memberFilters.name = this.value; processAndRenderMembers(lastFetchedData); })">
+                                oninput="debounceSearch(() => { memberFilters.name = this.value; currentMemberPage = 1; processAndRenderMembers(lastFetchedData); })">
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
@@ -1520,7 +1516,7 @@
                             </span>
                             <select id="filter-instrument" 
                                 class="pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!memberFilters.instrument ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}"
-                                onchange="memberFilters.instrument = this.value; processAndRenderMembers(lastFetchedData); updateSelectStyle('filter-instrument', this.value);">
+                                onchange="memberFilters.instrument = this.value; currentMemberPage = 1; processAndRenderMembers(lastFetchedData); updateSelectStyle('filter-instrument', this.value);">
                                 <option value="" ${!memberFilters.instrument ? 'selected' : ''} class="text-gray-500">Filtrar por instrumento...</option>
                                 ${getUniqueInstruments(originalMembers).map(inst => 
                                     `<option value="${inst}" ${memberFilters.instrument === inst ? 'selected' : ''} class="text-gray-900 dark:text-gray-100">${inst}</option>`
@@ -1533,7 +1529,7 @@
                             </span>
                             <select id="filter-location" 
                                 class="pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!memberFilters.location ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}"
-                                onchange="memberFilters.location = this.value; processAndRenderMembers(lastFetchedData); updateSelectStyle('filter-location', this.value);">
+                                onchange="memberFilters.location = this.value; currentMemberPage = 1; processAndRenderMembers(lastFetchedData); updateSelectStyle('filter-location', this.value);">
                                 <option value="" ${!memberFilters.location ? 'selected' : ''} class="text-gray-500">Filtrar por localidade...</option>
                                 ${getUniqueLocations(originalMembers).map(loc => 
                                     `<option value="${loc}" ${memberFilters.location === loc ? 'selected' : ''} class="text-gray-900 dark:text-gray-100">${loc}</option>`
@@ -1644,6 +1640,7 @@
                 <tbody class="text-rjb-text dark:text-rjb-text-dark/80 divide-y divide-gray-100 dark:divide-gray-700/50">${membersListHtml}</tbody>
             </table>
         </div>
+        ${paginationHTML}
     `;
     
     // Atualiza estilos dos selects após renderização
@@ -1652,6 +1649,107 @@
         updateSelectStyle('filter-location', memberFilters.location);
     }, 100);
 }
+
+        // Gerar controles de paginação para membros
+        function generateMemberPaginationControls(totalPages, totalItems) {
+            if (totalPages <= 1) return '';
+            
+            const startItem = (currentMemberPage - 1) * MEMBERS_PER_PAGE + 1;
+            const endItem = Math.min(currentMemberPage * MEMBERS_PER_PAGE, totalItems);
+            
+            let paginationHTML = `
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-rjb-yellow/20">
+                    <div class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+                        Mostrando <span class="font-semibold">${startItem}</span> a <span class="font-semibold">${endItem}</span> de <span class="font-semibold">${totalItems}</span> membros
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            onclick="changeMemberPage(${currentMemberPage - 1})" 
+                            ${currentMemberPage === 1 ? 'disabled' : ''}
+                            class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 rounded-lg hover:bg-rjb-yellow/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            Anterior
+                        </button>
+                        <div class="flex items-center gap-1">
+            `;
+            
+            // Mostrar números de página (máximo 5 páginas visíveis)
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentMemberPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // Botão primeira página
+            if (startPage > 1) {
+                paginationHTML += `
+                    <button onclick="changeMemberPage(1)" class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 rounded-lg hover:bg-rjb-yellow/10 transition-all">
+                        1
+                    </button>
+                `;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="px-2 text-rjb-text/50 dark:text-rjb-text-dark/50">...</span>`;
+                }
+            }
+            
+            // Números de página
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button 
+                        onclick="changeMemberPage(${i})" 
+                        ${i === currentMemberPage ? 'class="px-3 py-2 text-sm font-medium text-white bg-rjb-yellow border border-rjb-yellow rounded-lg transition-all"' : 'class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 rounded-lg hover:bg-rjb-yellow/10 transition-all"'}
+                    >
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Botão última página
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="px-2 text-rjb-text/50 dark:text-rjb-text-dark/50">...</span>`;
+                }
+                paginationHTML += `
+                    <button onclick="changeMemberPage(${totalPages})" class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 rounded-lg hover:bg-rjb-yellow/10 transition-all">
+                        ${totalPages}
+                    </button>
+                `;
+            }
+            
+            paginationHTML += `
+                        </div>
+                        <button 
+                            onclick="changeMemberPage(${currentMemberPage + 1})" 
+                            ${currentMemberPage === totalPages ? 'disabled' : ''}
+                            class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 rounded-lg hover:bg-rjb-yellow/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            Próxima
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return paginationHTML;
+        }
+
+        // Mudar página de membros
+        function changeMemberPage(page) {
+            if (!lastFetchedData) return;
+            
+            const filtered = getFilteredMembers(lastFetchedData);
+            const totalPages = Math.ceil(filtered.length / MEMBERS_PER_PAGE);
+            
+            if (page < 1 || page > totalPages) return;
+            
+            currentMemberPage = page;
+            processAndRenderMembers(lastFetchedData);
+            
+            // Scroll suave para o topo
+            const reportArea = document.getElementById('member-report-details');
+            if (reportArea) {
+                reportArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
         async function submitEditMember(event) {
             event.preventDefault();
             const memberId = document.getElementById('edit-member-id').value;
@@ -2849,7 +2947,7 @@
         <!-- Tabs Navigation -->
         <div class="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700">
             <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 -mb-px">
-                <button onclick="switchFinanceTab('contributions')" id="tab-contributions" class="finance-tab active px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-green-600 text-green-600 whitespace-nowrap">
+                <button onclick="switchFinanceTab('contributions')" id="tab-contributions" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
                     Contribuições
                 </button>
                 <button onclick="switchFinanceTab('deposits')" id="tab-deposits" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
@@ -2858,14 +2956,14 @@
                 <button onclick="switchFinanceTab('expenses')" id="tab-expenses" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
                     Gastos
                 </button>
-                <button onclick="switchFinanceTab('reports')" id="tab-reports" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
+                <button onclick="switchFinanceTab('reports')" id="tab-reports" class="finance-tab active px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-green-600 text-green-600 whitespace-nowrap">
                     Relatórios
                 </button>
             </nav>
         </div>
 
         <!-- Tab Content: Contribuições -->
-        <div id="finance-tab-contributions" class="finance-tab-content">
+        <div id="finance-tab-contributions" class="finance-tab-content hidden">
             <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
                 <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
@@ -2969,6 +3067,7 @@
                             </p>
                         </div>
                         <div class="mb-4 flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="report-search" placeholder="Buscar por nome..." class="flex-1 p-2 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" oninput="filterPaymentReport()">
                             <select id="report-year" class="p-2 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
                                 <option value="">Todos os anos</option>
                             </select>
@@ -2977,6 +3076,12 @@
                             </select>
                             <button onclick="loadPaymentReport()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all whitespace-nowrap">
                                 Gerar Relatório
+                            </button>
+                            <button onclick="generatePDFReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all whitespace-nowrap flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                PDF
                             </button>
                         </div>
                         <div id="payment-report-content">
@@ -2995,6 +3100,7 @@
         const API_BASE_FINANCE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
         const MONTHLY_CONTRIBUTION_AMOUNT = 20.00; // Valor mensal obrigatório de contribuição
         let currentFinanceTab = 'contributions';
+        let financePageInitialized = false; // Flag para controlar inicialização
 
         // Trocar entre abas da área financeira
         function switchFinanceTab(tab) {
@@ -3023,7 +3129,41 @@
                 loadExpenses();
             } else if (tab === 'reports') {
                 initializeReportFilters();
+                // Carregar relatório automaticamente em ordem alfabética
                 loadPaymentReport();
+            }
+        }
+
+        // Inicializar área financeira quando a página for gerada
+        function initializeFinancePage() {
+            if (!financePageInitialized) {
+                financePageInitialized = true;
+                // Definir aba de relatórios como padrão e carregar
+                currentFinanceTab = 'reports';
+                // Aguardar um pouco para garantir que o DOM foi renderizado
+                setTimeout(() => {
+                    // Atualizar visualização das tabs
+                    document.querySelectorAll('.finance-tab').forEach(t => {
+                        t.classList.remove('active', 'border-green-600', 'text-green-600');
+                        t.classList.add('border-transparent', 'text-rjb-text/70', 'dark:text-rjb-text-dark/70');
+                    });
+                    const reportsTab = document.getElementById('tab-reports');
+                    if (reportsTab) {
+                        reportsTab.classList.add('active', 'border-green-600', 'text-green-600');
+                        reportsTab.classList.remove('border-transparent', 'text-rjb-text/70', 'dark:text-rjb-text-dark/70');
+                    }
+                    
+                    // Atualizar conteúdo das tabs
+                    document.querySelectorAll('.finance-tab-content').forEach(c => c.classList.add('hidden'));
+                    const reportsContent = document.getElementById('finance-tab-reports');
+                    if (reportsContent) {
+                        reportsContent.classList.remove('hidden');
+                    }
+                    
+                    // Inicializar filtros e carregar relatório
+                    initializeReportFilters();
+                    loadPaymentReport(); // Carregar relatório automaticamente em ordem alfabética
+                }, 200);
             }
         }
 
@@ -3172,6 +3312,11 @@
             }
         }
 
+        // Armazenar dados do relatório para busca e PDF
+        let currentReportData = [];
+        let currentReportPage = 1;
+        const ITEMS_PER_PAGE = 10;
+
         // Carregar relatório de pagamentos
         async function loadPaymentReport() {
             const token = localStorage.getItem('adminToken');
@@ -3191,68 +3336,322 @@
                 const data = await response.json();
                 
                 if (response.ok && data.report) {
+                    // Armazenar dados para busca e PDF
+                    currentReportData = data.report;
+                    
+                    // Resetar para primeira página ao carregar novo relatório
+                    currentReportPage = 1;
+                    
+                    // Limpar campo de busca
+                    const searchInput = document.getElementById('report-search');
+                    if (searchInput) {
+                        searchInput.value = '';
+                    }
+                    
                     if (data.report.length === 0) {
                         reportEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum dado encontrado.</p>';
                     } else {
                         // Carregar membros para o histórico
                         await loadMembersList();
                         
-                        // Versão mobile: cards
-                        const mobileCards = data.report.map(r => `
-                            <div class="lg:hidden bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 mb-3">
-                                <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark mb-2">${r.memberName}</p>
-                                <div class="space-y-1 text-xs sm:text-sm">
-                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Último mês pago: <span class="font-semibold">${r.lastPaidMonth}</span></p>
-                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Total pago: <span class="font-semibold text-green-600">R$ ${r.totalPaid.toFixed(2)}</span></p>
-                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Meses pendentes: <span class="font-semibold ${r.pendingMonths > 0 ? 'text-red-600' : 'text-green-600'}">${r.pendingMonths || 0}</span></p>
-                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Valor pendente: <span class="font-semibold ${r.totalPending > 0 ? 'text-red-600' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</span></p>
-                                    ${r.pendingMonths > 0 ? `<p class="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1">Valor mensal obrigatório: R$ ${(r.expectedMonthlyAmount || 20.00).toFixed(2)}</p>` : ''}
-                                </div>
-                                <button onclick="viewMemberHistory('${r.memberId}')" class="mt-3 w-full px-3 py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Ver Histórico</button>
-                            </div>
-                        `).join('');
-                        
-                        // Versão desktop: tabela
-                        const desktopTable = `
-                            <div class="hidden lg:block overflow-x-auto">
-                                <table class="w-full text-sm">
-                                    <thead class="bg-green-600/20">
-                                        <tr>
-                                            <th class="p-3 text-left">Membro</th>
-                                            <th class="p-3 text-left">Último Mês Pago</th>
-                                            <th class="p-3 text-right">Total Pago</th>
-                                            <th class="p-3 text-center">Meses Pendentes</th>
-                                            <th class="p-3 text-right">Valor Pendente</th>
-                                            <th class="p-3 text-center">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${data.report.map(r => `
-                                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                                <td class="p-3">${r.memberName}</td>
-                                                <td class="p-3">${r.lastPaidMonth}</td>
-                                                <td class="p-3 text-right">R$ ${r.totalPaid.toFixed(2)}</td>
-                                                <td class="p-3 text-center">
-                                                    <span class="px-2 py-1 rounded ${r.pendingMonths > 0 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}">
-                                                        ${r.pendingMonths || 0}
-                                                    </span>
-                                                </td>
-                                                <td class="p-3 text-right ${r.totalPending > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</td>
-                                                <td class="p-3 text-center">
-                                                    <button onclick="viewMemberHistory('${r.memberId}')" class="text-blue-600 hover:underline text-sm">Histórico</button>
-                                                </td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                        
-                        reportEl.innerHTML = mobileCards + desktopTable;
+                        // Renderizar relatório (será filtrado pela busca se necessário)
+                        renderPaymentReport(data.report);
                     }
                 }
             } catch (error) {
                 reportEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar relatório.</p>';
+            }
+        }
+
+        // Renderizar relatório de pagamentos com paginação
+        function renderPaymentReport(reportData) {
+            const reportEl = document.getElementById('payment-report-content');
+            if (!reportEl) return;
+            
+            // Garantir ordenação alfabética (caso não venha ordenado do backend)
+            const sortedData = [...reportData].sort((a, b) => {
+                const nameA = (a.memberName || '').toLowerCase().trim();
+                const nameB = (b.memberName || '').toLowerCase().trim();
+                return nameA.localeCompare(nameB, 'pt-BR');
+            });
+            
+            // Calcular paginação
+            const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
+            const startIndex = (currentReportPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const paginatedData = sortedData.slice(startIndex, endIndex);
+            
+            // Versão mobile: cards
+            const mobileCards = paginatedData.map(r => `
+                <div class="lg:hidden bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 mb-3 report-item" data-member-name="${(r.memberName || '').toLowerCase()}">
+                    <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark mb-2">${r.memberName}</p>
+                    <div class="space-y-1 text-xs sm:text-sm">
+                        <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Último mês pago: <span class="font-semibold">${r.lastPaidMonth}</span></p>
+                        <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Total pago: <span class="font-semibold text-green-600">R$ ${r.totalPaid.toFixed(2)}</span> ${r.totalPaid >= (r.annualAmount2026 || 240.00) ? '<span class="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded ml-2">Em dia</span>' : ''}</p>
+                        <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Meses pendentes: <span class="font-semibold ${r.pendingMonths > 0 ? 'text-red-600' : 'text-green-600'}">${r.pendingMonths || 0}</span></p>
+                        <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Valor pendente: <span class="font-semibold ${r.totalPending > 0 ? 'text-red-600' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</span></p>
+                        ${r.totalPaid < (r.annualAmount2026 || 240.00) ? `<p class="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1">Meta anual 2026: R$ ${(r.annualAmount2026 || 240.00).toFixed(2)}</p>` : ''}
+                    </div>
+                    <button onclick="viewMemberHistory('${r.memberId}')" class="mt-3 w-full px-3 py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Ver Histórico</button>
+                </div>
+            `).join('');
+            
+            // Versão desktop: tabela
+            const desktopTable = `
+                <div class="hidden lg:block overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-green-600/20">
+                            <tr>
+                                <th class="p-3 text-left">Membro</th>
+                                <th class="p-3 text-left">Último Mês Pago</th>
+                                <th class="p-3 text-right">Total Pago</th>
+                                <th class="p-3 text-center">Meses Pendentes</th>
+                                <th class="p-3 text-right">Valor Pendente</th>
+                                <th class="p-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${paginatedData.map(r => `
+                                <tr class="border-b border-gray-200 dark:border-gray-700 report-item" data-member-name="${(r.memberName || '').toLowerCase()}">
+                                    <td class="p-3">${r.memberName}</td>
+                                    <td class="p-3">${r.lastPaidMonth}</td>
+                                    <td class="p-3 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <span class="text-green-600">R$ ${r.totalPaid.toFixed(2)}</span>
+                                            ${r.totalPaid >= (r.annualAmount2026 || 240.00) ? '<span class="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded">Em dia</span>' : ''}
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <span class="px-2 py-1 rounded ${r.pendingMonths > 0 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}">
+                                            ${r.pendingMonths || 0}
+                                        </span>
+                                    </td>
+                                    <td class="p-3 text-right ${r.totalPending > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</td>
+                                    <td class="p-3 text-center">
+                                        <button onclick="viewMemberHistory('${r.memberId}')" class="text-blue-600 hover:underline text-sm">Histórico</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Controles de paginação
+            const paginationControls = generatePaginationControls(totalPages, sortedData.length);
+            
+            reportEl.innerHTML = mobileCards + desktopTable + paginationControls;
+        }
+
+        // Gerar controles de paginação
+        function generatePaginationControls(totalPages, totalItems) {
+            if (totalPages <= 1) return '';
+            
+            const startItem = (currentReportPage - 1) * ITEMS_PER_PAGE + 1;
+            const endItem = Math.min(currentReportPage * ITEMS_PER_PAGE, totalItems);
+            
+            let paginationHTML = `
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-green-600/20">
+                    <div class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+                        Mostrando <span class="font-semibold">${startItem}</span> a <span class="font-semibold">${endItem}</span> de <span class="font-semibold">${totalItems}</span> membros
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            onclick="changeReportPage(${currentReportPage - 1})" 
+                            ${currentReportPage === 1 ? 'disabled' : ''}
+                            class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-green-600/30 rounded-lg hover:bg-green-600/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            Anterior
+                        </button>
+                        <div class="flex items-center gap-1">
+            `;
+            
+            // Mostrar números de página (máximo 5 páginas visíveis)
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentReportPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // Botão primeira página
+            if (startPage > 1) {
+                paginationHTML += `
+                    <button onclick="changeReportPage(1)" class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-green-600/30 rounded-lg hover:bg-green-600/10 transition-all">
+                        1
+                    </button>
+                `;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="px-2 text-rjb-text/50 dark:text-rjb-text-dark/50">...</span>`;
+                }
+            }
+            
+            // Números de página
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button 
+                        onclick="changeReportPage(${i})" 
+                        ${i === currentReportPage ? 'class="px-3 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-lg transition-all"' : 'class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-green-600/30 rounded-lg hover:bg-green-600/10 transition-all"'}
+                    >
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Botão última página
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="px-2 text-rjb-text/50 dark:text-rjb-text-dark/50">...</span>`;
+                }
+                paginationHTML += `
+                    <button onclick="changeReportPage(${totalPages})" class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-green-600/30 rounded-lg hover:bg-green-600/10 transition-all">
+                        ${totalPages}
+                    </button>
+                `;
+            }
+            
+            paginationHTML += `
+                        </div>
+                        <button 
+                            onclick="changeReportPage(${currentReportPage + 1})" 
+                            ${currentReportPage === totalPages ? 'disabled' : ''}
+                            class="px-3 py-2 text-sm font-medium text-rjb-text dark:text-rjb-text-dark bg-rjb-bg-light dark:bg-rjb-bg-dark border border-green-600/30 rounded-lg hover:bg-green-600/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            Próxima
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return paginationHTML;
+        }
+
+        // Mudar página do relatório
+        function changeReportPage(page) {
+            const totalPages = Math.ceil(currentReportData.length / ITEMS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+            
+            currentReportPage = page;
+            renderPaymentReport(currentReportData);
+            
+            // Scroll suave para o topo do relatório
+            const reportEl = document.getElementById('payment-report-content');
+            if (reportEl) {
+                reportEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Filtrar relatório por nome
+        function filterPaymentReport() {
+            const searchTerm = (document.getElementById('report-search')?.value || '').toLowerCase().trim();
+            
+            if (!searchTerm) {
+                // Se não há busca, mostrar todos os dados com paginação
+                currentPage = 1;
+                renderPaymentReport(currentReportData);
+                return;
+            }
+            
+            // Filtrar dados
+            const filteredData = currentReportData.filter(r => {
+                const memberName = (r.memberName || '').toLowerCase();
+                return memberName.includes(searchTerm);
+            });
+            
+            // Resetar para primeira página
+            currentReportPage = 1;
+            
+            // Renderizar dados filtrados
+            renderPaymentReport(filteredData);
+        }
+
+        // Gerar relatório em PDF
+        async function generatePDFReport() {
+            if (!currentReportData || currentReportData.length === 0) {
+                showMessage('Nenhum relatório carregado. Gere o relatório primeiro.', true);
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4'); // Modo paisagem
+                
+                // Título
+                doc.setFontSize(18);
+                doc.setTextColor(34, 139, 34); // Verde
+                doc.text('Relatório de Pagamentos e Pendências', 14, 15);
+                
+                // Filtros aplicados
+                const year = document.getElementById('report-year')?.value || '';
+                const month = document.getElementById('report-month')?.value || '';
+                const monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                let filterText = 'Período: Todos';
+                if (year && month) {
+                    filterText = `Período: ${monthNames[parseInt(month)]}/${year}`;
+                } else if (year) {
+                    filterText = `Período: Ano ${year}`;
+                } else if (month) {
+                    filterText = `Período: ${monthNames[parseInt(month)]}`;
+                }
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(filterText, 14, 22);
+                doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, 14, 27);
+                
+                // Preparar dados da tabela
+                const tableData = currentReportData.map(r => [
+                    r.memberName || '',
+                    r.lastPaidMonth || 'Nunca',
+                    `R$ ${r.totalPaid.toFixed(2)}`,
+                    r.pendingMonths || 0,
+                    `R$ ${r.totalPending.toFixed(2)}`
+                ]);
+                
+                // Criar tabela
+                doc.autoTable({
+                    head: [['Membro', 'Último Mês Pago', 'Total Pago', 'Meses Pendentes', 'Valor Pendente']],
+                    body: tableData,
+                    startY: 32,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [34, 139, 34],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 60 },
+                        1: { cellWidth: 40 },
+                        2: { cellWidth: 35, halign: 'right' },
+                        3: { cellWidth: 35, halign: 'center' },
+                        4: { cellWidth: 40, halign: 'right' }
+                    },
+                    styles: {
+                        fontSize: 8,
+                        cellPadding: 2
+                    }
+                });
+                
+                // Totais
+                const totalPaid = currentReportData.reduce((sum, r) => sum + r.totalPaid, 0);
+                const totalPending = currentReportData.reduce((sum, r) => sum + r.totalPending, 0);
+                const totalMembers = currentReportData.length;
+                
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'bold');
+                doc.text(`Total de Membros: ${totalMembers}`, 14, finalY);
+                doc.text(`Total Pago: R$ ${totalPaid.toFixed(2)}`, 14, finalY + 5);
+                doc.text(`Total Pendente: R$ ${totalPending.toFixed(2)}`, 14, finalY + 10);
+                
+                // Salvar PDF
+                const fileName = `relatorio-pagamentos-${year || 'todos'}-${month || 'todos'}-${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                showMessage('PDF gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showMessage('Erro ao gerar PDF.', true);
             }
         }
 
@@ -4202,7 +4601,9 @@
                     case 'contato': html += generateContatoPage(); break;
                     case 'member-registration': html += generateCadastroPage(); break;
                     case 'reports': html += generateReportsPage(); break;
-                    case 'financeiro': html += generateFinancePage(); break;
+                    case 'financeiro': 
+                        html += generateFinancePage();
+                        break;
                     default: html += '<p class="text-center text-xl dark:text-rjb-text-dark/80 text-rjb-text/80">Opa! Página não encontrada.</p>';
                 }
 
@@ -4218,6 +4619,11 @@
             // CHAMA O CONTROLE DE ACESSO SOMENTE NA PÁGINA DE RELATÓRIOS
             if (currentPage === 'reports') {
                 setTimeout(renderProtectedReportView, 0);
+            }
+            
+            // Inicializar área financeira se for a página atual
+            if (currentPage === 'financeiro') {
+                setTimeout(initializeFinancePage, 300);
             }
         }
 
@@ -4346,16 +4752,8 @@
                 // Aplica os filtros ativos
                 const filteredMembers = getFilteredMembers(data);
                 
-                // Calcula números sequenciais baseados na data de cadastro (usando dados originais)
-                const originalMembers = data.allMembers || [];
-                const sequenceMap = calculateSequentialNumbers(originalMembers);
-                
-                // Ordena os membros filtrados pela sequência numérica
-                const sortedMembers = [...filteredMembers].sort((a, b) => {
-                    const seqA = sequenceMap[a.id] || 999999;
-                    const seqB = sequenceMap[b.id] || 999999;
-                    return seqA - seqB;
-                });
+                // Ordena os membros filtrados alfabeticamente (para PDF)
+                const sortedMembers = [...filteredMembers].sort(sortAlphabetically);
                 
                 // Verifica se há filtros ativos
                 const hasFilters = memberFilters.name || memberFilters.instrument || memberFilters.location;
@@ -4404,8 +4802,9 @@
                 }
                 
                 // Prepara os dados da tabela
-                const tableRows = sortedMembers.map(m => [
-                    sequenceMap[m.id] || '---',
+                // Numeração crescente (1, 2, 3...) em ordem alfabética
+                const tableRows = sortedMembers.map((m, index) => [
+                    index + 1, // Numeração crescente
                     m.name || '---',
                     m.tefa || '---',
                     m.instrument || '---',
@@ -4474,30 +4873,30 @@
             }
         }
 
+        // Função para ordenação alfabética que respeita acentos
+        function sortAlphabetically(a, b) {
+            const nameA = (a.name || '').trim();
+            const nameB = (b.name || '').trim();
+            // Usa localeCompare com pt-BR para respeitar acentos e ordem alfabética correta
+            return nameA.localeCompare(nameB, 'pt-BR', { sensitivity: 'base' });
+        }
+
         function processAndRenderMembers(data) {
             if (!data || !data.allMembers) return;
 
             // Usa a função auxiliar para obter dados filtrados
             let filtered = getFilteredMembers(data);
 
-            // Aplicar Ordenação robusta
-            filtered.sort((a, b) => {
-                let valA, valB;
+            // Sempre ordenar alfabeticamente por nome (respeitando acentos)
+            filtered.sort(sortAlphabetically);
 
-                if (currentSortColumn === 'location') {
-                    valA = `${a.city || ""} ${a.state || ""}`.toLowerCase();
-                    valB = `${b.city || ""} ${b.state || ""}`.toLowerCase();
-                } else {
-                    valA = (a[currentSortColumn] || "").toString().toLowerCase();
-                    valB = (b[currentSortColumn] || "").toString().toLowerCase();
-                }
+            // Aplicar paginação
+            const totalPages = Math.ceil(filtered.length / MEMBERS_PER_PAGE);
+            const startIndex = (currentMemberPage - 1) * MEMBERS_PER_PAGE;
+            const endIndex = startIndex + MEMBERS_PER_PAGE;
+            const paginatedMembers = filtered.slice(startIndex, endIndex);
 
-                if (valA < valB) return sortDirection ? -1 : 1;
-                if (valA > valB) return sortDirection ? 1 : -1;
-                return 0;
-            });
-
-            renderReportData({ ...data, allMembers: filtered });
+            renderReportData({ ...data, allMembers: paginatedMembers, totalFiltered: filtered.length, currentPage: currentMemberPage, totalPages });
         }
 
         function handleSort(column) {
@@ -4515,6 +4914,9 @@
         function clearFilters() {
             // Reseta o objeto de filtros para o estado original
             memberFilters = { name: '', instrument: '', location: '' };
+            
+            // Resetar para primeira página ao limpar filtros
+            currentMemberPage = 1;
 
             // Atualiza os estilos dos selects
             updateSelectStyle('filter-instrument', '');
