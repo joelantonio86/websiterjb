@@ -2817,8 +2817,8 @@
             return `
     <div class="max-w-7xl mx-auto">
         <!-- Breadcrumb Navigation -->
-        <nav class="mb-6" aria-label="Breadcrumb">
-            <ol class="flex items-center space-x-2 text-sm">
+        <nav class="mb-4 sm:mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm flex-wrap">
                 <li>
                     <button onclick="navigateTo('home')" class="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors">
                         Home
@@ -2836,29 +2836,29 @@
         </nav>
 
         <!-- Header Section -->
-        <div class="mb-8">
-            <div class="flex items-center gap-3 mb-2">
-                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="mb-6 sm:mb-8">
+            <div class="flex items-center gap-2 sm:gap-3 mb-2">
+                <svg class="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-green-600">Área Financeira</h2>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-green-600 break-words">Área Financeira</h2>
             </div>
-            <p class="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base ml-11 sm:ml-14">Controle de contribuições, depósitos e gastos da RJB</p>
+            <p class="text-rjb-text/70 dark:text-rjb-text-dark/70 text-xs sm:text-sm md:text-base ml-8 sm:ml-11 md:ml-14">Controle de contribuições, depósitos e gastos da RJB</p>
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-            <nav class="flex space-x-2 overflow-x-auto">
-                <button onclick="switchFinanceTab('contributions')" id="tab-contributions" class="finance-tab active px-4 py-2 font-semibold text-sm border-b-2 border-green-600 text-green-600">
+        <div class="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 -mb-px">
+                <button onclick="switchFinanceTab('contributions')" id="tab-contributions" class="finance-tab active px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-green-600 text-green-600 whitespace-nowrap">
                     Contribuições
                 </button>
-                <button onclick="switchFinanceTab('deposits')" id="tab-deposits" class="finance-tab px-4 py-2 font-semibold text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600">
+                <button onclick="switchFinanceTab('deposits')" id="tab-deposits" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
                     Depósitos
                 </button>
-                <button onclick="switchFinanceTab('expenses')" id="tab-expenses" class="finance-tab px-4 py-2 font-semibold text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600">
+                <button onclick="switchFinanceTab('expenses')" id="tab-expenses" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
                     Gastos
                 </button>
-                <button onclick="switchFinanceTab('reports')" id="tab-reports" class="finance-tab px-4 py-2 font-semibold text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600">
+                <button onclick="switchFinanceTab('reports')" id="tab-reports" class="finance-tab px-3 sm:px-4 py-2 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600 whitespace-nowrap">
                     Relatórios
                 </button>
             </nav>
@@ -2868,17 +2868,20 @@
         <div id="finance-tab-contributions" class="finance-tab-content">
             <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
                 <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                         <div class="flex items-center gap-3">
                             <div class="p-2 rounded-lg bg-green-600/20 dark:bg-green-600/10">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Contribuições Mensais</h3>
+                            <div>
+                                <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Contribuições Mensais</h3>
+                                <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-0.5">Valor mensal obrigatório: <span class="font-semibold text-green-600">R$ 20,00</span></p>
+                            </div>
                         </div>
-                        <button onclick="openAddContributionModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="openAddContributionModal()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Nova Contribuição
@@ -2897,17 +2900,17 @@
         <div id="finance-tab-deposits" class="finance-tab-content hidden">
             <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
                 <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                         <div class="flex items-center gap-3">
                             <div class="p-2 rounded-lg bg-green-600/20 dark:bg-green-600/10">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Depósitos e Comprovantes</h3>
+                            <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Depósitos e Comprovantes</h3>
                         </div>
-                        <button onclick="openAddDepositModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="openAddDepositModal()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Novo Depósito
@@ -2926,17 +2929,17 @@
         <div id="finance-tab-expenses" class="finance-tab-content hidden">
             <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
                 <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                         <div class="flex items-center gap-3">
                             <div class="p-2 rounded-lg bg-green-600/20 dark:bg-green-600/10">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da RJB</h3>
+                            <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da RJB</h3>
                         </div>
-                        <button onclick="openAddExpenseModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="openAddExpenseModal()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Novo Gasto
@@ -2960,6 +2963,11 @@
                         <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Relatório de Pagamentos e Pendências</h3>
                     </div>
                     <div class="p-5 sm:p-6">
+                        <div class="mb-4 p-3 sm:p-4 bg-green-600/10 dark:bg-green-600/5 rounded-lg border border-green-600/20">
+                            <p class="text-xs sm:text-sm text-rjb-text/80 dark:text-rjb-text-dark/80">
+                                <strong class="text-green-600">Valor Mensal Obrigatório:</strong> Cada membro deve contribuir com <strong>R$ 20,00</strong> mensalmente desde a data de seu cadastro.
+                            </p>
+                        </div>
                         <div class="mb-4 flex flex-col sm:flex-row gap-3">
                             <select id="report-year" class="p-2 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
                                 <option value="">Todos os anos</option>
@@ -2967,7 +2975,7 @@
                             <select id="report-month" class="p-2 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
                                 <option value="">Todos os meses</option>
                             </select>
-                            <button onclick="loadPaymentReport()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all">
+                            <button onclick="loadPaymentReport()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all whitespace-nowrap">
                                 Gerar Relatório
                             </button>
                         </div>
@@ -2985,6 +2993,7 @@
         // ========== FUNÇÕES DA ÁREA FINANCEIRA ==========
         
         const API_BASE_FINANCE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+        const MONTHLY_CONTRIBUTION_AMOUNT = 20.00; // Valor mensal obrigatório de contribuição
         let currentFinanceTab = 'contributions';
 
         // Trocar entre abas da área financeira
@@ -3037,15 +3046,15 @@
                         listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhuma contribuição registrada.</p>';
                     } else {
                         listEl.innerHTML = data.contributions.map(c => `
-                            <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 flex items-center justify-between">
-                                <div>
-                                    <p class="font-bold text-rjb-text dark:text-rjb-text-dark">${c.memberName || 'Membro'}</p>
-                                    <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${c.month}/${c.year} - R$ ${c.amount.toFixed(2)}</p>
-                                    <span class="inline-block mt-1 px-2 py-1 text-xs rounded ${c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${c.status === 'paid' ? 'Pago' : 'Pendente'}</span>
+                            <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 sm:p-4 rounded-lg border border-green-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-sm sm:text-base text-rjb-text dark:text-rjb-text-dark break-words">${c.memberName || 'Membro'}</p>
+                                    <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${c.month}/${c.year} - R$ ${c.amount.toFixed(2)}</p>
+                                    <span class="inline-block mt-2 px-2 py-1 text-xs rounded ${c.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${c.status === 'paid' ? 'Pago' : 'Pendente'}</span>
                                 </div>
-                                <div class="flex gap-2">
-                                    <button onclick="editContribution('${c.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded">Editar</button>
-                                    <button onclick="deleteContribution('${c.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">Excluir</button>
+                                <div class="flex gap-2 w-full sm:w-auto">
+                                    <button onclick="editContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                    <button onclick="deleteContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
                                 </div>
                             </div>
                         `).join('');
@@ -3077,17 +3086,17 @@
                         listEl.innerHTML = data.deposits.map(d => {
                             const date = d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A';
                             return `
-                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <div>
-                                            <p class="font-bold text-rjb-text dark:text-rjb-text-dark">${d.memberName || 'Membro'}</p>
-                                            <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${date} - R$ ${d.amount.toFixed(2)}</p>
-                                            ${d.description ? `<p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1">${d.description}</p>` : ''}
+                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 sm:p-4 rounded-lg border border-green-600/20">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold text-sm sm:text-base text-rjb-text dark:text-rjb-text-dark break-words">${d.memberName || 'Membro'}</p>
+                                            <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${date} - R$ ${d.amount.toFixed(2)}</p>
+                                            ${d.description ? `<p class="text-xs sm:text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 break-words">${d.description}</p>` : ''}
                                         </div>
-                                        <div class="flex gap-2">
-                                            ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="p-2 text-green-600 hover:bg-green-50 rounded">Ver Comprovante</a>` : ''}
-                                            <button onclick="editDeposit('${d.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded">Editar</button>
-                                            <button onclick="deleteDeposit('${d.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">Excluir</button>
+                                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                            ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                            <button onclick="editDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                            <button onclick="deleteDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
                                         </div>
                                     </div>
                                 </div>
@@ -3121,15 +3130,15 @@
                         listEl.innerHTML = data.expenses.map(e => {
                             const date = e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A';
                             return `
-                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 flex items-center justify-between">
-                                    <div>
-                                        <p class="font-bold text-rjb-text dark:text-rjb-text-dark">${e.description}</p>
-                                        <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${date} - R$ ${e.amount.toFixed(2)}</p>
-                                        ${e.category ? `<span class="inline-block mt-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">${e.category}</span>` : ''}
+                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 sm:p-4 rounded-lg border border-green-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-sm sm:text-base text-rjb-text dark:text-rjb-text-dark break-words">${e.description}</p>
+                                        <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${date} - R$ ${e.amount.toFixed(2)}</p>
+                                        ${e.category ? `<span class="inline-block mt-2 px-2 py-1 text-xs rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">${e.category}</span>` : ''}
                                     </div>
-                                    <div class="flex gap-2">
-                                        <button onclick="editExpense('${e.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded">Editar</button>
-                                        <button onclick="deleteExpense('${e.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">Excluir</button>
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <button onclick="editExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                        <button onclick="deleteExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
                                     </div>
                                 </div>
                             `;
@@ -3188,15 +3197,32 @@
                         // Carregar membros para o histórico
                         await loadMembersList();
                         
-                        reportEl.innerHTML = `
-                            <div class="overflow-x-auto">
+                        // Versão mobile: cards
+                        const mobileCards = data.report.map(r => `
+                            <div class="lg:hidden bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 mb-3">
+                                <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark mb-2">${r.memberName}</p>
+                                <div class="space-y-1 text-xs sm:text-sm">
+                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Último mês pago: <span class="font-semibold">${r.lastPaidMonth}</span></p>
+                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Total pago: <span class="font-semibold text-green-600">R$ ${r.totalPaid.toFixed(2)}</span></p>
+                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Meses pendentes: <span class="font-semibold ${r.pendingMonths > 0 ? 'text-red-600' : 'text-green-600'}">${r.pendingMonths || 0}</span></p>
+                                    <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Valor pendente: <span class="font-semibold ${r.totalPending > 0 ? 'text-red-600' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</span></p>
+                                    ${r.pendingMonths > 0 ? `<p class="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1">Valor mensal obrigatório: R$ ${(r.expectedMonthlyAmount || 20.00).toFixed(2)}</p>` : ''}
+                                </div>
+                                <button onclick="viewMemberHistory('${r.memberId}')" class="mt-3 w-full px-3 py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Ver Histórico</button>
+                            </div>
+                        `).join('');
+                        
+                        // Versão desktop: tabela
+                        const desktopTable = `
+                            <div class="hidden lg:block overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead class="bg-green-600/20">
                                         <tr>
                                             <th class="p-3 text-left">Membro</th>
                                             <th class="p-3 text-left">Último Mês Pago</th>
                                             <th class="p-3 text-right">Total Pago</th>
-                                            <th class="p-3 text-right">Pendente</th>
+                                            <th class="p-3 text-center">Meses Pendentes</th>
+                                            <th class="p-3 text-right">Valor Pendente</th>
                                             <th class="p-3 text-center">Ações</th>
                                         </tr>
                                     </thead>
@@ -3206,9 +3232,14 @@
                                                 <td class="p-3">${r.memberName}</td>
                                                 <td class="p-3">${r.lastPaidMonth}</td>
                                                 <td class="p-3 text-right">R$ ${r.totalPaid.toFixed(2)}</td>
-                                                <td class="p-3 text-right ${r.totalPending > 0 ? 'text-red-600' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</td>
                                                 <td class="p-3 text-center">
-                                                    <button onclick="viewMemberHistory('${r.memberId}')" class="text-blue-600 hover:underline">Histórico</button>
+                                                    <span class="px-2 py-1 rounded ${r.pendingMonths > 0 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}">
+                                                        ${r.pendingMonths || 0}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3 text-right ${r.totalPending > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</td>
+                                                <td class="p-3 text-center">
+                                                    <button onclick="viewMemberHistory('${r.memberId}')" class="text-blue-600 hover:underline text-sm">Histórico</button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -3216,6 +3247,8 @@
                                 </table>
                             </div>
                         `;
+                        
+                        reportEl.innerHTML = mobileCards + desktopTable;
                     }
                 }
             } catch (error) {
@@ -3258,7 +3291,16 @@
             document.getElementById('contribution-modal-title').textContent = 'Nova Contribuição';
             document.getElementById('contribution-form').reset();
             document.getElementById('contribution-id').value = '';
-            document.getElementById('contribution-year').value = new Date().getFullYear();
+            // Define o ano atual como padrão
+            const yearInput = document.getElementById('contribution-year');
+            if (yearInput) {
+                yearInput.value = new Date().getFullYear();
+            }
+            // Define o valor padrão de R$ 20,00
+            const amountInput = document.getElementById('contribution-amount');
+            if (amountInput) {
+                amountInput.value = MONTHLY_CONTRIBUTION_AMOUNT.toFixed(2);
+            }
             loadMembersList();
             document.getElementById('contribution-modal').classList.remove('hidden');
         }
@@ -5261,9 +5303,9 @@
     <!-- Modais da Área Financeira -->
     
     <!-- Modal: Adicionar/Editar Contribuição -->
-    <div id="contribution-modal" onclick="closeContributionModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 class="text-2xl font-bold text-green-600 mb-4" id="contribution-modal-title">Nova Contribuição</h3>
+    <div id="contribution-modal" onclick="closeContributionModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl sm:rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6 my-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-green-600 mb-4" id="contribution-modal-title">Nova Contribuição</h3>
             <form id="contribution-form" onsubmit="saveContribution(event)" class="space-y-4">
                 <input type="hidden" id="contribution-id">
                 <div>
@@ -5276,16 +5318,27 @@
                     <label class="block text-sm font-medium mb-1">Mês</label>
                     <select id="contribution-month" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
                         <option value="">Selecione</option>
-                        ${Array.from({length: 12}, (_, i) => `<option value="${i+1}">${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i]}</option>`).join('')}
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Ano</label>
-                    <input type="number" id="contribution-year" required min="2020" max="2100" value="${new Date().getFullYear()}" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                    <input type="number" id="contribution-year" required min="2020" max="2100" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Valor (R$)</label>
-                    <input type="number" id="contribution-amount" required step="0.01" min="0" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                    <label class="block text-sm font-medium mb-1">Valor (R$) <span class="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60">(Padrão: R$ 20,00)</span></label>
+                    <input type="number" id="contribution-amount" required step="0.01" min="0" value="20.00" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Status</label>
@@ -5307,9 +5360,9 @@
     </div>
 
     <!-- Modal: Adicionar/Editar Depósito -->
-    <div id="deposit-modal" onclick="closeDepositModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 class="text-2xl font-bold text-green-600 mb-4" id="deposit-modal-title">Novo Depósito</h3>
+    <div id="deposit-modal" onclick="closeDepositModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl sm:rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6 my-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-green-600 mb-4" id="deposit-modal-title">Novo Depósito</h3>
             <form id="deposit-form" onsubmit="saveDeposit(event)" class="space-y-4">
                 <input type="hidden" id="deposit-id">
                 <div>
@@ -5351,9 +5404,9 @@
     </div>
 
     <!-- Modal: Adicionar/Editar Gasto -->
-    <div id="expense-modal" onclick="closeExpenseModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 class="text-2xl font-bold text-green-600 mb-4" id="expense-modal-title">Novo Gasto</h3>
+    <div id="expense-modal" onclick="closeExpenseModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl sm:rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6 my-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-green-600 mb-4" id="expense-modal-title">Novo Gasto</h3>
             <form id="expense-form" onsubmit="saveExpense(event)" class="space-y-4">
                 <input type="hidden" id="expense-id">
                 <div>
@@ -5391,9 +5444,9 @@
     </div>
 
     <!-- Modal: Histórico Individual -->
-    <div id="history-modal" onclick="closeHistoryModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-2xl font-bold text-green-600 mb-4" id="history-modal-title">Histórico de Pagamentos</h3>
+    <div id="history-modal" onclick="closeHistoryModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl sm:rounded-2xl shadow-xl max-w-3xl w-full p-4 sm:p-6 my-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-green-600 mb-4" id="history-modal-title">Histórico de Pagamentos</h3>
             <div id="history-content">
                 <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando...</p>
             </div>

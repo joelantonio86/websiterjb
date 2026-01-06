@@ -615,10 +615,25 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
             deposits.push(deposit);
         });
 
+        // Constante: Valor mensal obrigatório de contribuição
+        const MONTHLY_CONTRIBUTION_AMOUNT = 20.00;
+        
         // Processar dados
         const report = members.map(member => {
             const memberContributions = contributions.filter(c => c.memberId === member.id);
             const memberDeposits = deposits.filter(d => d.memberId === member.id);
+            
+            // Data de cadastro do membro
+            let memberStartDate = new Date();
+            if (member.submittedAt) {
+                if (member.submittedAt.toDate && typeof member.submittedAt.toDate === 'function') {
+                    memberStartDate = member.submittedAt.toDate();
+                } else if (member.submittedAt.seconds) {
+                    memberStartDate = new Date(member.submittedAt.seconds * 1000);
+                } else if (typeof member.submittedAt === 'string') {
+                    memberStartDate = new Date(member.submittedAt);
+                }
+            }
             
             // Último mês pago
             const paidMonths = memberContributions
@@ -634,9 +649,51 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
             // Total pago
             const totalPaid = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
             
-            // Pendências (contribuições pendentes)
+            // Calcular meses desde o cadastro até hoje
+            const now = new Date();
+            const startYear = memberStartDate.getFullYear();
+            const startMonth = memberStartDate.getMonth() + 1; // Janeiro = 1
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            
+            // Total de meses desde o cadastro até hoje (inclusive)
+            let totalMonthsSinceJoin = 0;
+            if (startYear === currentYear) {
+                totalMonthsSinceJoin = currentMonth - startMonth + 1;
+            } else {
+                totalMonthsSinceJoin = (12 - startMonth + 1) + (currentYear - startYear - 1) * 12 + currentMonth;
+            }
+            
+            // Criar conjunto de meses pagos (formato "YYYY-MM")
+            const paidMonthsSet = new Set();
+            memberContributions
+                .filter(c => c.status === 'paid')
+                .forEach(c => {
+                    paidMonthsSet.add(`${c.year}-${c.month}`);
+                });
+            
+            // Calcular meses pendentes desde o cadastro
+            let pendingMonths = [];
+            for (let y = startYear; y <= currentYear; y++) {
+                const startM = (y === startYear) ? startMonth : 1;
+                const endM = (y === currentYear) ? currentMonth : 12;
+                
+                for (let m = startM; m <= endM; m++) {
+                    if (!paidMonthsSet.has(`${y}-${m}`)) {
+                        pendingMonths.push({ month: m, year: y });
+                    }
+                }
+            }
+            
+            // Valor total pendente baseado no valor mensal obrigatório
+            const totalPendingAmount = pendingMonths.length * MONTHLY_CONTRIBUTION_AMOUNT;
+            
+            // Contribuições pendentes registradas manualmente
             const pendingContributions = memberContributions.filter(c => c.status === 'pending');
-            const totalPending = pendingContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
+            const manualPendingAmount = pendingContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
+            
+            // Usar o maior valor entre o cálculo automático e o manual
+            const totalPending = Math.max(totalPendingAmount, manualPendingAmount);
 
             return {
                 memberId: member.id,
@@ -644,7 +701,9 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                 lastPaidMonth: lastPaidMonth ? `${lastPaidMonth.month}/${lastPaidMonth.year}` : 'Nunca',
                 totalPaid,
                 totalPending,
-                pendingContributions: pendingContributions.length
+                pendingMonths: pendingMonths.length,
+                pendingContributions: pendingContributions.length,
+                expectedMonthlyAmount: MONTHLY_CONTRIBUTION_AMOUNT
             };
         });
 
