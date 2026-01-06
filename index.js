@@ -431,7 +431,7 @@ app.get('/api/finance/contributions', authenticateJWT, requireFinanceAccess, asy
 // Criar nova contribuição
 app.post('/api/finance/contributions', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
-        const { memberId, memberName, month, year, amount, status } = req.body;
+        const { memberId, memberName, month, year, amount, status, receiptUrl } = req.body;
         
         if (!memberId || !month || !year || !amount) {
             return res.status(400).json({ message: 'Campos obrigatórios: memberId, month, year, amount.' });
@@ -444,6 +444,7 @@ app.post('/api/finance/contributions', authenticateJWT, requireFinanceAccess, as
             year: parseInt(year),
             amount: parseFloat(amount),
             status: status || 'pending',
+            receiptUrl: receiptUrl || '',
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             createdBy: req.user.userId
         };
@@ -453,6 +454,27 @@ app.post('/api/finance/contributions', authenticateJWT, requireFinanceAccess, as
     } catch (error) {
         console.error('Erro ao criar contribuição:', error);
         res.status(500).json({ message: 'Erro ao registrar contribuição.' });
+    }
+});
+
+// Upload de comprovante de contribuição
+app.post('/api/finance/contributions/receipt', authenticateJWT, requireFinanceAccess, upload.single('receipt'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
+    
+    try {
+        const fileName = `contributions/${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
+        const blob = bucket.file(fileName);
+        const blobStream = blob.createWriteStream({ resumable: false, metadata: { contentType: req.file.mimetype } });
+
+        blobStream.on('error', () => res.status(500).json({ message: 'Erro no upload.' }));
+        blobStream.on('finish', () => {
+            const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(fileName)}`;
+            res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });
+        });
+        blobStream.end(req.file.buffer);
+    } catch (error) {
+        console.error('Erro ao fazer upload do comprovante:', error);
+        res.status(500).json({ message: 'Erro ao fazer upload.' });
     }
 });
 
@@ -625,7 +647,7 @@ app.get('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (r
 // Criar novo gasto
 app.post('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
-        const { description, amount, expenseDate, category } = req.body;
+        const { description, amount, expenseDate, category, receiptUrl } = req.body;
         
         if (!description || !amount || !expenseDate) {
             return res.status(400).json({ message: 'Campos obrigatórios: description, amount, expenseDate.' });
@@ -636,6 +658,7 @@ app.post('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (
             amount: parseFloat(amount),
             expenseDate: admin.firestore.Timestamp.fromDate(new Date(expenseDate)),
             category: category || 'outros',
+            receiptUrl: receiptUrl || '',
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             createdBy: req.user.userId
         };
@@ -645,6 +668,27 @@ app.post('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (
     } catch (error) {
         console.error('Erro ao criar gasto:', error);
         res.status(500).json({ message: 'Erro ao registrar gasto.' });
+    }
+});
+
+// Upload de comprovante de gasto
+app.post('/api/finance/expenses/receipt', authenticateJWT, requireFinanceAccess, upload.single('receipt'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
+    
+    try {
+        const fileName = `expenses/${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
+        const blob = bucket.file(fileName);
+        const blobStream = blob.createWriteStream({ resumable: false, metadata: { contentType: req.file.mimetype } });
+
+        blobStream.on('error', () => res.status(500).json({ message: 'Erro no upload.' }));
+        blobStream.on('finish', () => {
+            const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(fileName)}`;
+            res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });
+        });
+        blobStream.end(req.file.buffer);
+    } catch (error) {
+        console.error('Erro ao fazer upload do comprovante:', error);
+        res.status(500).json({ message: 'Erro ao fazer upload.' });
     }
 });
 
@@ -755,8 +799,12 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
             
             const lastPaidMonth = paidMonths.length > 0 ? paidMonths[0] : null;
             
-            // Total pago (todos os depósitos, para histórico)
-            const totalPaid = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+            // Total pago: soma de depósitos + contribuições marcadas como "paid"
+            const totalPaidFromDeposits = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+            const totalPaidFromContributions = memberContributions
+                .filter(c => c.status === 'paid')
+                .reduce((sum, c) => sum + (c.amount || 0), 0);
+            const totalPaid = totalPaidFromDeposits + totalPaidFromContributions;
             
             // Total pago apenas de 2026 em diante (para cálculo de pendência de 2026)
             // Considera depósitos de 2026 em diante
@@ -903,6 +951,86 @@ app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinance
     } catch (error) {
         console.error('Erro ao buscar histórico:', error);
         res.status(500).json({ message: 'Erro ao buscar histórico.' });
+    }
+});
+
+// Relatório de Valor em Caixa (Contribuições + Depósitos - Gastos)
+app.get('/api/finance/reports/cash-flow', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        // Buscar todas as contribuições pagas
+        const contributionsSnapshot = await contributionsCollection.where('status', '==', 'paid').get();
+        const contributions = [];
+        contributionsSnapshot.forEach(doc => {
+            const contrib = { id: doc.id, ...doc.data() };
+            if (contrib.createdAt && contrib.createdAt.toDate) {
+                contrib.createdAt = contrib.createdAt.toDate().toISOString();
+            }
+            contributions.push(contrib);
+        });
+        
+        // Buscar todos os depósitos
+        const depositsSnapshot = await depositsCollection.get();
+        const deposits = [];
+        depositsSnapshot.forEach(doc => {
+            const deposit = { id: doc.id, ...doc.data() };
+            if (deposit.depositDate && deposit.depositDate.toDate) {
+                deposit.depositDate = deposit.depositDate.toDate().toISOString();
+            }
+            deposits.push(deposit);
+        });
+        
+        // Buscar todos os gastos
+        const expensesSnapshot = await expensesCollection.get();
+        const expenses = [];
+        expensesSnapshot.forEach(doc => {
+            const expense = { id: doc.id, ...doc.data() };
+            if (expense.expenseDate && expense.expenseDate.toDate) {
+                expense.expenseDate = expense.expenseDate.toDate().toISOString();
+            }
+            expenses.push(expense);
+        });
+        
+        // Calcular totais
+        const totalContributions = contributions.reduce((sum, c) => sum + (c.amount || 0), 0);
+        const totalDeposits = deposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+        const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+        const cashFlow = totalContributions + totalDeposits - totalExpenses;
+        
+        res.status(200).json({
+            summary: {
+                totalContributions,
+                totalDeposits,
+                totalExpenses,
+                cashFlow
+            },
+            details: {
+                contributions: contributions.map(c => ({
+                    id: c.id,
+                    memberName: c.memberName,
+                    month: c.month,
+                    year: c.year,
+                    amount: c.amount,
+                    createdAt: c.createdAt
+                })),
+                deposits: deposits.map(d => ({
+                    id: d.id,
+                    memberName: d.memberName,
+                    amount: d.amount,
+                    depositDate: d.depositDate,
+                    description: d.description
+                })),
+                expenses: expenses.map(e => ({
+                    id: e.id,
+                    description: e.description,
+                    amount: e.amount,
+                    expenseDate: e.expenseDate,
+                    category: e.category
+                }))
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao gerar relatório de caixa:', error);
+        res.status(500).json({ message: 'Erro ao gerar relatório de caixa.' });
     }
 });
 
