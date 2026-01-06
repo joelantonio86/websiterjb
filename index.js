@@ -1,5 +1,29 @@
-// Carregar variáveis de ambiente
-require('dotenv').config();
+// Carregar variáveis de ambiente (apenas em desenvolvimento local)
+// No Cloud Run, as variáveis já estão disponíveis via process.env
+if (process.env.NODE_ENV !== 'production' && !process.env.GCLOUD_PROJECT) {
+    try {
+        require('dotenv').config();
+        console.log('📝 Variáveis de ambiente carregadas do arquivo .env (desenvolvimento local)');
+    } catch (error) {
+        console.warn('⚠️  Arquivo .env não encontrado. Usando variáveis de ambiente do sistema.');
+    }
+} else {
+    console.log('📝 Usando variáveis de ambiente do Cloud Run/produção');
+}
+
+// Handler global para erros não capturados
+process.on('uncaughtException', (error) => {
+    console.error('❌ ERRO NÃO CAPTURADO (uncaughtException):', error);
+    console.error('📋 Stack trace:', error.stack);
+    console.error('⚠️  O servidor será encerrado. Verifique os logs acima para identificar o problema.');
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ PROMISE REJEITADA NÃO TRATADA:', reason);
+    console.error('📋 Promise:', promise);
+    console.error('⚠️  O servidor continuará, mas este erro deve ser investigado.');
+});
 
 const nodemailer = require('nodemailer');
 const express = require('express');
@@ -97,23 +121,37 @@ const limiter = rateLimit({
 // --- 3. Inicialização de Serviços (Firebase e GCS) ---
 let db, membersCollection, keysCollection, bucket, BUCKET_NAME;
 try {
+    console.log('🔄 Inicializando Firebase Admin...');
     if (!admin.apps.length) {
-        admin.initializeApp({});
+        // No Cloud Run, o Firebase Admin usa Application Default Credentials automaticamente
+        admin.initializeApp({
+            // Se houver credenciais explícitas, elas serão usadas
+            // Caso contrário, o SDK usa as credenciais do ambiente (Cloud Run)
+        });
         console.log('✅ Firebase Admin inicializado com sucesso.');
+    } else {
+        console.log('ℹ️  Firebase Admin já estava inicializado.');
     }
+    
+    console.log('🔄 Inicializando Firestore...');
     db = admin.firestore();
     membersCollection = db.collection('members');
     keysCollection = db.collection('inviteKeys'); // Coleção para controle de chaves únicas
+    console.log('✅ Firestore inicializado com sucesso.');
 
+    console.log('🔄 Inicializando Google Cloud Storage...');
     const storage = new Storage();
     BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
     bucket = storage.bucket(BUCKET_NAME);
     console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
 } catch (error) {
     console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
-    console.error('📋 Detalhes do erro:', error.message);
+    console.error('📋 Tipo do erro:', error.constructor.name);
+    console.error('📋 Mensagem do erro:', error.message);
+    console.error('📋 Stack trace completo:', error.stack);
+    console.error('⚠️  Verifique se as credenciais do Firebase/GCS estão configuradas corretamente no Cloud Run.');
     // Lançar erro aqui porque o sistema precisa do Firebase para funcionar
-    throw new Error(`Erro crítico ao inicializar serviços: ${error.message}`);
+    throw new Error(`Erro crítico ao inicializar serviços: ${error.message}. Stack: ${error.stack}`);
 }
 
 const upload = multer({
@@ -869,4 +907,16 @@ app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinance
 });
 
 // Listener imediato para Health Check
-app.listen(PORT, () => console.log(`RJB Backend Produção na porta ${PORT}`));
+try {
+    app.listen(PORT, () => {
+        console.log(`✅ RJB Backend Produção iniciado com sucesso na porta ${PORT}`);
+        console.log(`📋 Ambiente: ${process.env.NODE_ENV || 'desenvolvimento'}`);
+        console.log(`📋 Variáveis de ambiente carregadas: GMAIL_USER=${!!process.env.GMAIL_USER}, JWT_SECRET=${!!process.env.JWT_SECRET}, ADMIN_USERS=${!!process.env.ADMIN_USERS}`);
+    });
+} catch (error) {
+    console.error('❌ ERRO CRÍTICO ao iniciar o servidor:', error);
+    console.error('📋 Tipo do erro:', error.constructor.name);
+    console.error('📋 Mensagem do erro:', error.message);
+    console.error('📋 Stack trace completo:', error.stack);
+    process.exit(1);
+}

@@ -109,9 +109,73 @@ try {
 
 Execute: `node test-admin-users.js`
 
+## 🔍 Como Verificar os Logs de Aplicação no Cloud Run
+
+Os logs que você viu são apenas os **logs de sistema**. Para ver os **logs de aplicação** (onde estão as mensagens de erro detalhadas):
+
+1. Acesse o [Console do Google Cloud](https://console.cloud.google.com)
+2. Vá para **Cloud Run** → `rjb-email-sender`
+3. Clique na aba **"LOGS"** (não "Revisões")
+4. Ou acesse diretamente: [Logs Viewer](https://console.cloud.google.com/logs/viewer)
+5. Filtre por:
+   - **Recurso**: `cloud_run_revision`
+   - **Serviço**: `rjb-email-sender`
+   - **Revisão**: A revisão mais recente (ex: `rjb-email-sender-00093-jks`)
+
+### O que procurar nos logs:
+
+Procure por mensagens que começam com:
+- `❌ ERRO` - Erros críticos
+- `✅` - Inicialização bem-sucedida
+- `🔄` - Processos em andamento
+- `⚠️` - Avisos
+
+**Exemplo de log de sucesso:**
+```
+✅ ADMIN_USERS carregado com sucesso: 10 usuário(s) configurado(s).
+🔄 Inicializando Firebase Admin...
+✅ Firebase Admin inicializado com sucesso.
+🔄 Inicializando Firestore...
+✅ Firestore inicializado com sucesso.
+🔄 Inicializando Google Cloud Storage...
+✅ Google Cloud Storage inicializado. Bucket: rjb-admin-files-bucket
+✅ RJB Backend Produção iniciado com sucesso na porta 8080
+```
+
+**Se houver erro, você verá:**
+```
+❌ ERRO: [descrição do erro]
+📋 Detalhes do erro: [detalhes]
+📋 Stack trace: [stack trace completo]
+```
+
+## 🚨 Possíveis Problemas e Soluções
+
+### Problema 1: Firebase Admin não inicializa
+**Sintoma**: Erro `Erro crítico ao inicializar serviços: [erro do Firebase]`
+**Solução**: 
+- Verifique se a service account do Cloud Run tem permissões para acessar o Firestore
+- Vá em **IAM & Admin** → **Service Accounts** → Verifique a service account `215755766100-compute@developer.gserviceaccount.com`
+- Certifique-se de que ela tem a role `Firebase Admin` ou `Cloud Datastore User`
+
+### Problema 2: Google Cloud Storage não inicializa
+**Sintoma**: Erro relacionado ao Storage
+**Solução**:
+- Verifique se o bucket `rjb-admin-files-bucket` existe
+- Verifique se a service account tem permissão para acessar o bucket
+- Certifique-se de que a variável `GCS_BUCKET_NAME` está correta
+
+### Problema 3: Erro não capturado
+**Sintoma**: `Container called exit(1)` sem mensagens de erro nos logs
+**Solução**:
+- Verifique os logs de aplicação (não apenas os logs de sistema)
+- Procure por `uncaughtException` ou `unhandledRejection`
+- Os logs agora mostram stack traces completos
+
 ## 📞 Próximos Passos
 
-1. Atualize o `ADMIN_USERS` no Cloud Run com o JSON completo
-2. Faça o deploy
-3. Verifique os logs
-4. Se ainda houver erro, os logs mostrarão exatamente qual é o problema
+1. ✅ Atualize o `ADMIN_USERS` no Cloud Run com o JSON completo (você já fez isso)
+2. ✅ Faça o deploy do código atualizado (com melhor tratamento de erros)
+3. 🔍 **Verifique os logs de aplicação** (não apenas os logs de sistema)
+4. 📋 Copie e cole aqui os logs que começam com `❌`, `✅`, `🔄` ou `⚠️`
+5. Com base nos logs, identificaremos o problema específico
