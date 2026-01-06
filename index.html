@@ -524,11 +524,36 @@
             }
         }
 
+        // Função para normalizar nomes: primeira letra maiúscula, demais minúsculas
+        function normalizeName(name) {
+            if (!name) return '';
+            
+            return name
+                .toLowerCase()
+                .split(' ')
+                .map(word => {
+                    if (word.length === 0) return word;
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                })
+                .join(' ')
+                .trim();
+        }
+
+        // Função para normalizar o campo de nome quando o usuário sair dele
+        function normalizeNameField(field) {
+            if (field && field.value) {
+                const normalized = normalizeName(field.value);
+                if (normalized !== field.value) {
+                    field.value = normalized;
+                }
+            }
+        }
+
         async function submitMemberRegistration(event) {
             event.preventDefault();
 
             const inviteKey = document.getElementById('reg-invite-key').value.trim();
-            const name = document.getElementById('reg-name').value.trim();
+            let name = document.getElementById('reg-name').value.trim();
             const tefa = document.getElementById('reg-tefa').value.trim();
             const instrument = document.getElementById('reg-instrument').value.trim();
             const email = document.getElementById('reg-email').value.trim();
@@ -537,6 +562,12 @@
             const state = document.getElementById('reg-state').value; // Valor do select
             const termsVersion = document.getElementById('reg-terms-version').value;
             const termsAccepted = document.getElementById('terms').checked;
+
+            // Normaliza o nome antes de validar
+            name = normalizeName(name);
+            
+            // Atualiza o campo visualmente para o usuário ver a normalização
+            document.getElementById('reg-name').value = name;
 
             if (!inviteKey || !name || !instrument || !email || !city || !state || !phone) {
                 showMessage('Por favor, preencha todos os campos obrigatórios.', true);
@@ -1579,14 +1610,22 @@
         async function submitEditMember(event) {
             event.preventDefault();
             const memberId = document.getElementById('edit-member-id').value;
+            
+            // Normaliza o nome antes de enviar
+            let memberName = document.getElementById('edit-member-name').value.trim();
+            memberName = normalizeName(memberName);
+            
             const updatedData = {
-                name: document.getElementById('edit-member-name').value,
+                name: memberName,
                 tefa: document.getElementById('edit-member-tefa').value,
                 phone: document.getElementById('edit-member-phone').value, // Novo
                 instrument: document.getElementById('edit-member-instrument').value,
                 city: document.getElementById('edit-member-city').value,
                 state: document.getElementById('edit-member-state').value.toUpperCase()
             };
+            
+            // Atualiza o campo visualmente
+            document.getElementById('edit-member-name').value = memberName;
 
             const token = localStorage.getItem('adminToken');
             const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
@@ -1616,6 +1655,114 @@
                 showMessage('Erro de conexão com o servidor.', true);
             } finally {
                 toggleLoader(false);
+            }
+        }
+
+        // Função para normalizar todos os nomes dos membros cadastrados
+        async function normalizeAllMemberNames() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                showMessage('Você precisa estar logado para executar esta ação.', true);
+                return;
+            }
+
+            // Confirmação antes de executar
+            const confirmed = confirm('Esta ação irá normalizar todos os nomes em caixa alta para o formato padrão (Primeira Letra Maiúscula).\n\nDeseja continuar?');
+            if (!confirmed) return;
+
+            const API_BASE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+            toggleLoader(true, 'Buscando membros...');
+
+            try {
+                // 1. Busca todos os membros
+                const response = await fetch(`${API_BASE}/api/reports/members`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar membros');
+                }
+
+                const data = await response.json();
+                const members = data.allMembers || [];
+
+                if (members.length === 0) {
+                    toggleLoader(false);
+                    showMessage('Nenhum membro encontrado.', true);
+                    return;
+                }
+
+                // 2. Identifica membros que precisam ser normalizados
+                const membersToUpdate = members.filter(m => {
+                    if (!m.name) return false;
+                    const normalized = normalizeName(m.name);
+                    return normalized !== m.name && normalized.length > 0;
+                });
+
+                if (membersToUpdate.length === 0) {
+                    toggleLoader(false);
+                    showMessage('Todos os nomes já estão normalizados!', false);
+                    return;
+                }
+
+                // 3. Atualiza cada membro
+                toggleLoader(true, `Normalizando ${membersToUpdate.length} membro(s)...`);
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (let i = 0; i < membersToUpdate.length; i++) {
+                    const member = membersToUpdate[i];
+                    const normalizedName = normalizeName(member.name);
+                    
+                    toggleLoader(true, `Normalizando ${i + 1} de ${membersToUpdate.length}: ${member.name} → ${normalizedName}`);
+
+                    try {
+                        const updateResponse = await fetch(`${API_BASE}/api/admin/update-member/${member.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                name: normalizedName,
+                                tefa: member.tefa || '',
+                                phone: member.phone || '',
+                                instrument: member.instrument || '',
+                                city: member.city || '',
+                                state: member.state || ''
+                            })
+                        });
+
+                        if (updateResponse.ok) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                            console.error(`Erro ao atualizar membro ${member.id}:`, await updateResponse.text());
+                        }
+                    } catch (error) {
+                        errorCount++;
+                        console.error(`Erro ao atualizar membro ${member.id}:`, error);
+                    }
+
+                    // Pequeno delay para não sobrecarregar o servidor
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                toggleLoader(false);
+                
+                if (successCount > 0) {
+                    showMessage(`${successCount} nome(s) normalizado(s) com sucesso!${errorCount > 0 ? ` ${errorCount} erro(s).` : ''}`, errorCount > 0);
+                    // Recarrega a lista de membros
+                    fetchMemberReport(token);
+                } else {
+                    showMessage('Nenhum nome foi atualizado. Verifique os logs para mais detalhes.', true);
+                }
+
+            } catch (error) {
+                console.error('Erro ao normalizar nomes:', error);
+                toggleLoader(false);
+                showMessage('Erro ao normalizar nomes. Verifique o console para mais detalhes.', true);
             }
         }
 
@@ -2277,7 +2424,7 @@
                             </svg>
                         </label>
                         <input type="text" id="reg-name" required 
-                            onblur="validateField(this, 'name')"
+                            onblur="normalizeNameField(this); validateField(this, 'name')"
                             oninput="validateFieldRealTime(this, 'name'); clearFieldError(this)"
                             class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all">
                         <p class="field-error hidden text-xs text-red-600 dark:text-red-400 mt-1"></p>
@@ -2406,79 +2553,187 @@
 
         function generateReportsPage() {
             return `
-    <div class="max-w-4xl mx-auto">
-        <h2 class="text-4xl font-extrabold text-rjb-yellow mb-8 text-center">Área Administrativa</h2>
+    <div class="max-w-5xl mx-auto">
+        <!-- Breadcrumb Navigation -->
+        <nav class="mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2 text-sm">
+                <li>
+                    <button onclick="navigateTo('home')" class="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors">
+                        Home
+                    </button>
+                </li>
+                <li class="text-rjb-text/50 dark:text-rjb-text-dark/50">/</li>
+                <li class="text-rjb-yellow font-medium">Área Administrativa</li>
+            </ol>
+        </nav>
+
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-yellow">Área Administrativa</h2>
+            </div>
+            <p class="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base ml-11 sm:ml-14">Gerencie convites, membros e anexos do sistema</p>
+        </div>
         
-        <div id="admin-login-area" class="bg-rjb-bg-light dark:bg-rjb-bg-dark/70 p-6 rounded-lg shadow-xl border border-rjb-yellow/20">
-            <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-lg mb-6 text-center">Acesso restrito para regentes e administradores.</p>
+        <!-- Login Area -->
+        <div id="admin-login-area" class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/70 p-6 sm:p-8 rounded-2xl shadow-xl border-2 border-rjb-yellow/30 backdrop-blur-sm">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rjb-yellow/20 dark:bg-rjb-yellow/10 mb-4">
+                    <svg class="w-8 h-8 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <p class="text-rjb-text/80 dark:text-rjb-text-dark/80 text-base sm:text-lg font-medium">Acesso restrito para regentes e administradores</p>
+            </div>
             <form id="admin-login-form" onsubmit="handleAdminLogin(event);">
-                <div class="space-y-4">
+                <div class="space-y-5">
                     <div>
-                        <label for="admin-email" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">E-mail</label>
+                        <label for="admin-email" class="block text-sm font-semibold text-rjb-text dark:text-rjb-text-dark mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                            E-mail
+                        </label>
                         <input type="email" id="admin-email" name="email" required 
-                            class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
-                            placeholder="Seu e-mail de administrador">
+                            class="w-full p-3.5 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all placeholder:text-rjb-text/40" 
+                            placeholder="seu.email@exemplo.com">
                     </div>
                     <div>
-                        <label for="admin-password" class="block text-sm font-medium text-rjb-text/70 dark:text-rjb-text-dark/70 mb-1">Senha</label>
+                        <label for="admin-password" class="block text-sm font-semibold text-rjb-text dark:text-rjb-text-dark mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Senha
+                        </label>
                         <input type="password" id="admin-password" name="password" required 
-                            class="w-full p-3 rounded-lg bg-rjb-card-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow transition-all" 
-                            placeholder="Sua senha secreta">
+                            class="w-full p-3.5 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all placeholder:text-rjb-text/40" 
+                            placeholder="••••••••">
                     </div>
-                    <button type="submit" class="w-full bg-rjb-yellow text-rjb-text font-bold py-3 rounded-lg text-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-[1.01] shadow-soft-glow">
+                    <button type="submit" class="w-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3.5 rounded-xl text-base sm:text-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
                         Entrar
                     </button>
                 </div>
             </form>
         </div>
         
-        <div id="report-output-area" class="hidden mt-10 space-y-10">
+        <!-- Admin Dashboard Area -->
+        <div id="report-output-area" class="hidden mt-8 space-y-6">
             
-            <div class="p-4 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
-                <h3 class="text-xl sm:text-2xl font-bold text-rjb-yellow mb-3 sm:mb-4">Gerenciamento de Convites</h3>
-                <div class="space-y-3 sm:space-y-4">
+            <!-- Gerenciamento de Convites Card -->
+            <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-rjb-yellow/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 px-5 sm:px-6 py-4 border-b border-rjb-yellow/30">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-lg bg-rjb-yellow/20 dark:bg-rjb-yellow/10">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gerenciamento de Convites</h3>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6 space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <input type="text" id="generated-key-display" readonly 
-                               class="w-full sm:w-2/3 p-2.5 sm:p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark font-mono font-bold text-center text-sm sm:text-base"
-                               placeholder="--- CLIQUE PARA GERAR ---">
+                        <div class="relative flex-1">
+                            <input type="text" id="generated-key-display" readonly 
+                                   class="w-full p-3.5 sm:p-4 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark font-mono font-bold text-center text-sm sm:text-base focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 transition-all"
+                                   placeholder="--- CLIQUE PARA GERAR ---">
+                            <button onclick="copyKeyToClipboard()" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-rjb-text/50 hover:text-rjb-yellow transition-colors" title="Copiar chave">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                            </button>
+                        </div>
                         <button onclick="uiGenerateAndPrepare()" 
-                                class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2.5 sm:py-2 px-4 rounded-lg hover:bg-yellow-500 transition shadow-subtle-glow text-sm sm:text-base">
+                                class="bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3.5 sm:py-4 px-6 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
                             Gerar Nova Chave
                         </button>
                     </div>
                     
                     <div id="whatsapp-share-area" class="hidden">
                         <button onclick="shareViaWhatsApp()" 
-                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-3 rounded-lg flex items-center justify-center gap-2 transition-all text-sm sm:text-base">
+                                class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] text-sm sm:text-base">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
                             <span>Enviar via WhatsApp</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div id="member-report-details" class="p-4 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
-                ${generateSkeletonScreen('members')}
-            </div>
-
-            <div class="p-4 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark rounded-xl shadow-lg border border-rjb-yellow/10">
-                <h3 class="text-xl sm:text-2xl font-bold text-rjb-yellow mb-3 sm:mb-4 border-b border-rjb-yellow/50 pb-2">Gerenciamento de Anexos</h3>
-                <form id="file-upload-form" onsubmit="handleFileUpload(event);" class="mb-4 sm:mb-6 p-3 sm:p-4 border border-dashed border-rjb-yellow/50 rounded-lg">
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <input type="file" id="attachment-file" name="file" required 
-                               class="w-full sm:w-2/3 p-2 sm:p-3 text-sm border border-rjb-yellow/30 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
-                        <button type="submit" class="w-full sm:w-1/3 bg-rjb-yellow text-rjb-text font-bold py-2.5 sm:py-3 px-4 rounded-lg hover:bg-yellow-500 transition text-sm sm:text-base">
-                            Upload
+            <!-- Gerenciamento de Membros Card -->
+            <div id="member-report-details" class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-rjb-yellow/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 px-5 sm:px-6 py-4 border-b border-rjb-yellow/30">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg bg-rjb-yellow/20 dark:bg-rjb-yellow/10">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gerenciamento de Membros</h3>
+                        </div>
+                        <button onclick="normalizeAllMemberNames()" 
+                                class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Normalizar Nomes
                         </button>
                     </div>
-                </form>
-
-                <div id="attachments-output-area" class="space-y-2 sm:space-y-3">
-                    ${generateSkeletonScreen('attachments')}
+                </div>
+                <div class="p-5 sm:p-6">
+                    ${generateSkeletonScreen('members')}
                 </div>
             </div>
 
-            <div class="flex justify-center sm:justify-end">
-                <button onclick="adminLogout()" class="w-full sm:w-auto bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow text-rjb-yellow font-bold py-2.5 sm:py-2 px-4 sm:px-6 rounded-lg hover:bg-rjb-yellow/10 transition text-sm sm:text-base">
+            <!-- Gerenciamento de Anexos Card -->
+            <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-rjb-yellow/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 px-5 sm:px-6 py-4 border-b border-rjb-yellow/30">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-lg bg-rjb-yellow/20 dark:bg-rjb-yellow/10">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gerenciamento de Anexos</h3>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6 space-y-4">
+                    <form id="file-upload-form" onsubmit="handleFileUpload(event);" class="p-4 sm:p-5 border-2 border-dashed border-rjb-yellow/50 rounded-xl bg-rjb-bg-light/50 dark:bg-rjb-bg-dark/30 hover:border-rjb-yellow transition-colors">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="file" id="attachment-file" name="file" required 
+                                   class="w-full sm:flex-1 p-3 text-sm border-2 border-rjb-yellow/30 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-rjb-yellow file:text-rjb-text hover:file:bg-yellow-500">
+                            <button type="submit" class="bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3 px-6 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                Upload
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="attachments-output-area" class="space-y-2 sm:space-y-3">
+                        ${generateSkeletonScreen('attachments')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="flex justify-center sm:justify-end pt-4">
+                <button onclick="adminLogout()" class="bg-rjb-card-light dark:bg-rjb-card-dark border-2 border-rjb-yellow/50 text-rjb-yellow font-bold py-3 px-6 rounded-xl hover:bg-rjb-yellow/10 hover:border-rjb-yellow transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
                     Sair da Área Administrativa
                 </button>
             </div>
@@ -2496,6 +2751,19 @@
         }
 
         let currentGeneratedKey = '';
+
+        function copyKeyToClipboard() {
+            const display = document.getElementById('generated-key-display');
+            if (display && display.value && display.value !== '--- CLIQUE PARA GERAR ---') {
+                navigator.clipboard.writeText(display.value).then(() => {
+                    showMessage('Chave copiada para a área de transferência!', false);
+                }).catch(() => {
+                    showMessage('Erro ao copiar chave.', true);
+                });
+            } else {
+                showMessage('Gere uma chave primeiro.', true);
+            }
+        }
 
         async function uiGenerateAndPrepare() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -3955,7 +4223,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1 opacity-70">Nome Completo</label>
-                        <input type="text" id="edit-member-name" required
+                        <input type="text" id="edit-member-name" required onblur="normalizeNameField(this)"
                             class="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
