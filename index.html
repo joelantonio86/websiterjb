@@ -631,9 +631,14 @@
                 if (response.ok) {
                     localStorage.setItem('adminToken', result.token);
                     localStorage.setItem('adminRole', result.role);
+                    console.log('Login realizado. Role recebido:', result.role);
                     toggleLoader(false); // 👈 DESATIVA ANTES DE CARREGAR O RELATÓRIO
                     showMessage('Login bem-sucedido. Carregando relatórios...');
                     renderProtectedReportView();
+                    // Verifica acesso financeiro após renderizar (com delay para garantir que o elemento existe)
+                    setTimeout(() => {
+                        checkFinanceAccess();
+                    }, 300);
                 } else {
                     toggleLoader(false); // 👈 DESATIVA
                     showMessage(result.message || 'E-mail ou senha incorretos.', true);
@@ -1099,6 +1104,8 @@
             if (token) {
                 authArea.classList.add('hidden');
                 outputArea.classList.remove('hidden');
+                // Verifica acesso financeiro após renderizar a área
+                checkFinanceAccess();
                 fetchMemberReport(token); // Busca membros e, sequencialmente, anexos
             } else {
                 authArea.classList.remove('hidden');
@@ -1152,6 +1159,43 @@
             }
         }
         // index.html (FUNÇÃO renderProtectedReportView CORRIGIDA PARA GARANTIR ESTRUTURA)
+        // Função para verificar acesso financeiro (role 'financeiro' ou 'admin-financeiro')
+        function checkFinanceAccess() {
+            const role = localStorage.getItem('adminRole');
+            const financeLinkArea = document.getElementById('finance-link-area');
+            
+            // Debug: verificar role
+            console.log('[Finance] Verificando acesso. Role atual:', role);
+            
+            if (financeLinkArea) {
+                if (role === 'financeiro' || role === 'admin-financeiro') {
+                    financeLinkArea.classList.remove('hidden');
+                    console.log('[Finance] ✅ Link financeiro EXIBIDO');
+                } else {
+                    financeLinkArea.classList.add('hidden');
+                    console.log('[Finance] ❌ Link financeiro OCULTO - role:', role);
+                }
+            } else {
+                console.log('[Finance] ⚠️ Elemento finance-link-area não encontrado ainda. Tentando novamente...');
+                // Tenta novamente após um pequeno delay se o elemento não existir
+                setTimeout(() => {
+                    const retryElement = document.getElementById('finance-link-area');
+                    if (retryElement) {
+                        console.log('[Finance] ✅ Elemento encontrado na segunda tentativa');
+                        if (role === 'financeiro' || role === 'admin-financeiro') {
+                            retryElement.classList.remove('hidden');
+                            console.log('[Finance] ✅ Link financeiro EXIBIDO (retry)');
+                        } else {
+                            retryElement.classList.add('hidden');
+                            console.log('[Finance] ❌ Link financeiro OCULTO (retry) - role:', role);
+                        }
+                    } else {
+                        console.log('[Finance] ❌ Elemento ainda não encontrado após retry');
+                    }
+                }, 500);
+            }
+        }
+
         function renderProtectedReportView() {
             const token = localStorage.getItem('adminToken');
             const authArea = document.getElementById('admin-login-area');
@@ -1162,6 +1206,7 @@
             if (token) {
                 authArea.classList.add('hidden');
                 outputArea.classList.remove('hidden');
+                checkFinanceAccess(); // Verifica acesso financeiro
                 // Ação: Inicia a busca dos relatórios de Membros (que dispara a busca de Anexos)
                 fetchMemberReport(token);
             } else {
@@ -2625,6 +2670,19 @@
         <!-- Admin Dashboard Area -->
         <div id="report-output-area" class="hidden mt-8 space-y-6">
             
+            <!-- Link para Área Financeira (apenas para financeiro/admin) -->
+            <div id="finance-link-area" class="hidden mb-6">
+                <a href="#financeiro" onclick="navigateTo('financeiro')" class="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Área Financeira</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+            
             <!-- Gerenciamento de Convites Card -->
             <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-rjb-yellow/20 overflow-hidden">
                 <div class="bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-rjb-yellow/5 px-5 sm:px-6 py-4 border-b border-rjb-yellow/30">
@@ -2740,6 +2798,900 @@
         </div>
     </div>`;
         }
+
+        // Função para gerar página da Área Financeira (role 'financeiro' ou 'admin-financeiro')
+        function generateFinancePage() {
+            const role = localStorage.getItem('adminRole');
+            if (role !== 'financeiro' && role !== 'admin-financeiro') {
+                return `
+                    <div class="max-w-4xl mx-auto text-center py-12">
+                        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <h2 class="text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4">Acesso Negado</h2>
+                        <p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Você não tem permissão para acessar a área financeira. Acesso restrito ao responsável financeiro.</p>
+                    </div>
+                `;
+            }
+
+            return `
+    <div class="max-w-7xl mx-auto">
+        <!-- Breadcrumb Navigation -->
+        <nav class="mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2 text-sm">
+                <li>
+                    <button onclick="navigateTo('home')" class="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors">
+                        Home
+                    </button>
+                </li>
+                <li class="text-rjb-text/50 dark:text-rjb-text-dark/50">/</li>
+                <li>
+                    <button onclick="navigateTo('reports')" class="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors">
+                        Área Administrativa
+                    </button>
+                </li>
+                <li class="text-rjb-text/50 dark:text-rjb-text-dark/50">/</li>
+                <li class="text-green-600 font-medium">Financeiro</li>
+            </ol>
+        </nav>
+
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-green-600">Área Financeira</h2>
+            </div>
+            <p class="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base ml-11 sm:ml-14">Controle de contribuições, depósitos e gastos da RJB</p>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex space-x-2 overflow-x-auto">
+                <button onclick="switchFinanceTab('contributions')" id="tab-contributions" class="finance-tab active px-4 py-2 font-semibold text-sm border-b-2 border-green-600 text-green-600">
+                    Contribuições
+                </button>
+                <button onclick="switchFinanceTab('deposits')" id="tab-deposits" class="finance-tab px-4 py-2 font-semibold text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600">
+                    Depósitos
+                </button>
+                <button onclick="switchFinanceTab('expenses')" id="tab-expenses" class="finance-tab px-4 py-2 font-semibold text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600">
+                    Gastos
+                </button>
+                <button onclick="switchFinanceTab('reports')" id="tab-reports" class="finance-tab px-4 py-2 font-semibold text-sm border-b-2 border-transparent text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-green-600">
+                    Relatórios
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content: Contribuições -->
+        <div id="finance-tab-contributions" class="finance-tab-content">
+            <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg bg-green-600/20 dark:bg-green-600/10">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Contribuições Mensais</h3>
+                        </div>
+                        <button onclick="openAddContributionModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 text-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Nova Contribuição
+                        </button>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <div id="contributions-list" class="space-y-3">
+                        <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando contribuições...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Depósitos -->
+        <div id="finance-tab-deposits" class="finance-tab-content hidden">
+            <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg bg-green-600/20 dark:bg-green-600/10">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Depósitos e Comprovantes</h3>
+                        </div>
+                        <button onclick="openAddDepositModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 text-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Novo Depósito
+                        </button>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <div id="deposits-list" class="space-y-3">
+                        <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando depósitos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Gastos -->
+        <div id="finance-tab-expenses" class="finance-tab-content hidden">
+            <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg bg-green-600/20 dark:bg-green-600/10">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da RJB</h3>
+                        </div>
+                        <button onclick="openAddExpenseModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 text-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Novo Gasto
+                        </button>
+                    </div>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <div id="expenses-list" class="space-y-3">
+                        <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando gastos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Relatórios -->
+        <div id="finance-tab-reports" class="finance-tab-content hidden">
+            <div class="space-y-6">
+                <!-- Relatório de Pagamentos e Pendências -->
+                <div class="bg-gradient-to-br from-rjb-card-light to-rjb-bg-light dark:from-rjb-card-dark dark:to-rjb-bg-dark/50 rounded-2xl shadow-xl border-2 border-green-600/20 overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-600/20 via-green-600/15 to-green-600/10 dark:from-green-600/10 dark:via-green-600/5 dark:to-green-600/5 px-5 sm:px-6 py-4 border-b border-green-600/30">
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Relatório de Pagamentos e Pendências</h3>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                        <div class="mb-4 flex flex-col sm:flex-row gap-3">
+                            <select id="report-year" class="p-2 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                                <option value="">Todos os anos</option>
+                            </select>
+                            <select id="report-month" class="p-2 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                                <option value="">Todos os meses</option>
+                            </select>
+                            <button onclick="loadPaymentReport()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all">
+                                Gerar Relatório
+                            </button>
+                        </div>
+                        <div id="payment-report-content">
+                            <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Clique em "Gerar Relatório" para visualizar os dados</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+            `;
+        }
+
+        // ========== FUNÇÕES DA ÁREA FINANCEIRA ==========
+        
+        const API_BASE_FINANCE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
+        let currentFinanceTab = 'contributions';
+
+        // Trocar entre abas da área financeira
+        function switchFinanceTab(tab) {
+            currentFinanceTab = tab;
+            
+            // Atualiza tabs
+            document.querySelectorAll('.finance-tab').forEach(t => {
+                t.classList.remove('active', 'border-green-600', 'text-green-600');
+                t.classList.add('border-transparent', 'text-rjb-text/70', 'dark:text-rjb-text-dark/70');
+            });
+            document.getElementById(`tab-${tab}`).classList.add('active', 'border-green-600', 'text-green-600');
+            document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-rjb-text/70', 'dark:text-rjb-text-dark/70');
+            
+            // Atualiza conteúdo
+            document.querySelectorAll('.finance-tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`finance-tab-${tab}`).classList.remove('hidden');
+            
+            // Carrega dados da aba
+            if (tab === 'contributions') {
+                loadMembersList();
+                loadContributions();
+            } else if (tab === 'deposits') {
+                loadMembersList();
+                loadDeposits();
+            } else if (tab === 'expenses') {
+                loadExpenses();
+            } else if (tab === 'reports') {
+                initializeReportFilters();
+                loadPaymentReport();
+            }
+        }
+
+        // Carregar contribuições
+        async function loadContributions() {
+            const token = localStorage.getItem('adminToken');
+            const listEl = document.getElementById('contributions-list');
+            if (!listEl) return;
+            
+            listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/contributions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.contributions) {
+                    if (data.contributions.length === 0) {
+                        listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhuma contribuição registrada.</p>';
+                    } else {
+                        listEl.innerHTML = data.contributions.map(c => `
+                            <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-rjb-text dark:text-rjb-text-dark">${c.memberName || 'Membro'}</p>
+                                    <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${c.month}/${c.year} - R$ ${c.amount.toFixed(2)}</p>
+                                    <span class="inline-block mt-1 px-2 py-1 text-xs rounded ${c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${c.status === 'paid' ? 'Pago' : 'Pendente'}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="editContribution('${c.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded">Editar</button>
+                                    <button onclick="deleteContribution('${c.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">Excluir</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                listEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar contribuições.</p>';
+            }
+        }
+
+        // Carregar depósitos
+        async function loadDeposits() {
+            const token = localStorage.getItem('adminToken');
+            const listEl = document.getElementById('deposits-list');
+            if (!listEl) return;
+            
+            listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/deposits`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.deposits) {
+                    if (data.deposits.length === 0) {
+                        listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum depósito registrado.</p>';
+                    } else {
+                        listEl.innerHTML = data.deposits.map(d => {
+                            const date = d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A';
+                            return `
+                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p class="font-bold text-rjb-text dark:text-rjb-text-dark">${d.memberName || 'Membro'}</p>
+                                            <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${date} - R$ ${d.amount.toFixed(2)}</p>
+                                            ${d.description ? `<p class="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1">${d.description}</p>` : ''}
+                                        </div>
+                                        <div class="flex gap-2">
+                                            ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="p-2 text-green-600 hover:bg-green-50 rounded">Ver Comprovante</a>` : ''}
+                                            <button onclick="editDeposit('${d.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded">Editar</button>
+                                            <button onclick="deleteDeposit('${d.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">Excluir</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                listEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar depósitos.</p>';
+            }
+        }
+
+        // Carregar gastos
+        async function loadExpenses() {
+            const token = localStorage.getItem('adminToken');
+            const listEl = document.getElementById('expenses-list');
+            if (!listEl) return;
+            
+            listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/expenses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.expenses) {
+                    if (data.expenses.length === 0) {
+                        listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum gasto registrado.</p>';
+                    } else {
+                        listEl.innerHTML = data.expenses.map(e => {
+                            const date = e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A';
+                            return `
+                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-4 rounded-lg border border-green-600/20 flex items-center justify-between">
+                                    <div>
+                                        <p class="font-bold text-rjb-text dark:text-rjb-text-dark">${e.description}</p>
+                                        <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${date} - R$ ${e.amount.toFixed(2)}</p>
+                                        ${e.category ? `<span class="inline-block mt-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">${e.category}</span>` : ''}
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="editExpense('${e.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded">Editar</button>
+                                        <button onclick="deleteExpense('${e.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">Excluir</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                listEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar gastos.</p>';
+            }
+        }
+
+        // Inicializar filtros do relatório
+        function initializeReportFilters() {
+            const yearSelect = document.getElementById('report-year');
+            const monthSelect = document.getElementById('report-month');
+            
+            if (yearSelect) {
+                const currentYear = new Date().getFullYear();
+                yearSelect.innerHTML = '<option value="">Todos os anos</option>';
+                for (let y = currentYear; y >= 2020; y--) {
+                    yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+                }
+            }
+            
+            if (monthSelect) {
+                const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                monthSelect.innerHTML = '<option value="">Todos os meses</option>';
+                months.forEach((m, i) => {
+                    monthSelect.innerHTML += `<option value="${i+1}">${m}</option>`;
+                });
+            }
+        }
+
+        // Carregar relatório de pagamentos
+        async function loadPaymentReport() {
+            const token = localStorage.getItem('adminToken');
+            const reportEl = document.getElementById('payment-report-content');
+            if (!reportEl) return;
+            
+            const year = document.getElementById('report-year')?.value || '';
+            const month = document.getElementById('report-month')?.value || '';
+            
+            reportEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando relatório...</p>';
+            
+            try {
+                const url = `${API_BASE_FINANCE}/api/finance/reports/payments${year || month ? `?${year ? `year=${year}` : ''}${year && month ? '&' : ''}${month ? `month=${month}` : ''}` : ''}`;
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.report) {
+                    if (data.report.length === 0) {
+                        reportEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum dado encontrado.</p>';
+                    } else {
+                        // Carregar membros para o histórico
+                        await loadMembersList();
+                        
+                        reportEl.innerHTML = `
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-green-600/20">
+                                        <tr>
+                                            <th class="p-3 text-left">Membro</th>
+                                            <th class="p-3 text-left">Último Mês Pago</th>
+                                            <th class="p-3 text-right">Total Pago</th>
+                                            <th class="p-3 text-right">Pendente</th>
+                                            <th class="p-3 text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.report.map(r => `
+                                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                <td class="p-3">${r.memberName}</td>
+                                                <td class="p-3">${r.lastPaidMonth}</td>
+                                                <td class="p-3 text-right">R$ ${r.totalPaid.toFixed(2)}</td>
+                                                <td class="p-3 text-right ${r.totalPending > 0 ? 'text-red-600' : 'text-green-600'}">R$ ${r.totalPending.toFixed(2)}</td>
+                                                <td class="p-3 text-center">
+                                                    <button onclick="viewMemberHistory('${r.memberId}')" class="text-blue-600 hover:underline">Histórico</button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                reportEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar relatório.</p>';
+            }
+        }
+
+        // ========== FUNÇÕES DE MODAIS E CRUD ==========
+        
+        let allMembers = [];
+
+        // Carregar lista de membros para os selects
+        async function loadMembersList() {
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/reports/members`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (response.ok && data.allMembers) {
+                    allMembers = data.allMembers;
+                    // Preencher selects de membros
+                    const selects = ['contribution-member-id', 'deposit-member-id'];
+                    selects.forEach(selectId => {
+                        const select = document.getElementById(selectId);
+                        if (select) {
+                            select.innerHTML = '<option value="">Selecione um membro</option>' +
+                                allMembers.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar membros:', error);
+            }
+        }
+
+        // ========== CONTRIBUIÇÕES ==========
+        
+        function openAddContributionModal() {
+            document.getElementById('contribution-modal-title').textContent = 'Nova Contribuição';
+            document.getElementById('contribution-form').reset();
+            document.getElementById('contribution-id').value = '';
+            document.getElementById('contribution-year').value = new Date().getFullYear();
+            loadMembersList();
+            document.getElementById('contribution-modal').classList.remove('hidden');
+        }
+
+        async function editContribution(id) {
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/contributions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                const contribution = data.contributions.find(c => c.id === id);
+                
+                if (contribution) {
+                    document.getElementById('contribution-modal-title').textContent = 'Editar Contribuição';
+                    document.getElementById('contribution-id').value = contribution.id;
+                    document.getElementById('contribution-member-id').value = contribution.memberId;
+                    document.getElementById('contribution-month').value = contribution.month;
+                    document.getElementById('contribution-year').value = contribution.year;
+                    document.getElementById('contribution-amount').value = contribution.amount;
+                    document.getElementById('contribution-status').value = contribution.status;
+                    loadMembersList();
+                    document.getElementById('contribution-modal').classList.remove('hidden');
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar contribuição.', true);
+            }
+        }
+
+        function closeContributionModal(event) {
+            if (!event || event.target.id === 'contribution-modal') {
+                document.getElementById('contribution-modal').classList.add('hidden');
+            }
+        }
+
+        async function saveContribution(event) {
+            event.preventDefault();
+            const token = localStorage.getItem('adminToken');
+            const id = document.getElementById('contribution-id').value;
+            const memberId = document.getElementById('contribution-member-id').value;
+            const member = allMembers.find(m => m.id === memberId);
+            
+            const data = {
+                memberId,
+                memberName: member ? member.name : '',
+                month: parseInt(document.getElementById('contribution-month').value),
+                year: parseInt(document.getElementById('contribution-year').value),
+                amount: parseFloat(document.getElementById('contribution-amount').value),
+                status: document.getElementById('contribution-status').value
+            };
+
+            try {
+                const url = id 
+                    ? `${API_BASE_FINANCE}/api/finance/contributions/${id}`
+                    : `${API_BASE_FINANCE}/api/finance/contributions`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showMessage(id ? 'Contribuição atualizada!' : 'Contribuição criada!');
+                    closeContributionModal();
+                    loadContributions();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.message || 'Erro ao salvar.', true);
+                }
+            } catch (error) {
+                showMessage('Erro de conexão.', true);
+            }
+        }
+
+        async function deleteContribution(id) {
+            if (!confirm('Deseja realmente excluir esta contribuição?')) return;
+            
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/contributions/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Contribuição excluída!');
+                    loadContributions();
+                } else {
+                    showMessage('Erro ao excluir.', true);
+                }
+            } catch (error) {
+                showMessage('Erro de conexão.', true);
+            }
+        }
+
+        // ========== DEPÓSITOS ==========
+        
+        function openAddDepositModal() {
+            document.getElementById('deposit-modal-title').textContent = 'Novo Depósito';
+            document.getElementById('deposit-form').reset();
+            document.getElementById('deposit-id').value = '';
+            document.getElementById('deposit-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('deposit-receipt-preview').classList.add('hidden');
+            loadMembersList();
+            document.getElementById('deposit-modal').classList.remove('hidden');
+        }
+
+        async function editDeposit(id) {
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/deposits`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                const deposit = data.deposits.find(d => d.id === id);
+                
+                if (deposit) {
+                    document.getElementById('deposit-modal-title').textContent = 'Editar Depósito';
+                    document.getElementById('deposit-id').value = deposit.id;
+                    document.getElementById('deposit-member-id').value = deposit.memberId;
+                    document.getElementById('deposit-date').value = deposit.depositDate ? deposit.depositDate.split('T')[0] : '';
+                    document.getElementById('deposit-amount').value = deposit.amount;
+                    document.getElementById('deposit-description').value = deposit.description || '';
+                    
+                    if (deposit.receiptUrl) {
+                        document.getElementById('deposit-receipt-link').href = deposit.receiptUrl;
+                        document.getElementById('deposit-receipt-preview').classList.remove('hidden');
+                    } else {
+                        document.getElementById('deposit-receipt-preview').classList.add('hidden');
+                    }
+                    
+                    loadMembersList();
+                    document.getElementById('deposit-modal').classList.remove('hidden');
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar depósito.', true);
+            }
+        }
+
+        function closeDepositModal(event) {
+            if (!event || event.target.id === 'deposit-modal') {
+                document.getElementById('deposit-modal').classList.add('hidden');
+            }
+        }
+
+        async function saveDeposit(event) {
+            event.preventDefault();
+            const token = localStorage.getItem('adminToken');
+            const id = document.getElementById('deposit-id').value;
+            const memberId = document.getElementById('deposit-member-id').value;
+            const member = allMembers.find(m => m.id === memberId);
+            
+            let receiptUrl = '';
+            const receiptFile = document.getElementById('deposit-receipt').files[0];
+            
+            // Upload do comprovante se houver
+            if (receiptFile) {
+                try {
+                    const formData = new FormData();
+                    formData.append('receipt', receiptFile);
+                    
+                    const uploadResponse = await fetch(`${API_BASE_FINANCE}/api/finance/deposits/receipt`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    
+                    if (uploadResponse.ok) {
+                        const uploadData = await uploadResponse.json();
+                        receiptUrl = uploadData.receiptUrl;
+                    } else {
+                        showMessage('Erro ao fazer upload do comprovante.', true);
+                        return;
+                    }
+                } catch (error) {
+                    showMessage('Erro ao fazer upload do comprovante.', true);
+                    return;
+                }
+            } else if (id) {
+                // Se editando e não há novo arquivo, manter o URL existente
+                const existingDeposit = await fetch(`${API_BASE_FINANCE}/api/finance/deposits`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(r => r.json()).then(d => d.deposits.find(dep => dep.id === id));
+                if (existingDeposit) receiptUrl = existingDeposit.receiptUrl || '';
+            }
+
+            const data = {
+                memberId,
+                memberName: member ? member.name : '',
+                amount: parseFloat(document.getElementById('deposit-amount').value),
+                depositDate: document.getElementById('deposit-date').value,
+                description: document.getElementById('deposit-description').value,
+                receiptUrl
+            };
+
+            try {
+                const url = id 
+                    ? `${API_BASE_FINANCE}/api/finance/deposits/${id}`
+                    : `${API_BASE_FINANCE}/api/finance/deposits`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showMessage(id ? 'Depósito atualizado!' : 'Depósito criado!');
+                    closeDepositModal();
+                    loadDeposits();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.message || 'Erro ao salvar.', true);
+                }
+            } catch (error) {
+                showMessage('Erro de conexão.', true);
+            }
+        }
+
+        async function deleteDeposit(id) {
+            if (!confirm('Deseja realmente excluir este depósito?')) return;
+            
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/deposits/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Depósito excluído!');
+                    loadDeposits();
+                } else {
+                    showMessage('Erro ao excluir.', true);
+                }
+            } catch (error) {
+                showMessage('Erro de conexão.', true);
+            }
+        }
+
+        // ========== GASTOS ==========
+        
+        function openAddExpenseModal() {
+            document.getElementById('expense-modal-title').textContent = 'Novo Gasto';
+            document.getElementById('expense-form').reset();
+            document.getElementById('expense-id').value = '';
+            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('expense-modal').classList.remove('hidden');
+        }
+
+        async function editExpense(id) {
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/expenses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                const expense = data.expenses.find(e => e.id === id);
+                
+                if (expense) {
+                    document.getElementById('expense-modal-title').textContent = 'Editar Gasto';
+                    document.getElementById('expense-id').value = expense.id;
+                    document.getElementById('expense-description').value = expense.description;
+                    document.getElementById('expense-amount').value = expense.amount;
+                    document.getElementById('expense-date').value = expense.expenseDate ? expense.expenseDate.split('T')[0] : '';
+                    document.getElementById('expense-category').value = expense.category || 'outros';
+                    document.getElementById('expense-modal').classList.remove('hidden');
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar gasto.', true);
+            }
+        }
+
+        function closeExpenseModal(event) {
+            if (!event || event.target.id === 'expense-modal') {
+                document.getElementById('expense-modal').classList.add('hidden');
+            }
+        }
+
+        async function saveExpense(event) {
+            event.preventDefault();
+            const token = localStorage.getItem('adminToken');
+            const id = document.getElementById('expense-id').value;
+
+            const data = {
+                description: document.getElementById('expense-description').value,
+                amount: parseFloat(document.getElementById('expense-amount').value),
+                expenseDate: document.getElementById('expense-date').value,
+                category: document.getElementById('expense-category').value
+            };
+
+            try {
+                const url = id 
+                    ? `${API_BASE_FINANCE}/api/finance/expenses/${id}`
+                    : `${API_BASE_FINANCE}/api/finance/expenses`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showMessage(id ? 'Gasto atualizado!' : 'Gasto criado!');
+                    closeExpenseModal();
+                    loadExpenses();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.message || 'Erro ao salvar.', true);
+                }
+            } catch (error) {
+                showMessage('Erro de conexão.', true);
+            }
+        }
+
+        async function deleteExpense(id) {
+            if (!confirm('Deseja realmente excluir este gasto?')) return;
+            
+            const token = localStorage.getItem('adminToken');
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/expenses/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Gasto excluído!');
+                    loadExpenses();
+                } else {
+                    showMessage('Erro ao excluir.', true);
+                }
+            } catch (error) {
+                showMessage('Erro de conexão.', true);
+            }
+        }
+
+        // ========== HISTÓRICO INDIVIDUAL ==========
+        
+        async function viewMemberHistory(memberId) {
+            const token = localStorage.getItem('adminToken');
+            const member = allMembers.find(m => m.id === memberId);
+            const memberName = member ? member.name : 'Membro';
+            
+            document.getElementById('history-modal-title').textContent = `Histórico - ${memberName}`;
+            document.getElementById('history-content').innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando...</p>';
+            document.getElementById('history-modal').classList.remove('hidden');
+            
+            try {
+                const response = await fetch(`${API_BASE_FINANCE}/api/finance/reports/member/${memberId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                let html = '<div class="space-y-4">';
+                
+                // Contribuições
+                html += '<div><h4 class="font-bold text-lg mb-2">Contribuições</h4>';
+                if (data.contributions && data.contributions.length > 0) {
+                    html += '<div class="space-y-2">';
+                    data.contributions.forEach(c => {
+                        const date = c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-BR') : 'N/A';
+                        html += `
+                            <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 rounded-lg border border-green-600/20">
+                                <p class="font-semibold">${c.month}/${c.year} - R$ ${c.amount.toFixed(2)}</p>
+                                <p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">Status: ${c.status === 'paid' ? 'Pago' : 'Pendente'} | Registrado em: ${date}</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhuma contribuição registrada.</p>';
+                }
+                html += '</div>';
+                
+                // Depósitos
+                html += '<div><h4 class="font-bold text-lg mb-2">Depósitos</h4>';
+                if (data.deposits && data.deposits.length > 0) {
+                    html += '<div class="space-y-2">';
+                    data.deposits.forEach(d => {
+                        const date = d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A';
+                        html += `
+                            <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 rounded-lg border border-green-600/20">
+                                <p class="font-semibold">R$ ${d.amount.toFixed(2)} - ${date}</p>
+                                ${d.description ? `<p class="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">${d.description}</p>` : ''}
+                                ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="text-green-600 hover:underline text-sm">Ver comprovante</a>` : ''}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<p class="text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum depósito registrado.</p>';
+                }
+                html += '</div>';
+                
+                html += '</div>';
+                document.getElementById('history-content').innerHTML = html;
+            } catch (error) {
+                document.getElementById('history-content').innerHTML = '<p class="text-center text-red-500">Erro ao carregar histórico.</p>';
+            }
+        }
+
+        function closeHistoryModal(event) {
+            if (!event || event.target.id === 'history-modal') {
+                document.getElementById('history-modal').classList.add('hidden');
+            }
+        }
+
+        // Carregar dados quando a página financeira é acessada
+        if (typeof window !== 'undefined') {
+            window.addEventListener('hashchange', () => {
+                if (window.location.hash === '#financeiro' || window.location.hash === '#finance') {
+                    setTimeout(() => {
+                        if (currentFinanceTab === 'contributions') loadContributions();
+                        else if (currentFinanceTab === 'deposits') loadDeposits();
+                        else if (currentFinanceTab === 'expenses') loadExpenses();
+                    }, 500);
+                }
+            });
+        }
+
         // Variável global temporária para a chave
         // Atalho para compatibilidade com as novas funções
         function showLoading(show, message = 'Carregando...') {
@@ -3132,6 +4084,7 @@
                 'contato': [{ name: 'Home', page: 'home' }, { name: 'Contato', page: 'contato' }],
                 'member-registration': [{ name: 'Home', page: 'home' }, { name: 'Cadastro', page: 'member-registration' }],
                 'reports': [{ name: 'Home', page: 'home' }, { name: 'Área Administrativa', page: 'reports' }],
+                'financeiro': [{ name: 'Home', page: 'home' }, { name: 'Área Administrativa', page: 'reports' }, { name: 'Financeiro', page: 'financeiro' }],
             };
             
             const breadcrumbs = breadcrumbMap[page] || [{ name: 'Home', page: 'home' }];
@@ -3172,6 +4125,7 @@
                     case 'contato': pageTitle = 'Fale Conosco'; break;
                     case 'member-registration': pageTitle = 'Cadastro de Membros'; break;
                     case 'reports': pageTitle = 'Área Administrativa'; break;
+                    case 'financeiro': pageTitle = 'Área Financeira'; break;
                     default: pageTitle = 'Página Não Encontrada';
                 }
             }
@@ -3206,6 +4160,7 @@
                     case 'contato': html += generateContatoPage(); break;
                     case 'member-registration': html += generateCadastroPage(); break;
                     case 'reports': html += generateReportsPage(); break;
+                    case 'financeiro': html += generateFinancePage(); break;
                     default: html += '<p class="text-center text-xl dark:text-rjb-text-dark/80 text-rjb-text/80">Opa! Página não encontrada.</p>';
                 }
 
@@ -4302,6 +5257,154 @@
             </div>
         </div>
     </div>
+
+    <!-- Modais da Área Financeira -->
+    
+    <!-- Modal: Adicionar/Editar Contribuição -->
+    <div id="contribution-modal" onclick="closeContributionModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 class="text-2xl font-bold text-green-600 mb-4" id="contribution-modal-title">Nova Contribuição</h3>
+            <form id="contribution-form" onsubmit="saveContribution(event)" class="space-y-4">
+                <input type="hidden" id="contribution-id">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Membro</label>
+                    <select id="contribution-member-id" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <option value="">Selecione um membro</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Mês</label>
+                    <select id="contribution-month" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <option value="">Selecione</option>
+                        ${Array.from({length: 12}, (_, i) => `<option value="${i+1}">${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i]}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Ano</label>
+                    <input type="number" id="contribution-year" required min="2020" max="2100" value="${new Date().getFullYear()}" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Valor (R$)</label>
+                    <input type="number" id="contribution-amount" required step="0.01" min="0" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Status</label>
+                    <select id="contribution-status" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <option value="pending">Pendente</option>
+                        <option value="paid">Pago</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeContributionModal()" class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Adicionar/Editar Depósito -->
+    <div id="deposit-modal" onclick="closeDepositModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 class="text-2xl font-bold text-green-600 mb-4" id="deposit-modal-title">Novo Depósito</h3>
+            <form id="deposit-form" onsubmit="saveDeposit(event)" class="space-y-4">
+                <input type="hidden" id="deposit-id">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Membro</label>
+                    <select id="deposit-member-id" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <option value="">Selecione um membro</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Data do Depósito</label>
+                    <input type="date" id="deposit-date" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Valor (R$)</label>
+                    <input type="number" id="deposit-amount" required step="0.01" min="0" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Descrição (opcional)</label>
+                    <textarea id="deposit-description" rows="2" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Comprovante</label>
+                    <input type="file" id="deposit-receipt" accept="image/*,.pdf" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                    <p class="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1">Formatos aceitos: JPG, PNG, PDF</p>
+                    <div id="deposit-receipt-preview" class="mt-2 hidden">
+                        <a id="deposit-receipt-link" href="#" target="_blank" class="text-green-600 hover:underline">Ver comprovante atual</a>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDepositModal()" class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Adicionar/Editar Gasto -->
+    <div id="expense-modal" onclick="closeExpenseModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 class="text-2xl font-bold text-green-600 mb-4" id="expense-modal-title">Novo Gasto</h3>
+            <form id="expense-form" onsubmit="saveExpense(event)" class="space-y-4">
+                <input type="hidden" id="expense-id">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Descrição</label>
+                    <input type="text" id="expense-description" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Valor (R$)</label>
+                    <input type="number" id="expense-amount" required step="0.01" min="0" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Data</label>
+                    <input type="date" id="expense-date" required class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Categoria</label>
+                    <select id="expense-category" class="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+                        <option value="lanche">Lanche</option>
+                        <option value="transporte">Transporte</option>
+                        <option value="equipamento">Equipamento</option>
+                        <option value="evento">Evento</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeExpenseModal()" class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Histórico Individual -->
+    <div id="history-modal" onclick="closeHistoryModal(event)" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div onclick="event.stopPropagation()" class="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl shadow-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-2xl font-bold text-green-600 mb-4" id="history-modal-title">Histórico de Pagamentos</h3>
+            <div id="history-content">
+                <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando...</p>
+            </div>
+            <div class="mt-4">
+                <button onclick="closeHistoryModal()" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

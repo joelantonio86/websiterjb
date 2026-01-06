@@ -18,7 +18,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-9
 const ADMIN_USERS = [
     { email: 'regente@racionaljazzband.com', password: 'SenhaSuperSecreta123', role: 'regente' },
     { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin' },
-    { email: 'samara.oliver3012@gmail.com', password: 'samoliveiraRJB@1935', role: 'admin' },
+    { email: 'samara.oliver3012@gmail.com', password: 'financeiroRJB@1935', role: 'admin-financeiro' },
     { email: 'adersontm@hotmail.com', password: 'R8mQ4ZpA', role: 'admin' },
     { email: 'teste@hotmail.com', password: '123456Joel', role: 'admin' },
     { email: 'clarinetabest@hotmail.com', password: 'u7#K9pZ$', role: 'admin' },
@@ -290,6 +290,404 @@ app.put('/api/admin/update-member/:id', authenticateJWT, async (req, res) => {
     } catch (error) {
         console.error('Erro ao atualizar membro:', error);
         res.status(500).json({ message: 'Erro ao atualizar dados no servidor.' });
+    }
+});
+
+// --- 10. Rotas da Área Financeira ---
+
+// Middleware para verificar acesso financeiro (role 'financeiro' ou 'admin-financeiro')
+function requireFinanceAccess(req, res, next) {
+    if (req.user.role !== 'financeiro' && req.user.role !== 'admin-financeiro') {
+        return res.status(403).json({ status: 403, message: 'Acesso negado. Área restrita ao financeiro.' });
+    }
+    next();
+}
+
+// Coleções do Firestore para área financeira
+const contributionsCollection = db.collection('contributions');
+const depositsCollection = db.collection('deposits');
+const expensesCollection = db.collection('expenses');
+
+// --- Contribuições Mensais (CRUD) ---
+
+// Listar todas as contribuições
+app.get('/api/finance/contributions', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const snapshot = await contributionsCollection.orderBy('month', 'desc').get();
+        const data = [];
+        snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+        res.status(200).json({ contributions: data });
+    } catch (error) {
+        console.error('Erro ao buscar contribuições:', error);
+        res.status(500).json({ message: 'Erro ao buscar contribuições.' });
+    }
+});
+
+// Criar nova contribuição
+app.post('/api/finance/contributions', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { memberId, memberName, month, year, amount, status } = req.body;
+        
+        if (!memberId || !month || !year || !amount) {
+            return res.status(400).json({ message: 'Campos obrigatórios: memberId, month, year, amount.' });
+        }
+
+        const contributionData = {
+            memberId,
+            memberName: memberName || '',
+            month: parseInt(month),
+            year: parseInt(year),
+            amount: parseFloat(amount),
+            status: status || 'pending',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user.userId
+        };
+
+        const docRef = await contributionsCollection.add(contributionData);
+        res.status(200).json({ status: 200, message: 'Contribuição registrada.', id: docRef.id });
+    } catch (error) {
+        console.error('Erro ao criar contribuição:', error);
+        res.status(500).json({ message: 'Erro ao registrar contribuição.' });
+    }
+});
+
+// Atualizar contribuição
+app.put('/api/finance/contributions/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        
+        delete updateData.id;
+        delete updateData.createdAt;
+        delete updateData.createdBy;
+        
+        updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+        updateData.updatedBy = req.user.userId;
+
+        await contributionsCollection.doc(id).update(updateData);
+        res.status(200).json({ status: 200, message: 'Contribuição atualizada.' });
+    } catch (error) {
+        console.error('Erro ao atualizar contribuição:', error);
+        res.status(500).json({ message: 'Erro ao atualizar contribuição.' });
+    }
+});
+
+// Excluir contribuição
+app.delete('/api/finance/contributions/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        await contributionsCollection.doc(req.params.id).delete();
+        res.status(200).json({ status: 200, message: 'Contribuição excluída.' });
+    } catch (error) {
+        console.error('Erro ao excluir contribuição:', error);
+        res.status(500).json({ message: 'Erro ao excluir contribuição.' });
+    }
+});
+
+// --- Depósitos com Comprovantes (CRUD) ---
+
+// Listar todos os depósitos
+app.get('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const snapshot = await depositsCollection.orderBy('depositDate', 'desc').get();
+        const data = [];
+        snapshot.forEach(doc => {
+            const deposit = { id: doc.id, ...doc.data() };
+            // Converter Timestamp para ISO string se necessário
+            if (deposit.depositDate && deposit.depositDate.toDate) {
+                deposit.depositDate = deposit.depositDate.toDate().toISOString();
+            }
+            if (deposit.createdAt && deposit.createdAt.toDate) {
+                deposit.createdAt = deposit.createdAt.toDate().toISOString();
+            }
+            data.push(deposit);
+        });
+        res.status(200).json({ deposits: data });
+    } catch (error) {
+        console.error('Erro ao buscar depósitos:', error);
+        res.status(500).json({ message: 'Erro ao buscar depósitos.' });
+    }
+});
+
+// Criar novo depósito
+app.post('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { memberId, memberName, amount, depositDate, description, receiptUrl } = req.body;
+        
+        if (!memberId || !amount || !depositDate) {
+            return res.status(400).json({ message: 'Campos obrigatórios: memberId, amount, depositDate.' });
+        }
+
+        const depositData = {
+            memberId,
+            memberName: memberName || '',
+            amount: parseFloat(amount),
+            depositDate: admin.firestore.Timestamp.fromDate(new Date(depositDate)),
+            description: description || '',
+            receiptUrl: receiptUrl || '',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user.userId
+        };
+
+        const docRef = await depositsCollection.add(depositData);
+        res.status(200).json({ status: 200, message: 'Depósito registrado.', id: docRef.id });
+    } catch (error) {
+        console.error('Erro ao criar depósito:', error);
+        res.status(500).json({ message: 'Erro ao registrar depósito.' });
+    }
+});
+
+// Upload de comprovante de depósito
+app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceAccess, upload.single('receipt'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
+    
+    try {
+        const fileName = `deposits/${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
+        const blob = bucket.file(fileName);
+        const blobStream = blob.createWriteStream({ resumable: false, metadata: { contentType: req.file.mimetype } });
+
+        blobStream.on('error', () => res.status(500).json({ message: 'Erro no upload.' }));
+        blobStream.on('finish', () => {
+            const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(fileName)}`;
+            res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });
+        });
+        blobStream.end(req.file.buffer);
+    } catch (error) {
+        console.error('Erro ao fazer upload do comprovante:', error);
+        res.status(500).json({ message: 'Erro ao fazer upload.' });
+    }
+});
+
+// Atualizar depósito
+app.put('/api/finance/deposits/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        
+        delete updateData.id;
+        delete updateData.createdAt;
+        delete updateData.createdBy;
+        
+        if (updateData.depositDate) {
+            updateData.depositDate = admin.firestore.Timestamp.fromDate(new Date(updateData.depositDate));
+        }
+        
+        updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+        updateData.updatedBy = req.user.userId;
+
+        await depositsCollection.doc(id).update(updateData);
+        res.status(200).json({ status: 200, message: 'Depósito atualizado.' });
+    } catch (error) {
+        console.error('Erro ao atualizar depósito:', error);
+        res.status(500).json({ message: 'Erro ao atualizar depósito.' });
+    }
+});
+
+// Excluir depósito
+app.delete('/api/finance/deposits/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        await depositsCollection.doc(req.params.id).delete();
+        res.status(200).json({ status: 200, message: 'Depósito excluído.' });
+    } catch (error) {
+        console.error('Erro ao excluir depósito:', error);
+        res.status(500).json({ message: 'Erro ao excluir depósito.' });
+    }
+});
+
+// --- Gastos da RJB (CRUD) ---
+
+// Listar todos os gastos
+app.get('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const snapshot = await expensesCollection.orderBy('expenseDate', 'desc').get();
+        const data = [];
+        snapshot.forEach(doc => {
+            const expense = { id: doc.id, ...doc.data() };
+            if (expense.expenseDate && expense.expenseDate.toDate) {
+                expense.expenseDate = expense.expenseDate.toDate().toISOString();
+            }
+            if (expense.createdAt && expense.createdAt.toDate) {
+                expense.createdAt = expense.createdAt.toDate().toISOString();
+            }
+            data.push(expense);
+        });
+        res.status(200).json({ expenses: data });
+    } catch (error) {
+        console.error('Erro ao buscar gastos:', error);
+        res.status(500).json({ message: 'Erro ao buscar gastos.' });
+    }
+});
+
+// Criar novo gasto
+app.post('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { description, amount, expenseDate, category } = req.body;
+        
+        if (!description || !amount || !expenseDate) {
+            return res.status(400).json({ message: 'Campos obrigatórios: description, amount, expenseDate.' });
+        }
+
+        const expenseData = {
+            description,
+            amount: parseFloat(amount),
+            expenseDate: admin.firestore.Timestamp.fromDate(new Date(expenseDate)),
+            category: category || 'outros',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user.userId
+        };
+
+        const docRef = await expensesCollection.add(expenseData);
+        res.status(200).json({ status: 200, message: 'Gasto registrado.', id: docRef.id });
+    } catch (error) {
+        console.error('Erro ao criar gasto:', error);
+        res.status(500).json({ message: 'Erro ao registrar gasto.' });
+    }
+});
+
+// Atualizar gasto
+app.put('/api/finance/expenses/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        
+        delete updateData.id;
+        delete updateData.createdAt;
+        delete updateData.createdBy;
+        
+        if (updateData.expenseDate) {
+            updateData.expenseDate = admin.firestore.Timestamp.fromDate(new Date(updateData.expenseDate));
+        }
+        
+        updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+        updateData.updatedBy = req.user.userId;
+
+        await expensesCollection.doc(id).update(updateData);
+        res.status(200).json({ status: 200, message: 'Gasto atualizado.' });
+    } catch (error) {
+        console.error('Erro ao atualizar gasto:', error);
+        res.status(500).json({ message: 'Erro ao atualizar gasto.' });
+    }
+});
+
+// Excluir gasto
+app.delete('/api/finance/expenses/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        await expensesCollection.doc(req.params.id).delete();
+        res.status(200).json({ status: 200, message: 'Gasto excluído.' });
+    } catch (error) {
+        console.error('Erro ao excluir gasto:', error);
+        res.status(500).json({ message: 'Erro ao excluir gasto.' });
+    }
+});
+
+// --- Relatórios Financeiros ---
+
+// Relatório de pagamentos e pendências
+app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { year, month } = req.query;
+        
+        // Buscar todos os membros
+        const membersSnapshot = await membersCollection.get();
+        const members = [];
+        membersSnapshot.forEach(doc => members.push({ id: doc.id, ...doc.data() }));
+
+        // Buscar contribuições
+        let contributionsQuery = contributionsCollection;
+        if (year) {
+            contributionsQuery = contributionsQuery.where('year', '==', parseInt(year));
+        }
+        if (month) {
+            contributionsQuery = contributionsQuery.where('month', '==', parseInt(month));
+        }
+        
+        const contributionsSnapshot = await contributionsQuery.get();
+        const contributions = [];
+        contributionsSnapshot.forEach(doc => contributions.push({ id: doc.id, ...doc.data() }));
+
+        // Buscar depósitos
+        const depositsSnapshot = await depositsCollection.get();
+        const deposits = [];
+        depositsSnapshot.forEach(doc => {
+            const deposit = { id: doc.id, ...doc.data() };
+            if (deposit.depositDate && deposit.depositDate.toDate) {
+                deposit.depositDate = deposit.depositDate.toDate().toISOString();
+            }
+            deposits.push(deposit);
+        });
+
+        // Processar dados
+        const report = members.map(member => {
+            const memberContributions = contributions.filter(c => c.memberId === member.id);
+            const memberDeposits = deposits.filter(d => d.memberId === member.id);
+            
+            // Último mês pago
+            const paidMonths = memberContributions
+                .filter(c => c.status === 'paid')
+                .map(c => ({ month: c.month, year: c.year }))
+                .sort((a, b) => {
+                    if (a.year !== b.year) return b.year - a.year;
+                    return b.month - a.month;
+                });
+            
+            const lastPaidMonth = paidMonths.length > 0 ? paidMonths[0] : null;
+            
+            // Total pago
+            const totalPaid = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+            
+            // Pendências (contribuições pendentes)
+            const pendingContributions = memberContributions.filter(c => c.status === 'pending');
+            const totalPending = pendingContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
+
+            return {
+                memberId: member.id,
+                memberName: member.name,
+                lastPaidMonth: lastPaidMonth ? `${lastPaidMonth.month}/${lastPaidMonth.year}` : 'Nunca',
+                totalPaid,
+                totalPending,
+                pendingContributions: pendingContributions.length
+            };
+        });
+
+        res.status(200).json({ report });
+    } catch (error) {
+        console.error('Erro ao gerar relatório:', error);
+        res.status(500).json({ message: 'Erro ao gerar relatório.' });
+    }
+});
+
+// Histórico individual de pagamentos
+app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinanceAccess, async (req, res) => {
+    try {
+        const { memberId } = req.params;
+        
+        const contributionsSnapshot = await contributionsCollection.where('memberId', '==', memberId).orderBy('year', 'desc').orderBy('month', 'desc').get();
+        const depositsSnapshot = await depositsCollection.where('memberId', '==', memberId).orderBy('depositDate', 'desc').get();
+        
+        const contributions = [];
+        contributionsSnapshot.forEach(doc => {
+            const contrib = { id: doc.id, ...doc.data() };
+            if (contrib.createdAt && contrib.createdAt.toDate) {
+                contrib.createdAt = contrib.createdAt.toDate().toISOString();
+            }
+            contributions.push(contrib);
+        });
+        
+        const deposits = [];
+        depositsSnapshot.forEach(doc => {
+            const deposit = { id: doc.id, ...doc.data() };
+            if (deposit.depositDate && deposit.depositDate.toDate) {
+                deposit.depositDate = deposit.depositDate.toDate().toISOString();
+            }
+            if (deposit.createdAt && deposit.createdAt.toDate) {
+                deposit.createdAt = deposit.createdAt.toDate().toISOString();
+            }
+            deposits.push(deposit);
+        });
+
+        res.status(200).json({ contributions, deposits });
+    } catch (error) {
+        console.error('Erro ao buscar histórico:', error);
+        res.status(500).json({ message: 'Erro ao buscar histórico.' });
     }
 });
 
