@@ -1,3 +1,6 @@
+// Carregar variáveis de ambiente
+require('dotenv').config();
+
 const nodemailer = require('nodemailer');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -15,18 +18,24 @@ const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com, racionaljazzbandoficia
 const VALID_INVITE_KEYS = ['RJB-MEMBER-2025', 'RJB-TESTE-999'];
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-987654321';
 
-const ADMIN_USERS = [
-    { email: 'regente@racionaljazzband.com', password: 'SenhaSuperSecreta123', role: 'regente' },
-    { email: 'naleribeiro@hotmail.com', password: 'naleribeiroRJB', role: 'admin' },
-    { email: 'samara.oliver3012@gmail.com', password: 'financeiroRJB@1935', role: 'admin-financeiro' },
-    { email: 'adersontm@hotmail.com', password: 'R8mQ4ZpA', role: 'admin' },
-    { email: 'teste@hotmail.com', password: '123456Joel', role: 'admin' },
-    { email: 'clarinetabest@hotmail.com', password: 'u7#K9pZ$', role: 'admin' },
-    { email: 'anapaulacmarciano@gmail.com', password: 'a8@J7uC$', role: 'admin' },
-    { email: 'edilashirley@gmail.com', password: 'b5!T3gC$', role: 'admin' },
-    { email: 'vivian.colombo@hotmail.com', password: 'V3%u1An$', role: 'admin' },
-    { email: 'andressamqxs@gmail.com', password: 'A4@d3r$An', role: 'admin' },
-];
+// Carregar usuários administradores de variáveis de ambiente
+// Se ADMIN_USERS não estiver definido nas variáveis de ambiente, usa valores padrão (fallback)
+let ADMIN_USERS = [];
+try {
+    if (process.env.ADMIN_USERS) {
+        ADMIN_USERS = JSON.parse(process.env.ADMIN_USERS);
+    } else {
+        // ⚠️ SEGURANÇA: NUNCA deixe senhas hardcoded no código!
+        // Configure ADMIN_USERS via variáveis de ambiente (.env ou Cloud Run)
+        console.error('❌ ERRO DE SEGURANÇA: ADMIN_USERS não definido nas variáveis de ambiente!');
+        console.error('⚠️  Configure a variável ADMIN_USERS no arquivo .env ou nas variáveis de ambiente do Cloud Run.');
+        console.error('📖 Consulte README-SECURITY.md para instruções de configuração.');
+        throw new Error('ADMIN_USERS não configurado. Configure via variáveis de ambiente para segurança. Consulte README-SECURITY.md');
+    }
+} catch (error) {
+    console.error('❌ Erro ao carregar ADMIN_USERS das variáveis de ambiente:', error);
+    throw new Error('Erro ao carregar configuração de usuários administradores. Verifique a variável ADMIN_USERS.');
+}
 
 const app = express();
 const PORT = process.env.PORT || 8080;
