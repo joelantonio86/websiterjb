@@ -4,6 +4,7 @@
 .env.production
 *.env
 password.env
+generate-admin-users.js
 
 # Node modules
 node_modules/
