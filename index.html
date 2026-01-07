@@ -1335,6 +1335,11 @@
     const reportArea = document.getElementById('member-report-details');
     if (!reportArea) return;
 
+    // Preservar foco e valor do campo de busca antes de re-renderizar
+    const searchInput = document.querySelector('input[placeholder="Buscar por nome..."]');
+    const wasSearchFocused = document.activeElement === searchInput;
+    const searchCursorPosition = searchInput ? searchInput.selectionStart : null;
+
     const totalMembros = data.totalMembers || 0;
     
     // Usa dados originais (não filtrados) para popular os selects
@@ -1660,10 +1665,22 @@
         ${paginationHTML}
     `;
     
-    // Atualiza estilos dos selects após renderização
+    // Atualiza estilos dos selects após renderização e restaura foco do campo de busca
     setTimeout(() => {
         updateSelectStyle('filter-instrument', memberFilters.instrument);
         updateSelectStyle('filter-location', memberFilters.location);
+        
+        // Restaurar foco no campo de busca se estava focado antes da renderização
+        if (wasSearchFocused) {
+            const newSearchInput = document.querySelector('input[placeholder="Buscar por nome..."]');
+            if (newSearchInput) {
+                newSearchInput.focus();
+                // Restaurar posição do cursor se estava digitando
+                if (searchCursorPosition !== null && searchCursorPosition !== undefined) {
+                    newSearchInput.setSelectionRange(searchCursorPosition, searchCursorPosition);
+                }
+            }
+        }
     }, 100);
 }
 
