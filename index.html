@@ -179,6 +179,16 @@
         // --- FUNÇÕES DE UTILIDADE GERAL ---
         // index.html (Adicionar no bloco de Funções de Utilidade Geral)
 
+        // Função de debounce para busca de membros
+        function debounceSearch(callback) {
+            if (searchDebounceTimer) {
+                clearTimeout(searchDebounceTimer);
+            }
+            searchDebounceTimer = setTimeout(() => {
+                callback();
+            }, 300); // Aguarda 300ms após parar de digitar
+        }
+
         function toggleLoader(show, message = 'Carregando...') {
             const loader = document.getElementById('loading-overlay');
             const loaderMessage = document.getElementById('loader-message');
@@ -1299,14 +1309,20 @@
             
             let filtered = [...data.allMembers];
             
+            // Normalizar o termo de busca para minúsculas e sem acentos
+            const normalizeText = (text) => {
+                return (text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            };
+            
             // Aplicar Filtros com tratamento para nulos
             filtered = filtered.filter(m => {
-                const name = (m.name || "").toLowerCase();
-                const instrument = (m.instrument || "").toLowerCase();
+                const name = normalizeText(m.name);
+                const instrument = normalizeText(m.instrument);
                 const location = `${m.city || ''}/${m.state || ''}`.trim();
                 
-                const nameMatch = !memberFilters.name || name.includes(memberFilters.name.toLowerCase());
-                const instrumentMatch = !memberFilters.instrument || instrument === memberFilters.instrument.toLowerCase();
+                const searchName = normalizeText(memberFilters.name);
+                const nameMatch = !memberFilters.name || name.includes(searchName);
+                const instrumentMatch = !memberFilters.instrument || instrument === normalizeText(memberFilters.instrument);
                 const locationMatch = !memberFilters.location || location === memberFilters.location;
                 
                 return nameMatch && instrumentMatch && locationMatch;
@@ -1506,7 +1522,8 @@
                             </span>
                             <input type="text" placeholder="Buscar por nome..." value="${memberFilters.name}" 
                                 class="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md" 
-                                oninput="debounceSearch(() => { memberFilters.name = this.value; currentMemberPage = 1; processAndRenderMembers(lastFetchedData); })">
+                                oninput="debounceSearch(() => { memberFilters.name = this.value; currentMemberPage = 1; processAndRenderMembers(lastFetchedData); })"
+                                onkeypress="if(event.key === 'Enter') { event.preventDefault(); if(searchDebounceTimer) clearTimeout(searchDebounceTimer); memberFilters.name = this.value; currentMemberPage = 1; processAndRenderMembers(lastFetchedData); }">
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
