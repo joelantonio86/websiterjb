@@ -4049,19 +4049,30 @@
                             textColor: [255, 255, 255],
                             fontSize: 9,
                             fontStyle: 'bold',
-                            2: { halign: 'right' }
+                            0: { halign: 'left' },
+                            1: { halign: 'left' },
+                            2: { halign: 'right' },
+                            3: { halign: 'left' }
                         },
                         columnStyles: {
-                            0: { cellWidth: 70 },
-                            1: { cellWidth: 35 },
+                            0: { cellWidth: 70, halign: 'left' },
+                            1: { cellWidth: 35, halign: 'left' },
                             2: { cellWidth: 40, halign: 'right' },
-                            3: { cellWidth: 60 }
+                            3: { cellWidth: 60, halign: 'left' }
                         },
                         styles: { 
                             fontSize: 8,
                             cellPadding: 3
                         },
-                        margin: { left: 14, right: 14 }
+                        margin: { left: 14, right: 14 },
+                        didParseCell: function(data) {
+                            if (data.column.index === 2) { // Coluna Valor
+                                data.cell.styles.halign = 'right';
+                                if (data.row.index === -1) { // Cabeçalho
+                                    data.cell.styles.halign = 'right';
+                                }
+                            }
+                        }
                     });
                     
                     // Total do mês
@@ -4248,19 +4259,30 @@
                             textColor: [255, 255, 255],
                             fontSize: 9,
                             fontStyle: 'bold',
+                            0: { halign: 'left' },
+                            1: { halign: 'left' },
+                            2: { halign: 'left' },
                             3: { halign: 'right' }
                         },
                         columnStyles: {
-                            0: { cellWidth: 35 },
-                            1: { cellWidth: 80 },
-                            2: { cellWidth: 50 },
+                            0: { cellWidth: 35, halign: 'left' },
+                            1: { cellWidth: 80, halign: 'left' },
+                            2: { cellWidth: 50, halign: 'left' },
                             3: { cellWidth: 40, halign: 'right' }
                         },
                         styles: { 
                             fontSize: 8,
                             cellPadding: 3
                         },
-                        margin: { left: 14, right: 14 }
+                        margin: { left: 14, right: 14 },
+                        didParseCell: function(data) {
+                            if (data.column.index === 3) { // Coluna Valor
+                                data.cell.styles.halign = 'right';
+                                if (data.row.index === -1) { // Cabeçalho
+                                    data.cell.styles.halign = 'right';
+                                }
+                            }
+                        }
                     });
                     
                     // Total do mês
