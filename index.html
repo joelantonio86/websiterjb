@@ -3021,6 +3021,33 @@
                     </div>
                 </div>
                 <div class="p-5 sm:p-6">
+                    <!-- Campo de busca e botão PDF -->
+                    <div class="mb-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </span>
+                            <input type="text" id="contributions-search" placeholder="Buscar por nome do membro..." 
+                                class="pl-10 pr-3 py-2 w-full text-sm rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-green-600 focus:ring-2 focus:ring-green-600/20 outline-none transition-all"
+                                oninput="debounceSearch(() => { filterContributions(); })"
+                                onkeypress="if(event.key === 'Enter') { event.preventDefault(); if(searchDebounceTimer) clearTimeout(searchDebounceTimer); filterContributions(); }">
+                        </div>
+                        <button onclick="generateContributionsPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Gerar PDF
+                        </button>
+                    </div>
+                    <!-- Total geral -->
+                    <div id="contributions-total" class="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm sm:text-base font-semibold text-green-800 dark:text-green-200">Total Pago:</span>
+                            <span class="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400" id="contributions-total-value">R$ 0,00</span>
+                        </div>
+                    </div>
                     <div id="contributions-list" class="space-y-3">
                         <p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando contribuições...</p>
                     </div>
@@ -3050,6 +3077,26 @@
                     </div>
                 </div>
                 <div class="p-5 sm:p-6">
+                    <!-- Campo de busca e botão PDF -->
+                    <div class="mb-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </span>
+                            <input type="text" id="deposits-search" placeholder="Buscar por nome do membro..." 
+                                class="pl-10 pr-3 py-2 w-full text-sm rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-green-600 focus:ring-2 focus:ring-green-600/20 outline-none transition-all"
+                                oninput="debounceSearch(() => { filterDeposits(); })"
+                                onkeypress="if(event.key === 'Enter') { event.preventDefault(); if(searchDebounceTimer) clearTimeout(searchDebounceTimer); filterDeposits(); }">
+                        </div>
+                        <button onclick="generateDepositsPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Gerar PDF
+                        </button>
+                    </div>
                     <div id="deposits-total" class="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                         <div class="flex items-center justify-between">
                             <span class="text-sm sm:text-base font-semibold text-green-800 dark:text-green-200">Total de Depósitos:</span>
@@ -3085,6 +3132,26 @@
                     </div>
                 </div>
                 <div class="p-5 sm:p-6">
+                    <!-- Campo de busca e botão PDF -->
+                    <div class="mb-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </span>
+                            <input type="text" id="expenses-search" placeholder="Buscar por descrição..." 
+                                class="pl-10 pr-3 py-2 w-full text-sm rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-red-600 focus:ring-2 focus:ring-red-600/20 outline-none transition-all"
+                                oninput="debounceSearch(() => { filterExpenses(); })"
+                                onkeypress="if(event.key === 'Enter') { event.preventDefault(); if(searchDebounceTimer) clearTimeout(searchDebounceTimer); filterExpenses(); }">
+                        </div>
+                        <button onclick="generateExpensesPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Gerar PDF
+                        </button>
+                    </div>
                     <div id="expenses-total" class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                         <div class="flex items-center justify-between">
                             <span class="text-sm sm:text-base font-semibold text-red-800 dark:text-red-200">Total de Gastos:</span>
@@ -3159,11 +3226,17 @@
         }
 
         // ========== FUNÇÕES DA ÁREA FINANCEIRA ==========
-        
+
         const API_BASE_FINANCE = 'https://rjb-email-sender-215755766100.europe-west1.run.app';
         const MONTHLY_CONTRIBUTION_AMOUNT = 20.00; // Valor mensal obrigatório de contribuição
         let currentFinanceTab = 'contributions';
         let financePageInitialized = false; // Flag para controlar inicialização
+        
+        // Variáveis para armazenar dados e filtros
+        let allContributions = [];
+        let allDeposits = [];
+        let allExpenses = [];
+        let allMembers = [];
 
         // Trocar entre abas da área financeira
         function switchFinanceTab(tab) {
@@ -3245,28 +3318,123 @@
                 const data = await response.json();
                 
                 if (response.ok && data.contributions) {
-                    if (data.contributions.length === 0) {
-                        listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhuma contribuição registrada.</p>';
-                    } else {
-                        listEl.innerHTML = data.contributions.map(c => `
-                            <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 sm:p-4 rounded-lg border border-green-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-bold text-sm sm:text-base text-rjb-text dark:text-rjb-text-dark break-words">${c.memberName || 'Membro'}</p>
-                                    <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${c.month}/${c.year} - R$ ${c.amount.toFixed(2)}</p>
-                                    <span class="inline-block mt-2 px-2 py-1 text-xs rounded ${c.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${c.status === 'paid' ? 'Pago' : 'Pendente'}</span>
-                                </div>
-                                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                                    ${c.receiptUrl ? `<a href="${c.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
-                                    <button onclick="editContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
-                                    <button onclick="deleteContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
-                                </div>
-                            </div>
-                        `).join('');
-                    }
+                    allContributions = data.contributions;
+                    renderContributions();
                 }
             } catch (error) {
                 listEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar contribuições.</p>';
             }
+        }
+
+        // Renderizar contribuições organizadas por mês
+        function renderContributions() {
+            const listEl = document.getElementById('contributions-list');
+            const searchInput = document.getElementById('contributions-search');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+            
+            if (!listEl) return;
+            
+            if (allContributions.length === 0) {
+                listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhuma contribuição registrada.</p>';
+                document.getElementById('contributions-total-value').textContent = 'R$ 0,00';
+                return;
+            }
+
+            // Filtrar por busca
+            let filtered = allContributions;
+            if (searchTerm) {
+                filtered = allContributions.filter(c => {
+                    const name = (c.memberName || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    return name.includes(searchTerm);
+                });
+            }
+
+            // Organizar por mês/ano
+            const byMonth = {};
+            filtered.forEach(c => {
+                const key = `${c.year}-${String(c.month).padStart(2, '0')}`;
+                if (!byMonth[key]) {
+                    byMonth[key] = [];
+                }
+                byMonth[key].push(c);
+            });
+
+            // Ordenar meses (mais recente primeiro)
+            const sortedMonths = Object.keys(byMonth).sort().reverse();
+
+            // Calcular total pago
+            const totalPaid = filtered.filter(c => c.status === 'paid').reduce((sum, c) => sum + (c.amount || 0), 0);
+            document.getElementById('contributions-total-value').textContent = `R$ ${totalPaid.toFixed(2).replace('.', ',')}`;
+
+            // Identificar membros que pagaram e não pagaram por mês
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            let html = '';
+            sortedMonths.forEach(monthKey => {
+                const [year, month] = monthKey.split('-');
+                const contributions = byMonth[monthKey];
+                const paidContributions = contributions.filter(c => c.status === 'paid');
+                const pendingContributions = contributions.filter(c => c.status !== 'paid');
+                
+                const monthTotal = paidContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
+                const monthName = monthNames[parseInt(month) - 1];
+                
+                html += `
+                    <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-600/20 to-green-600/10 dark:from-green-600/10 dark:to-green-600/5 px-4 py-3 border-b border-green-600/30">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <h4 class="text-lg font-bold text-rjb-text dark:text-rjb-text-dark">${monthName}/${year}</h4>
+                                <span class="text-sm font-semibold text-green-600">Total Pago: R$ ${monthTotal.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            ${paidContributions.length > 0 ? `
+                                <div class="mb-3">
+                                    <h5 class="text-sm font-semibold text-green-600 mb-2">✓ Pagos (${paidContributions.length})</h5>
+                                    ${paidContributions.map(c => `
+                                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800 mb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark break-words">${c.memberName || 'Membro'}</p>
+                                                <p class="text-xs text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">R$ ${c.amount.toFixed(2)}</p>
+                                            </div>
+                                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                                ${c.receiptUrl ? `<a href="${c.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                                <button onclick="editContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                                <button onclick="deleteContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            ${pendingContributions.length > 0 ? `
+                                <div>
+                                    <h5 class="text-sm font-semibold text-yellow-600 mb-2">⚠ Pendentes (${pendingContributions.length})</h5>
+                                    ${pendingContributions.map(c => `
+                                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark break-words">${c.memberName || 'Membro'}</p>
+                                                <p class="text-xs text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">R$ ${c.amount.toFixed(2)}</p>
+                                            </div>
+                                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                                ${c.receiptUrl ? `<a href="${c.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                                <button onclick="editContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                                <button onclick="deleteContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html || '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhuma contribuição encontrada.</p>';
+        }
+
+        // Filtrar contribuições
+        function filterContributions() {
+            renderContributions();
         }
 
         // Carregar depósitos
@@ -3284,40 +3452,105 @@
                 const data = await response.json();
                 
                 if (response.ok && data.deposits) {
-                    // Calcular total
-                    const total = data.deposits.reduce((sum, d) => sum + (d.amount || 0), 0);
-                    const totalEl = document.getElementById('deposits-total-value');
-                    if (totalEl) {
-                        totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-                    }
-                    
-                    if (data.deposits.length === 0) {
-                        listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum depósito registrado.</p>';
-                    } else {
-                        listEl.innerHTML = data.deposits.map(d => {
-                            const date = d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A';
-                            return `
-                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 sm:p-4 rounded-lg border border-green-600/20">
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                        <div class="flex-1 min-w-0">
-                                            <p class="font-bold text-sm sm:text-base text-rjb-text dark:text-rjb-text-dark break-words">${d.memberName || 'Membro'}</p>
-                                            <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${date} - R$ ${d.amount.toFixed(2)}</p>
-                                            ${d.description ? `<p class="text-xs sm:text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 break-words">${d.description}</p>` : ''}
-                                        </div>
-                                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                                            ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
-                                            <button onclick="editDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
-                                            <button onclick="deleteDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
+                    allDeposits = data.deposits;
+                    renderDeposits();
                 }
             } catch (error) {
                 listEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar depósitos.</p>';
             }
+        }
+
+        // Renderizar depósitos organizados por mês
+        function renderDeposits() {
+            const listEl = document.getElementById('deposits-list');
+            const searchInput = document.getElementById('deposits-search');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+            
+            if (!listEl) return;
+            
+            if (allDeposits.length === 0) {
+                listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum depósito registrado.</p>';
+                document.getElementById('deposits-total-value').textContent = 'R$ 0,00';
+                return;
+            }
+
+            // Filtrar por busca
+            let filtered = allDeposits;
+            if (searchTerm) {
+                filtered = allDeposits.filter(d => {
+                    const name = (d.memberName || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    return name.includes(searchTerm);
+                });
+            }
+
+            // Organizar por mês/ano
+            const byMonth = {};
+            filtered.forEach(d => {
+                if (d.depositDate) {
+                    const date = new Date(d.depositDate);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const key = `${year}-${month}`;
+                    if (!byMonth[key]) {
+                        byMonth[key] = [];
+                    }
+                    byMonth[key].push(d);
+                }
+            });
+
+            // Ordenar meses (mais recente primeiro)
+            const sortedMonths = Object.keys(byMonth).sort().reverse();
+
+            // Calcular total
+            const total = filtered.reduce((sum, d) => sum + (d.amount || 0), 0);
+            document.getElementById('deposits-total-value').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            let html = '';
+            sortedMonths.forEach(monthKey => {
+                const [year, month] = monthKey.split('-');
+                const deposits = byMonth[monthKey];
+                const monthTotal = deposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+                const monthName = monthNames[parseInt(month) - 1];
+                
+                html += `
+                    <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-600/20 to-green-600/10 dark:from-green-600/10 dark:to-green-600/5 px-4 py-3 border-b border-green-600/30">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <h4 class="text-lg font-bold text-rjb-text dark:text-rjb-text-dark">${monthName}/${year}</h4>
+                                <span class="text-sm font-semibold text-green-600">Total: R$ ${monthTotal.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            ${deposits.map(d => {
+                                const date = d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A';
+                                return `
+                                    <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 rounded-lg border border-green-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark break-words">${d.memberName || 'Membro'}</p>
+                                            <p class="text-xs text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${date} - R$ ${d.amount.toFixed(2)}</p>
+                                            ${d.description ? `<p class="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 break-words">${d.description}</p>` : ''}
+                                        </div>
+                                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                            ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                            <button onclick="editDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                            <button onclick="deleteDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html || '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum depósito encontrado.</p>';
+        }
+
+        // Filtrar depósitos
+        function filterDeposits() {
+            renderDeposits();
         }
 
         // Carregar gastos
@@ -3335,37 +3568,733 @@
                 const data = await response.json();
                 
                 if (response.ok && data.expenses) {
-                    // Calcular total
-                    const total = data.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-                    const totalEl = document.getElementById('expenses-total-value');
-                    if (totalEl) {
-                        totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-                    }
-                    
-                    if (data.expenses.length === 0) {
-                        listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum gasto registrado.</p>';
-                    } else {
-                        listEl.innerHTML = data.expenses.map(e => {
-                            const date = e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A';
-                            return `
-                                <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 sm:p-4 rounded-lg border border-green-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-bold text-sm sm:text-base text-rjb-text dark:text-rjb-text-dark break-words">${e.description}</p>
-                                        <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${date} - R$ ${e.amount.toFixed(2)}</p>
-                                        ${e.category ? `<span class="inline-block mt-2 px-2 py-1 text-xs rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">${e.category}</span>` : ''}
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                                        ${e.receiptUrl ? `<a href="${e.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
-                                        <button onclick="editExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
-                                        <button onclick="deleteExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
+                    allExpenses = data.expenses;
+                    renderExpenses();
                 }
             } catch (error) {
                 listEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar gastos.</p>';
+            }
+        }
+
+        // Renderizar gastos organizados por mês
+        function renderExpenses() {
+            const listEl = document.getElementById('expenses-list');
+            const searchInput = document.getElementById('expenses-search');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+            
+            if (!listEl) return;
+            
+            if (allExpenses.length === 0) {
+                listEl.innerHTML = '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum gasto registrado.</p>';
+                document.getElementById('expenses-total-value').textContent = 'R$ 0,00';
+                return;
+            }
+
+            // Filtrar por busca
+            let filtered = allExpenses;
+            if (searchTerm) {
+                filtered = allExpenses.filter(e => {
+                    const desc = (e.description || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    return desc.includes(searchTerm);
+                });
+            }
+
+            // Organizar por mês/ano
+            const byMonth = {};
+            filtered.forEach(e => {
+                if (e.expenseDate) {
+                    const date = new Date(e.expenseDate);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const key = `${year}-${month}`;
+                    if (!byMonth[key]) {
+                        byMonth[key] = [];
+                    }
+                    byMonth[key].push(e);
+                }
+            });
+
+            // Ordenar meses (mais recente primeiro)
+            const sortedMonths = Object.keys(byMonth).sort().reverse();
+
+            // Calcular total
+            const total = filtered.reduce((sum, e) => sum + (e.amount || 0), 0);
+            document.getElementById('expenses-total-value').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            let html = '';
+            sortedMonths.forEach(monthKey => {
+                const [year, month] = monthKey.split('-');
+                const expenses = byMonth[monthKey];
+                const monthTotal = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+                const monthName = monthNames[parseInt(month) - 1];
+                
+                html += `
+                    <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-red-600/20 to-red-600/10 dark:from-red-600/10 dark:to-red-600/5 px-4 py-3 border-b border-red-600/30">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <h4 class="text-lg font-bold text-rjb-text dark:text-rjb-text-dark">${monthName}/${year}</h4>
+                                <span class="text-sm font-semibold text-red-600">Total: R$ ${monthTotal.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            ${expenses.map(e => {
+                                const date = e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A';
+                                return `
+                                    <div class="bg-rjb-bg-light dark:bg-rjb-bg-dark p-3 rounded-lg border border-red-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold text-sm text-rjb-text dark:text-rjb-text-dark break-words">${e.description}</p>
+                                            <p class="text-xs text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">${date} - R$ ${e.amount.toFixed(2)}</p>
+                                            ${e.category ? `<span class="inline-block mt-2 px-2 py-1 text-xs rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">${e.category}</span>` : ''}
+                                        </div>
+                                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                            ${e.receiptUrl ? `<a href="${e.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                            <button onclick="editExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
+                                            <button onclick="deleteExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html || '<p class="text-center text-rjb-text/70 dark:text-rjb-text-dark/70">Nenhum gasto encontrado.</p>';
+        }
+
+        // Filtrar gastos
+        function filterExpenses() {
+            renderExpenses();
+        }
+
+        // ========== FUNÇÕES DE GERAÇÃO DE PDF ==========
+
+        // Gerar PDF de Contribuições
+        async function generateContributionsPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.width;
+                const pageHeight = doc.internal.pageSize.height;
+                
+                const searchInput = document.getElementById('contributions-search');
+                const searchTerm = searchInput ? searchInput.value : '';
+                
+                // Filtrar dados
+                let filtered = allContributions;
+                if (searchTerm) {
+                    const normalized = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    filtered = allContributions.filter(c => {
+                        const name = (c.memberName || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        return name.includes(normalized);
+                    });
+                }
+
+                // Organizar por mês
+                const byMonth = {};
+                filtered.forEach(c => {
+                    const key = `${c.year}-${String(c.month).padStart(2, '0')}`;
+                    if (!byMonth[key]) byMonth[key] = [];
+                    byMonth[key].push(c);
+                });
+
+                const sortedMonths = Object.keys(byMonth).sort().reverse();
+                const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                
+                // Calcular totais
+                const totalPaid = filtered.filter(c => c.status === 'paid').reduce((sum, c) => sum + (c.amount || 0), 0);
+                const totalPending = filtered.filter(c => c.status !== 'paid').reduce((sum, c) => sum + (c.amount || 0), 0);
+                const totalContributions = filtered.length;
+                const paidCount = filtered.filter(c => c.status === 'paid').length;
+                const pendingCount = filtered.filter(c => c.status !== 'paid').length;
+                
+                let startY = 20;
+                
+                // ========== CABEÇALHO PROFISSIONAL ==========
+                doc.setFillColor(34, 139, 34);
+                doc.rect(0, 0, pageWidth, 25, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('RELATÓRIO DE CONTRIBUIÇÕES MENSAIS', pageWidth / 2, 15, { align: 'center' });
+                
+                startY = 35;
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Racional Jazz Band - Área Financeira`, 14, startY);
+                startY += 5;
+                doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, 14, startY);
+                if (searchTerm) {
+                    startY += 5;
+                    doc.text(`Filtro aplicado: "${searchTerm}"`, 14, startY);
+                }
+                
+                startY += 10;
+                
+                // ========== RESUMO EXECUTIVO ==========
+                doc.setFillColor(240, 248, 240);
+                doc.rect(14, startY, pageWidth - 28, 25, 'F');
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(34, 139, 34);
+                doc.text('RESUMO EXECUTIVO', 20, startY + 7);
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Total de Contribuições: ${totalContributions}`, 20, startY + 13);
+                doc.text(`Contribuições Pagas: ${paidCount}`, 20, startY + 18);
+                doc.text(`Contribuições Pendentes: ${pendingCount}`, 20, startY + 23);
+                
+                doc.text(`Total Pago: R$ ${totalPaid.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 13, { align: 'right' });
+                doc.text(`Total Pendente: R$ ${totalPending.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 18, { align: 'right' });
+                
+                startY += 30;
+                
+                // ========== DETALHAMENTO POR MÊS ==========
+                sortedMonths.forEach((monthKey) => {
+                    if (startY > pageHeight - 50) {
+                        doc.addPage();
+                        startY = 20;
+                    }
+                    
+                    const [year, month] = monthKey.split('-');
+                    const contributions = byMonth[monthKey];
+                    const paid = contributions.filter(c => c.status === 'paid');
+                    const pending = contributions.filter(c => c.status !== 'paid');
+                    const monthTotalPaid = paid.reduce((sum, c) => sum + (c.amount || 0), 0);
+                    const monthTotalPending = pending.reduce((sum, c) => sum + (c.amount || 0), 0);
+                    const monthName = monthNames[parseInt(month) - 1];
+                    
+                    // Cabeçalho do mês
+                    doc.setFillColor(34, 139, 34);
+                    doc.rect(14, startY, pageWidth - 28, 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${monthName.toUpperCase()}/${year}`, 20, startY + 6);
+                    doc.text(`Total Pago: R$ ${monthTotalPaid.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 6, { align: 'right' });
+                    startY += 12;
+                    
+                    // Tabela de pagos
+                    if (paid.length > 0) {
+                        // Subtítulo antes da tabela
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(34, 139, 34);
+                        doc.text('CONTRIBUIÇÕES PAGAS', 20, startY);
+                        startY += 6;
+                        
+                        const paidData = paid.map(c => [
+                            c.memberName || 'N/A',
+                            `R$ ${c.amount.toFixed(2).replace('.', ',')}`,
+                            c.receiptUrl ? 'Sim' : 'Não'
+                        ]);
+                        
+                        doc.autoTable({
+                            head: [['Membro', 'Valor', 'Comprovante']],
+                            body: paidData,
+                            startY: startY,
+                            theme: 'striped',
+                            headStyles: { 
+                                fillColor: [34, 139, 34], 
+                                textColor: [255, 255, 255],
+                                fontSize: 9,
+                                fontStyle: 'bold',
+                                0: { halign: 'left' },
+                                1: { halign: 'right' },
+                                2: { halign: 'center' }
+                            },
+                            columnStyles: {
+                                0: { cellWidth: 100, halign: 'left' },
+                                1: { cellWidth: 50, halign: 'right' },
+                                2: { cellWidth: 40, halign: 'center' }
+                            },
+                            styles: { 
+                                fontSize: 9,
+                                cellPadding: 4
+                            },
+                            margin: { left: 14, right: 14 },
+                            didParseCell: function(data) {
+                                if (data.column.index === 1) { // Coluna Valor
+                                    data.cell.styles.halign = 'right';
+                                    if (data.row.index === -1) { // Cabeçalho
+                                        data.cell.styles.halign = 'right';
+                                    }
+                                }
+                            }
+                        });
+                        startY = doc.lastAutoTable.finalY + 5;
+                    }
+                    
+                    // Tabela de pendentes
+                    if (pending.length > 0) {
+                        if (startY > pageHeight - 40) {
+                            doc.addPage();
+                            startY = 20;
+                        }
+                        
+                        // Subtítulo antes da tabela
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(255, 140, 0);
+                        doc.text('⚠ CONTRIBUIÇÕES PENDENTES', 20, startY);
+                        startY += 6;
+                        
+                        const pendingData = pending.map(c => [
+                            c.memberName || 'N/A',
+                            `R$ ${c.amount.toFixed(2).replace('.', ',')}`
+                        ]);
+                        
+                        doc.autoTable({
+                            head: [['Membro', 'Valor']],
+                            body: pendingData,
+                            startY: startY,
+                            theme: 'striped',
+                            headStyles: { 
+                                fillColor: [255, 193, 7], 
+                                textColor: [0, 0, 0],
+                                fontSize: 9,
+                                fontStyle: 'bold',
+                                0: { halign: 'left' },
+                                1: { halign: 'right' }
+                            },
+                            columnStyles: {
+                                0: { cellWidth: 120, halign: 'left' },
+                                1: { cellWidth: 50, halign: 'right' }
+                            },
+                            styles: { 
+                                fontSize: 9,
+                                cellPadding: 4
+                            },
+                            margin: { left: 14, right: 14 },
+                            didParseCell: function(data) {
+                                if (data.column.index === 1) { // Coluna Valor
+                                    data.cell.styles.halign = 'right';
+                                    if (data.row.index === -1) { // Cabeçalho
+                                        data.cell.styles.halign = 'right';
+                                    }
+                                }
+                            }
+                        });
+                        startY = doc.lastAutoTable.finalY + 10;
+                    } else {
+                        startY += 5;
+                    }
+                });
+                
+                // ========== RODAPÉ COM TOTAL GERAL ==========
+                if (startY > pageHeight - 30) {
+                    doc.addPage();
+                    startY = 20;
+                }
+                
+                doc.setFillColor(240, 248, 240);
+                doc.rect(14, startY, pageWidth - 28, 15, 'F');
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(34, 139, 34);
+                doc.text('TOTAL GERAL PAGO', 20, startY + 8);
+                doc.text(`R$ ${totalPaid.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 8, { align: 'right' });
+                
+                if (totalPending > 0) {
+                    doc.setFontSize(10);
+                    doc.setTextColor(255, 140, 0);
+                    doc.text('TOTAL PENDENTE', 20, startY + 13);
+                    doc.text(`R$ ${totalPending.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 13, { align: 'right' });
+                }
+                
+                const fileName = `contribuicoes-${searchTerm ? searchTerm.replace(/\s+/g, '_') + '-' : ''}${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                showMessage('PDF de contribuições gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showMessage('Erro ao gerar PDF.', true);
+            }
+        }
+
+        // Gerar PDF de Depósitos
+        async function generateDepositsPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.width;
+                const pageHeight = doc.internal.pageSize.height;
+                
+                const searchInput = document.getElementById('deposits-search');
+                const searchTerm = searchInput ? searchInput.value : '';
+                
+                // Filtrar dados
+                let filtered = allDeposits;
+                if (searchTerm) {
+                    const normalized = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    filtered = allDeposits.filter(d => {
+                        const name = (d.memberName || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        return name.includes(normalized);
+                    });
+                }
+
+                // Organizar por mês
+                const byMonth = {};
+                filtered.forEach(d => {
+                    if (d.depositDate) {
+                        const date = new Date(d.depositDate);
+                        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                        if (!byMonth[key]) byMonth[key] = [];
+                        byMonth[key].push(d);
+                    }
+                });
+
+                const sortedMonths = Object.keys(byMonth).sort().reverse();
+                const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                
+                // Calcular totais
+                const total = filtered.reduce((sum, d) => sum + (d.amount || 0), 0);
+                const totalDeposits = filtered.length;
+                
+                let startY = 20;
+                
+                // ========== CABEÇALHO PROFISSIONAL ==========
+                doc.setFillColor(34, 139, 34);
+                doc.rect(0, 0, pageWidth, 25, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('RELATÓRIO DE DEPÓSITOS E COMPROVANTES', pageWidth / 2, 15, { align: 'center' });
+                
+                startY = 35;
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Racional Jazz Band - Área Financeira`, 14, startY);
+                startY += 5;
+                doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, 14, startY);
+                if (searchTerm) {
+                    startY += 5;
+                    doc.text(`Filtro aplicado: "${searchTerm}"`, 14, startY);
+                }
+                
+                startY += 10;
+                
+                // ========== RESUMO EXECUTIVO ==========
+                doc.setFillColor(240, 248, 240);
+                doc.rect(14, startY, pageWidth - 28, 20, 'F');
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(34, 139, 34);
+                doc.text('RESUMO EXECUTIVO', 20, startY + 7);
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Total de Depósitos Registrados: ${totalDeposits}`, 20, startY + 13);
+                doc.text(`Período: ${sortedMonths.length > 0 ? monthNames[parseInt(sortedMonths[sortedMonths.length - 1].split('-')[1]) - 1] + '/' + sortedMonths[sortedMonths.length - 1].split('-')[0] + ' a ' + monthNames[parseInt(sortedMonths[0].split('-')[1]) - 1] + '/' + sortedMonths[0].split('-')[0] : 'N/A'}`, 20, startY + 18);
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(34, 139, 34);
+                doc.text('TOTAL GERAL', pageWidth - 14, startY + 13, { align: 'right' });
+                doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 18, { align: 'right' });
+                
+                startY += 25;
+                
+                // ========== DETALHAMENTO POR MÊS ==========
+                sortedMonths.forEach(monthKey => {
+                    if (startY > pageHeight - 40) {
+                        doc.addPage();
+                        startY = 20;
+                    }
+                    
+                    const [year, month] = monthKey.split('-');
+                    const deposits = byMonth[monthKey];
+                    const monthTotal = deposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+                    const monthName = monthNames[parseInt(month) - 1];
+                    
+                    // Cabeçalho do mês
+                    doc.setFillColor(34, 139, 34);
+                    doc.rect(14, startY, pageWidth - 28, 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${monthName.toUpperCase()}/${year}`, 20, startY + 6);
+                    doc.text(`Total: R$ ${monthTotal.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 6, { align: 'right' });
+                    startY += 12;
+                    
+                    // Dados da tabela
+                    const tableData = deposits.map(d => {
+                        const date = d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A';
+                        return [
+                            d.memberName || 'N/A',
+                            date,
+                            `R$ ${d.amount.toFixed(2).replace('.', ',')}`,
+                            d.description || '-'
+                        ];
+                    });
+                    
+                    doc.autoTable({
+                        head: [['Membro', 'Data', 'Valor', 'Descrição']],
+                        body: tableData,
+                        startY: startY,
+                        theme: 'striped',
+                        headStyles: { 
+                            fillColor: [34, 139, 34], 
+                            textColor: [255, 255, 255],
+                            fontSize: 9,
+                            fontStyle: 'bold',
+                            2: { halign: 'right' }
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 70 },
+                            1: { cellWidth: 35 },
+                            2: { cellWidth: 40, halign: 'right' },
+                            3: { cellWidth: 60 }
+                        },
+                        styles: { 
+                            fontSize: 8,
+                            cellPadding: 3
+                        },
+                        margin: { left: 14, right: 14 }
+                    });
+                    
+                    // Total do mês
+                    startY = doc.lastAutoTable.finalY + 5;
+                    doc.setFillColor(245, 245, 245);
+                    doc.rect(14, startY, pageWidth - 28, 6, 'F');
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Total do Mês: R$ ${monthTotal.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 4, { align: 'right' });
+                    startY += 10;
+                });
+                
+                // ========== RODAPÉ COM TOTAL GERAL ==========
+                if (startY > pageHeight - 20) {
+                    doc.addPage();
+                    startY = 20;
+                }
+                
+                doc.setFillColor(240, 248, 240);
+                doc.rect(14, startY, pageWidth - 28, 12, 'F');
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(34, 139, 34);
+                doc.text('TOTAL GERAL DE DEPÓSITOS', 20, startY + 8);
+                doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 8, { align: 'right' });
+                
+                const fileName = `depositos-${searchTerm ? searchTerm.replace(/\s+/g, '_') + '-' : ''}${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                showMessage('PDF de depósitos gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showMessage('Erro ao gerar PDF.', true);
+            }
+        }
+
+        // Gerar PDF de Gastos
+        async function generateExpensesPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.width;
+                const pageHeight = doc.internal.pageSize.height;
+                
+                const searchInput = document.getElementById('expenses-search');
+                const searchTerm = searchInput ? searchInput.value : '';
+                
+                // Filtrar dados
+                let filtered = allExpenses;
+                if (searchTerm) {
+                    const normalized = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    filtered = allExpenses.filter(e => {
+                        const desc = (e.description || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        return desc.includes(normalized);
+                    });
+                }
+
+                // Organizar por mês
+                const byMonth = {};
+                filtered.forEach(e => {
+                    if (e.expenseDate) {
+                        const date = new Date(e.expenseDate);
+                        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                        if (!byMonth[key]) byMonth[key] = [];
+                        byMonth[key].push(e);
+                    }
+                });
+
+                const sortedMonths = Object.keys(byMonth).sort().reverse();
+                const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                
+                // Calcular totais
+                const total = filtered.reduce((sum, e) => sum + (e.amount || 0), 0);
+                const totalExpenses = filtered.length;
+                
+                // Agrupar por categoria
+                const byCategory = {};
+                filtered.forEach(e => {
+                    const cat = e.category || 'Sem categoria';
+                    if (!byCategory[cat]) byCategory[cat] = 0;
+                    byCategory[cat] += e.amount || 0;
+                });
+                
+                let startY = 20;
+                
+                // ========== CABEÇALHO PROFISSIONAL ==========
+                doc.setFillColor(220, 53, 69);
+                doc.rect(0, 0, pageWidth, 25, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('RELATÓRIO DE GASTOS', pageWidth / 2, 15, { align: 'center' });
+                
+                startY = 35;
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Racional Jazz Band - Área Financeira`, 14, startY);
+                startY += 5;
+                doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, 14, startY);
+                if (searchTerm) {
+                    startY += 5;
+                    doc.text(`Filtro aplicado: "${searchTerm}"`, 14, startY);
+                }
+                
+                startY += 10;
+                
+                // ========== RESUMO EXECUTIVO ==========
+                doc.setFillColor(255, 245, 245);
+                doc.rect(14, startY, pageWidth - 28, 30, 'F');
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(220, 53, 69);
+                doc.text('RESUMO EXECUTIVO', 20, startY + 7);
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Total de Gastos Registrados: ${totalExpenses}`, 20, startY + 13);
+                doc.text(`Período: ${sortedMonths.length > 0 ? monthNames[parseInt(sortedMonths[sortedMonths.length - 1].split('-')[1]) - 1] + '/' + sortedMonths[sortedMonths.length - 1].split('-')[0] + ' a ' + monthNames[parseInt(sortedMonths[0].split('-')[1]) - 1] + '/' + sortedMonths[0].split('-')[0] : 'N/A'}`, 20, startY + 18);
+                
+                // Gastos por categoria
+                const categories = Object.keys(byCategory).sort((a, b) => byCategory[b] - byCategory[a]);
+                if (categories.length > 0) {
+                    doc.text('Gastos por Categoria:', 20, startY + 23);
+                    let catY = startY + 28;
+                    categories.slice(0, 3).forEach(cat => {
+                        doc.text(`• ${cat}: R$ ${byCategory[cat].toFixed(2).replace('.', ',')}`, 25, catY);
+                        catY += 4;
+                    });
+                }
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(220, 53, 69);
+                doc.text('TOTAL GERAL', pageWidth - 14, startY + 13, { align: 'right' });
+                doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 18, { align: 'right' });
+                
+                startY += 35;
+                
+                // ========== DETALHAMENTO POR MÊS ==========
+                sortedMonths.forEach(monthKey => {
+                    if (startY > pageHeight - 40) {
+                        doc.addPage();
+                        startY = 20;
+                    }
+                    
+                    const [year, month] = monthKey.split('-');
+                    const expenses = byMonth[monthKey];
+                    const monthTotal = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+                    const monthName = monthNames[parseInt(month) - 1];
+                    
+                    // Cabeçalho do mês
+                    doc.setFillColor(220, 53, 69);
+                    doc.rect(14, startY, pageWidth - 28, 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${monthName.toUpperCase()}/${year}`, 20, startY + 6);
+                    doc.text(`Total: R$ ${monthTotal.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 6, { align: 'right' });
+                    startY += 12;
+                    
+                    // Dados da tabela
+                    const tableData = expenses.map(e => {
+                        const date = e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A';
+                        return [
+                            date,
+                            e.description || 'N/A',
+                            e.category || '-',
+                            `R$ ${e.amount.toFixed(2).replace('.', ',')}`
+                        ];
+                    });
+                    
+                    doc.autoTable({
+                        head: [['Data', 'Descrição', 'Categoria', 'Valor']],
+                        body: tableData,
+                        startY: startY,
+                        theme: 'striped',
+                        headStyles: { 
+                            fillColor: [220, 53, 69], 
+                            textColor: [255, 255, 255],
+                            fontSize: 9,
+                            fontStyle: 'bold',
+                            3: { halign: 'right' }
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 35 },
+                            1: { cellWidth: 80 },
+                            2: { cellWidth: 50 },
+                            3: { cellWidth: 40, halign: 'right' }
+                        },
+                        styles: { 
+                            fontSize: 8,
+                            cellPadding: 3
+                        },
+                        margin: { left: 14, right: 14 }
+                    });
+                    
+                    // Total do mês
+                    startY = doc.lastAutoTable.finalY + 5;
+                    doc.setFillColor(255, 245, 245);
+                    doc.rect(14, startY, pageWidth - 28, 6, 'F');
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Total do Mês: R$ ${monthTotal.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 4, { align: 'right' });
+                    startY += 10;
+                });
+                
+                // ========== RODAPÉ COM TOTAL GERAL ==========
+                if (startY > pageHeight - 20) {
+                    doc.addPage();
+                    startY = 20;
+                }
+                
+                doc.setFillColor(255, 245, 245);
+                doc.rect(14, startY, pageWidth - 28, 12, 'F');
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(220, 53, 69);
+                doc.text('TOTAL GERAL DE GASTOS', 20, startY + 8);
+                doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, pageWidth - 14, startY + 8, { align: 'right' });
+                
+                const fileName = `gastos-${searchTerm ? searchTerm.replace(/\s+/g, '_') + '-' : ''}${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                showMessage('PDF de gastos gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showMessage('Erro ao gerar PDF.', true);
             }
         }
 
@@ -3838,8 +4767,6 @@
         }
 
         // ========== FUNÇÕES DE MODAIS E CRUD ==========
-        
-        let allMembers = [];
 
         // Carregar lista de membros para os selects
         async function loadMembersList() {
