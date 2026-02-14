@@ -1,0 +1,40 @@
+# Cloud Build: construir a imagem do backend (backend/send-email) e implantar no Cloud Run.
+# Uso: no Console, Cloud Build → Disparar build → este repositório, arquivo cloudbuild.yaml.
+# Ou: gcloud builds submit --config=cloudbuild.yaml . (na raiz do repo)
+#
+# Substitua PROJECT_ID e REGION se necessário. Serviço: rjb-email-sender.
+substitutions:
+  _SERVICE_NAME: rjb-email-sender
+  _REGION: europe-west1
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
+      - '-f'
+      - 'backend/send-email/Dockerfile'
+      - 'backend/send-email'
+    id: build
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+    id: deploy
+    waitFor: ['build']
+
+images:
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
