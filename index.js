@@ -274,6 +274,11 @@ app.post('/api/register-member', limiter, async (req, res) => {
     }
 });
 
+// --- Rotas públicas (sem autenticação) ---
+app.get('/api/public/health', (req, res) => {
+    res.json({ ok: true, version: 'with-members-by-state', service: 'rjb-backend' });
+});
+
 // --- Estatísticas públicas (para mapa da Home: componentes por estado) ---
 const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 app.get('/api/public/stats/members-by-state', async (req, res) => {
