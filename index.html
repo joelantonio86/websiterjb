@@ -123,13 +123,13 @@
             //{ title: 'De Onde Veio e Vai', time: '3:00', mp3: 'De_Onde_Veio_e_Vai' },
             { title: 'Deixa Quem Quiser Falar', time: '3:00', mp3: 'Deixa_Quem_Quiser_Falar' },
             { title: 'Desencanto Universal', time: '3:00', mp3: 'Desencanto_Universal' },
-            { title: 'Homenagem a Brud', time: '3:00', mp3: 'Homenagem_A_Brud' },
             { title: 'Jubileu de Ouro', time: '3:00', mp3: 'Jubileu_De_Ouro' },
             { title: 'Menino Rei', time: '3:00', mp3: 'Menino_Rei' },
             { title: 'Meu Lugar Não é Aqui', time: '3:00', mp3: 'Meu_Lugar_Nao_E_Aqui' },
             { title: 'Mundo Racional', time: '3:00', mp3: 'Mundo_Racional' },
             { title: 'Natureza', time: '3:00', mp3: 'Natureza' },
-            { title: 'O Homem', time: '3:00', mp3: 'O_Homem' },
+            { title: 'Natureza BUR', time: '3:00', mp3: 'Natureza_Bur' },
+            { title: 'O Homem da Planície Racional', time: '3:00', mp3: 'O_Homem' },
             //{ title: 'Os Caravaneiros - Em Andamento', time: '3:00', mp3: 'Os_Caravaneiros_Em_Andamento' },
             { title: 'Oxigênio - Rosa de Deus', time: '3:00', mp3: 'Oxigenio' },
             { title: 'Oxigênio da Vida - Alison Grillo', time: '3:00', mp3: 'Oxigenio_Da_Vida' },
@@ -150,8 +150,8 @@
             { title: 'Caruso', time: '4:20', mp3: 'Caruso' },
             { title: 'Cheia de Manias', time: '3:50', mp3: 'Cheia_De_Manias' },
             { title: 'Colo de Menina', time: '3:55', mp3: 'Colo_De_Menina' },
-            { title: 'Con te Partiró', time: '4:40', mp3: 'Conte_Te_Partiro' },
-            { title: 'Daqui Pra Sempre', time: '3:15', mp3: 'Daqui_Pra_Sempre' },
+            { title: 'Con te Partiró', time: '4:40', mp3: 'Con_Te_Partiro' },
+            { title: 'Daqui Para Sempre', time: '3:15', mp3: 'Daqui_Para_Sempre' },
             { title: 'Do Seu Lado', time: '3:35', mp3: 'Do_Seu_Lado' },
             { title: 'Eu Só Quero Um Xodó', time: '3:05', mp3: 'Eu_So_Quero_Um_Xodo' },
             { title: 'Felicidade', time: '3:25', mp3: 'Felicidade' },
@@ -1163,7 +1163,7 @@
             }
         }
         // index.html (FUNÇÃO renderProtectedReportView CORRIGIDA PARA GARANTIR ESTRUTURA)
-        // Função para verificar acesso financeiro (role 'financeiro' ou 'admin-financeiro')
+        // Função para verificar acesso financeiro (role 'financeiro', 'admin-financeiro' ou 'financeiro-view')
         function checkFinanceAccess() {
             const role = localStorage.getItem('adminRole');
             const financeLinkArea = document.getElementById('finance-link-area');
@@ -1172,7 +1172,7 @@
             console.log('[Finance] Verificando acesso. Role atual:', role);
             
             if (financeLinkArea) {
-                if (role === 'financeiro' || role === 'admin-financeiro') {
+                if (role === 'financeiro' || role === 'admin-financeiro' || role === 'financeiro-view') {
                     financeLinkArea.classList.remove('hidden');
                     console.log('[Finance] ✅ Link financeiro EXIBIDO');
                 } else {
@@ -1186,7 +1186,7 @@
                     const retryElement = document.getElementById('finance-link-area');
                     if (retryElement) {
                         console.log('[Finance] ✅ Elemento encontrado na segunda tentativa');
-                        if (role === 'financeiro' || role === 'admin-financeiro') {
+                        if (role === 'financeiro' || role === 'admin-financeiro' || role === 'financeiro-view') {
                             retryElement.classList.remove('hidden');
                             console.log('[Finance] ✅ Link financeiro EXIBIDO (retry)');
                         } else {
@@ -1198,6 +1198,12 @@
                     }
                 }, 500);
             }
+        }
+
+        // Função para verificar se o usuário tem permissão de escrita (apenas 'admin-financeiro')
+        function hasFinanceWriteAccess() {
+            const role = localStorage.getItem('adminRole');
+            return role === 'admin-financeiro';
         }
 
         function renderProtectedReportView() {
@@ -2931,10 +2937,10 @@
     </div>`;
         }
 
-        // Função para gerar página da Área Financeira (role 'financeiro' ou 'admin-financeiro')
+        // Função para gerar página da Área Financeira (role 'financeiro', 'admin-financeiro' ou 'financeiro-view')
         function generateFinancePage() {
             const role = localStorage.getItem('adminRole');
-            if (role !== 'financeiro' && role !== 'admin-financeiro') {
+            if (role !== 'financeiro' && role !== 'admin-financeiro' && role !== 'financeiro-view') {
                 return `
                     <div class="max-w-4xl mx-auto text-center py-12">
                         <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3012,12 +3018,14 @@
                                 <p class="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-0.5">Valor mensal obrigatório: <span class="font-semibold text-green-600">R$ 20,00</span></p>
                             </div>
                         </div>
+                        ${hasFinanceWriteAccess() ? `
                         <button onclick="openAddContributionModal()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Nova Contribuição
                         </button>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="p-5 sm:p-6">
@@ -3068,12 +3076,14 @@
                             </div>
                             <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Depósitos e Comprovantes</h3>
                         </div>
+                        ${hasFinanceWriteAccess() ? `
                         <button onclick="openAddDepositModal()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Novo Depósito
                         </button>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="p-5 sm:p-6">
@@ -3123,12 +3133,14 @@
                             </div>
                             <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da RJB</h3>
                         </div>
+                        ${hasFinanceWriteAccess() ? `
                         <button onclick="openAddExpenseModal()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 sm:py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Novo Gasto
                         </button>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="p-5 sm:p-6">
@@ -3399,8 +3411,10 @@
                                             </div>
                                             <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                                                 ${c.receiptUrl ? `<a href="${c.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                                ${hasFinanceWriteAccess() ? `
                                                 <button onclick="editContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
                                                 <button onclick="deleteContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                                ` : ''}
                                             </div>
                                         </div>
                                     `).join('')}
@@ -3417,8 +3431,10 @@
                                             </div>
                                             <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                                                 ${c.receiptUrl ? `<a href="${c.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                                ${hasFinanceWriteAccess() ? `
                                                 <button onclick="editContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
                                                 <button onclick="deleteContribution('${c.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                                ` : ''}
                                             </div>
                                         </div>
                                     `).join('')}
@@ -3534,8 +3550,10 @@
                                         </div>
                                         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                                             ${d.receiptUrl ? `<a href="${d.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                            ${hasFinanceWriteAccess() ? `
                                             <button onclick="editDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
                                             <button onclick="deleteDeposit('${d.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                            ` : ''}
                                         </div>
                                     </div>
                                 `;
@@ -3650,8 +3668,10 @@
                                         </div>
                                         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                                             ${e.receiptUrl ? `<a href="${e.receiptUrl}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition text-center">Ver Comprovante</a>` : ''}
+                                            ${hasFinanceWriteAccess() ? `
                                             <button onclick="editExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Editar</button>
                                             <button onclick="deleteExpense('${e.id}')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Excluir</button>
+                                            ` : ''}
                                         </div>
                                     </div>
                                 `;

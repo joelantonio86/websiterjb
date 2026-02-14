@@ -236,6 +236,35 @@ app.post('/api/register-member', limiter, async (req, res) => {
     }
 });
 
+// --- Estatísticas públicas (mapa da Home: componentes por estado) ---
+const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+app.get('/api/public/stats/members-by-state', async (req, res) => {
+    try {
+        const snapshot = await membersCollection.get();
+        const byState = {};
+        const byStateDetail = {};
+        UFS.forEach(uf => {
+            byState[uf] = 0;
+            byStateDetail[uf] = { count: 0, cities: {}, instruments: {} };
+        });
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            const state = (d.state || '').toUpperCase().trim();
+            if (!state || byState[state] === undefined) return;
+            byState[state]++;
+            const city = (d.city || '').trim() || '(não informada)';
+            const instrument = (d.instrument || '').trim() || '(não informado)';
+            byStateDetail[state].count = byState[state];
+            byStateDetail[state].cities[city] = (byStateDetail[state].cities[city] || 0) + 1;
+            byStateDetail[state].instruments[instrument] = (byStateDetail[state].instruments[instrument] || 0) + 1;
+        });
+        res.status(200).json({ byState, byStateDetail, total: snapshot.size });
+    } catch (error) {
+        console.error('Erro ao buscar membros por estado:', error);
+        res.status(500).json({ message: 'Erro ao buscar estatísticas.' });
+    }
+});
+
 // --- 7. Rotas de Relatórios (Preservadas) ---
 
 app.get('/api/reports/members', authenticateJWT, async (req, res) => {
@@ -356,10 +385,18 @@ app.put('/api/admin/update-member/:id', authenticateJWT, async (req, res) => {
 
 // --- 10. Rotas da Área Financeira ---
 
-// Middleware para verificar acesso financeiro (role 'financeiro' ou 'admin-financeiro')
+// Middleware para verificar acesso financeiro (role 'financeiro', 'admin-financeiro' ou 'financeiro-view')
 function requireFinanceAccess(req, res, next) {
-    if (req.user.role !== 'financeiro' && req.user.role !== 'admin-financeiro') {
+    if (req.user.role !== 'financeiro' && req.user.role !== 'admin-financeiro' && req.user.role !== 'financeiro-view') {
         return res.status(403).json({ status: 403, message: 'Acesso negado. Área restrita ao financeiro.' });
+    }
+    next();
+}
+
+// Middleware para verificar permissão de escrita (apenas 'admin-financeiro' pode criar/editar/excluir)
+function requireFinanceWriteAccess(req, res, next) {
+    if (req.user.role !== 'admin-financeiro') {
+        return res.status(403).json({ status: 403, message: 'Acesso negado. Apenas administradores financeiros podem realizar esta operação.' });
     }
     next();
 }
@@ -391,7 +428,7 @@ app.get('/api/finance/contributions', authenticateJWT, requireFinanceAccess, asy
 });
 
 // Criar nova contribuição
-app.post('/api/finance/contributions', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.post('/api/finance/contributions', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { memberId, memberName, month, year, amount, status } = req.body;
         
@@ -419,7 +456,7 @@ app.post('/api/finance/contributions', authenticateJWT, requireFinanceAccess, as
 });
 
 // Atualizar contribuição
-app.put('/api/finance/contributions/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.put('/api/finance/contributions/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
@@ -440,7 +477,7 @@ app.put('/api/finance/contributions/:id', authenticateJWT, requireFinanceAccess,
 });
 
 // Excluir contribuição
-app.delete('/api/finance/contributions/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.delete('/api/finance/contributions/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         await contributionsCollection.doc(req.params.id).delete();
         res.status(200).json({ status: 200, message: 'Contribuição excluída.' });
@@ -476,7 +513,7 @@ app.get('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (r
 });
 
 // Criar novo depósito
-app.post('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.post('/api/finance/deposits', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { memberId, memberName, amount, depositDate, description, receiptUrl } = req.body;
         
@@ -504,7 +541,7 @@ app.post('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (
 });
 
 // Upload de comprovante de depósito
-app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceAccess, upload.single('receipt'), async (req, res) => {
+app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceWriteAccess, upload.single('receipt'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
     
     try {
@@ -525,7 +562,7 @@ app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceAccess,
 });
 
 // Atualizar depósito
-app.put('/api/finance/deposits/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.put('/api/finance/deposits/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
@@ -550,7 +587,7 @@ app.put('/api/finance/deposits/:id', authenticateJWT, requireFinanceAccess, asyn
 });
 
 // Excluir depósito
-app.delete('/api/finance/deposits/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.delete('/api/finance/deposits/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         await depositsCollection.doc(req.params.id).delete();
         res.status(200).json({ status: 200, message: 'Depósito excluído.' });
@@ -585,7 +622,7 @@ app.get('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (r
 });
 
 // Criar novo gasto
-app.post('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.post('/api/finance/expenses', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { description, amount, expenseDate, category } = req.body;
         
@@ -611,7 +648,7 @@ app.post('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (
 });
 
 // Atualizar gasto
-app.put('/api/finance/expenses/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.put('/api/finance/expenses/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
@@ -636,7 +673,7 @@ app.put('/api/finance/expenses/:id', authenticateJWT, requireFinanceAccess, asyn
 });
 
 // Excluir gasto
-app.delete('/api/finance/expenses/:id', authenticateJWT, requireFinanceAccess, async (req, res) => {
+app.delete('/api/finance/expenses/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         await expensesCollection.doc(req.params.id).delete();
         res.status(200).json({ status: 200, message: 'Gasto excluído.' });
