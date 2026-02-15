@@ -76,7 +76,7 @@ const limiter = rateLimit({
 });
 
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
-let db, membersCollection, keysCollection, bucket, BUCKET_NAME;
+let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, bucket, BUCKET_NAME;
 
 function initFirebaseAndGCS() {
     try {
@@ -87,6 +87,9 @@ function initFirebaseAndGCS() {
         db = admin.firestore();
         membersCollection = db.collection('members');
         keysCollection = db.collection('inviteKeys');
+        contributionsCollection = db.collection('contributions');
+        depositsCollection = db.collection('deposits');
+        expensesCollection = db.collection('expenses');
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
@@ -395,10 +398,7 @@ function requireFinanceWriteAccess(req, res, next) {
     next();
 }
 
-// Coleções do Firestore para área financeira
-const contributionsCollection = db.collection('contributions');
-const depositsCollection = db.collection('deposits');
-const expensesCollection = db.collection('expenses');
+// Coleções do Firestore para área financeira (inicializadas em initFirebaseAndGCS)
 
 // --- Contribuições Mensais (CRUD) ---
 
