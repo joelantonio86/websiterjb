@@ -8,10 +8,10 @@ substitutions:
   _REGION: europe-west1
 
 steps:
+  # Use --no-cache apenas quando precisar forçar rebuild completo (pode dar timeout).
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
-      - '--no-cache'
       - '-t'
       - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
       - '-t'
@@ -31,6 +31,7 @@ steps:
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
+      - '--cpu-boost'
     id: deploy
     waitFor: ['build']
 
