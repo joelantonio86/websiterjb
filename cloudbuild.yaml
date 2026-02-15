@@ -1,20 +1,17 @@
 # Cloud Build: construir a imagem do backend (backend/send-email) e implantar no Cloud Run.
 # Uso: no Console, Cloud Build → Disparar build → este repositório, arquivo cloudbuild.yaml.
-# Ou: gcloud builds submit --config=cloudbuild.yaml . (na raiz do repo)
-#
-# Substitua PROJECT_ID e REGION se necessário. Serviço: rjb-email-sender.
+# IMPORTANTE: Push explícito antes do deploy — no Cloud Build as imagens de "images" são
+# enviadas só ao final; o deploy precisa da imagem já no registry.
 substitutions:
   _SERVICE_NAME: rjb-email-sender
   _REGION: europe-west1
 
 steps:
-  # Use --no-cache apenas quando precisar forçar rebuild completo (pode dar timeout).
-  # Usar SHORT_SHA (7 chars) para build e deploy ficarem com a mesma tag no registry.
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${SHORT_SHA}'
+      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${BUILD_ID}'
       - '-t'
       - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
       - '-f'
@@ -22,22 +19,30 @@ steps:
       - 'backend/send-email'
     id: build
 
+  # Push explícito para o deploy encontrar a imagem no registry.
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${BUILD_ID}'
+    id: push
+    waitFor: ['build']
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
       - '${_SERVICE_NAME}'
-      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${SHORT_SHA}'
+      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${BUILD_ID}'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--cpu-boost'
     id: deploy
-    waitFor: ['build']
+    waitFor: ['push']
 
 images:
-  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${SHORT_SHA}'
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${BUILD_ID}'
   - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
 
 options:
