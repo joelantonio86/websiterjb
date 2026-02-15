@@ -1,3 +1,5 @@
+// Primeira linha: confirma que este arquivo está rodando no container (visível nos logs do Cloud Run)
+console.log('RJB index.js iniciado');
 // Carregar variáveis de ambiente
 require('dotenv').config();
 console.log('Backend RJB: carregando...');
