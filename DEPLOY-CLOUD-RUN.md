@@ -73,6 +73,24 @@ Assim o build passa a enviar a imagem para o mesmo repositório que o Cloud Run 
 
 ---
 
+## Erro: "Creating Revision.........failed" / "Deployment failed"
+
+Se o **build** passar e o **deploy** falhar no Cloud Build:
+
+1. **Veja o erro completo:** no log do passo "deploy", clique na linha do ERROR ou role até o fim. A mensagem pode ser:
+   - **"Permission denied" / "403"** → a conta do Cloud Build não tem permissão para implantar no Cloud Run.
+   - **"Image not found"** → a imagem não foi enviada para o Artifact Registry antes do deploy (raro).
+   - **"Container failed to start"** → a nova revisão sobe mas o app quebra ao iniciar (ex.: variáveis de ambiente).
+
+2. **Permissões da conta do Cloud Build:**
+   - No Console: **IAM e administração** → **IAM**.
+   - Encontre a conta **Cloud Build** (tipo "Conta de serviço", algo como `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`).
+   - Adicione as funções: **Cloud Run Admin** e **Usuário da conta de serviço** (Service Account User). Salve e execute o gatilho de novo.
+
+3. **Se o container falhar ao iniciar:** em **Cloud Run** → **rjb-email-sender** → aba **Logs**, filtre pela revisão mais recente. Erros comuns: `ADMIN_USERS` ausente ou inválido, Firebase ou GCS sem permissão. Corrija as variáveis de ambiente do serviço e implante de novo (ou dispare o gatilho novamente após corrigir).
+
+---
+
 ## Resumo
 
 - O **código** das rotas está em **backend/send-email/index.js**.
