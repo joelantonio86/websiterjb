@@ -70,12 +70,9 @@ const Home = () => {
       {/* Mapa de palco: nome, UF e instrumento */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="mapa-palco-title">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 id="mapa-palco-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="mapa-palco-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark">
             Mapa de palco
           </h2>
-          <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
-            Quem está em cena: primeiro nome, sigla do estado e instrumento. Nomes iguais aparecem com primeiro e segundo nome.
-          </p>
         </div>
         <StageRoster />
       </section>
