@@ -262,6 +262,46 @@ app.get('/api/public/stats/members-by-state', async (req, res) => {
     }
 });
 
+// --- Mapa de palco (lista pública: primeiro nome, UF, instrumento) ---
+app.get('/api/public/stats/stage-roster', async (req, res) => {
+    try {
+        const snapshot = await membersCollection.get();
+        const members = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            const state = (d.state || '').toUpperCase().trim();
+            if (!state || !UFS.includes(state)) return;
+            const name = (d.name || '').trim();
+            if (!name) return;
+            const instrument = (d.instrument || '').trim() || '(não informado)';
+            members.push({ name, state, instrument });
+        });
+        const firstNames = {};
+        members.forEach(m => {
+            const parts = m.name.split(/\s+/).filter(Boolean);
+            const first = (parts[0] || '').toLowerCase();
+            firstNames[first] = (firstNames[first] || 0) + 1;
+        });
+        const roster = members.map(m => {
+            const parts = m.name.split(/\s+/).filter(Boolean);
+            const firstName = parts[0] || '';
+            const duplicate = firstNames[(firstName || '').toLowerCase()] > 1;
+            const displayName = duplicate && parts.length >= 2
+                ? `${parts[0]} ${parts[1]}`
+                : firstName;
+            return { displayName, state: m.state, instrument: m.instrument };
+        });
+        roster.sort((a, b) => {
+            if (a.state !== b.state) return a.state.localeCompare(b.state);
+            return (a.displayName || '').localeCompare(b.displayName || '', 'pt-BR');
+        });
+        res.status(200).json({ roster });
+    } catch (error) {
+        console.error('Erro ao buscar mapa de palco:', error);
+        res.status(500).json({ message: 'Erro ao buscar mapa de palco.' });
+    }
+});
+
 // --- 7. Rotas de Relatórios (Preservadas) ---
 
 app.get('/api/reports/members', authenticateJWT, async (req, res) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps'
 import api from '../services/api'
 
@@ -41,6 +41,8 @@ const getFillColor = (count, maxCount) => {
   return `rgb(${r}, ${g}, ${b})`
 }
 
+const MAP_CENTER = [-54, -15]
+
 const BrazilMap = () => {
   const [byState, setByState] = useState({})
   const [byStateDetail, setByStateDetail] = useState({})
@@ -50,6 +52,12 @@ const BrazilMap = () => {
   const [error, setError] = useState(null)
   const [statsError, setStatsError] = useState(null)
   const [tooltip, setTooltip] = useState(null)
+  const [mapCenter, setMapCenter] = useState(MAP_CENTER)
+  const [mapZoom, setMapZoom] = useState(1)
+  const tooltipHideTimeout = useRef(null)
+  const tooltipOpenedAt = useRef(0)
+  const TOOLTIP_HIDE_DELAY_MS = 150
+  const BACKDROP_IGNORE_MS = 400
 
   useEffect(() => {
     let cancelled = false
@@ -86,6 +94,12 @@ const BrazilMap = () => {
     }
     fetchData()
     return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (tooltipHideTimeout.current) clearTimeout(tooltipHideTimeout.current)
+    }
   }, [])
 
   const maxCount = Math.max(0, ...Object.values(byState))
@@ -126,17 +140,34 @@ const BrazilMap = () => {
           {statsError}
         </div>
       )}
-      <div className="rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl">
+      <div className="rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl relative">
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{
-            center: [-54, -15],
+            center: MAP_CENTER,
             scale: 900,
           }}
           className="w-full aspect-[4/3] sm:aspect-[5/4]"
           style={{ width: '100%', height: 'auto' }}
         >
-          <ZoomableGroup center={[-54, -15]} zoom={1} minZoom={0.8} maxZoom={2}>
+          <ZoomableGroup
+            center={mapCenter}
+            zoom={mapZoom}
+            minZoom={0.8}
+            maxZoom={2}
+            onMoveEnd={({ zoom }) => {
+              setMapZoom(zoom)
+              setMapCenter(MAP_CENTER)
+            }}
+            filterZoomEvent={(e) => {
+              if (!e || !e.sourceEvent) return false
+              const ev = e.sourceEvent
+              if (ev.type === 'wheel') return true
+              const twoFingers = ev.touches && ev.touches.length >= 2
+              if ((ev.type === 'touchstart' || ev.type === 'touchmove') && twoFingers) return true
+              return false
+            }}
+          >
             <Geographies geography={geo}>
               {({ geographies }) =>
                 geographies.map((geo) => {
@@ -152,6 +183,11 @@ const BrazilMap = () => {
                       stroke="rgba(255,255,255,0.7)"
                       strokeWidth={0.6}
                       onMouseEnter={() => {
+                        if (tooltipHideTimeout.current) {
+                          clearTimeout(tooltipHideTimeout.current)
+                          tooltipHideTimeout.current = null
+                        }
+                        tooltipOpenedAt.current = Date.now()
                         const detail = byStateDetail[uf]
                         setTooltip({
                           name,
@@ -161,7 +197,25 @@ const BrazilMap = () => {
                           instruments: detail ? Object.entries(detail.instruments || {}).sort((a, b) => b[1] - a[1]) : [],
                         })
                       }}
-                      onMouseLeave={() => setTooltip(null)}
+                      onMouseLeave={() => {
+                        if (Date.now() - tooltipOpenedAt.current < BACKDROP_IGNORE_MS) return
+                        tooltipHideTimeout.current = setTimeout(() => setTooltip(null), TOOLTIP_HIDE_DELAY_MS)
+                      }}
+                      onClick={() => {
+                        if (tooltipHideTimeout.current) {
+                          clearTimeout(tooltipHideTimeout.current)
+                          tooltipHideTimeout.current = null
+                        }
+                        tooltipOpenedAt.current = Date.now()
+                        const detail = byStateDetail[uf]
+                        setTooltip({
+                          name,
+                          uf,
+                          count,
+                          cities: detail ? Object.entries(detail.cities || {}).sort((a, b) => b[1] - a[1]) : [],
+                          instruments: detail ? Object.entries(detail.instruments || {}).sort((a, b) => b[1] - a[1]) : [],
+                        })
+                      }}
                       style={{
                         default: { outline: 'none' },
                         hover: { outline: 'none', filter: 'brightness(1.08)', cursor: 'pointer' },
@@ -174,36 +228,95 @@ const BrazilMap = () => {
             </Geographies>
           </ZoomableGroup>
         </ComposableMap>
+        <button
+          type="button"
+          onClick={() => {
+            setMapCenter(MAP_CENTER)
+            setMapZoom(1)
+          }}
+          className="absolute top-3 right-3 p-2 rounded-lg bg-gray-900/80 dark:bg-gray-800/80 text-white hover:bg-gray-800 dark:hover:bg-gray-700 shadow-md transition-colors z-10"
+          title="Recentralizar mapa"
+          aria-label="Recentralizar mapa"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+        </button>
         {tooltip && (
-          <div
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[min(90vw,320px)] max-h-[50vh] overflow-y-auto px-4 py-3 rounded-xl bg-gray-900/95 dark:bg-gray-800/95 text-white text-sm shadow-lg pointer-events-none z-10"
-          >
-            <div className="font-semibold border-b border-white/20 pb-1.5 mb-2">
-              {tooltip.name} · {tooltip.count === 1 ? '1 componente' : `${tooltip.count} componentes`}
+          <>
+            {/* Backdrop: só em mobile; toque fora fecha */}
+            <div
+              className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-[2px]"
+              onClick={() => {
+                if (Date.now() - tooltipOpenedAt.current > BACKDROP_IGNORE_MS) setTooltip(null)
+              }}
+              aria-hidden
+            />
+            {/* Card: bottom sheet no mobile (não cobre o mapa), flutuante no desktop */}
+            <div
+              className="
+                fixed left-0 right-0 bottom-0 z-50 max-h-[52vh] flex flex-col
+                md:absolute md:left-1/2 md:right-auto md:bottom-4 md:max-h-[75vh] md:w-[min(90vw,360px)] md:-translate-x-1/2
+                rounded-t-2xl md:rounded-2xl
+                bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                shadow-[0_-8px_32px_rgba(0,0,0,0.2)] md:shadow-xl
+                border border-gray-200/80 dark:border-gray-700/80 border-b-0 md:border-b
+                transition-all duration-300 ease-out
+              "
+              onMouseEnter={() => {
+                if (tooltipHideTimeout.current) {
+                  clearTimeout(tooltipHideTimeout.current)
+                  tooltipHideTimeout.current = null
+                }
+              }}
+              onMouseLeave={() => setTooltip(null)}
+              role="dialog"
+              aria-labelledby="map-tooltip-title"
+            >
+              {/* Handle + título + fechar (mobile) */}
+              <div className="flex-shrink-0 flex flex-col items-center pt-2 pb-1 px-4 md:pt-3 md:pb-2 md:px-4 border-b border-gray-200/80 dark:border-gray-700/80">
+                <span className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600 md:hidden" aria-hidden />
+                <div className="flex items-center justify-between w-full mt-2 md:mt-0">
+                  <h3 id="map-tooltip-title" className="font-semibold text-base md:text-sm text-rjb-text dark:text-rjb-text-dark">
+                    {tooltip.name} · {tooltip.count === 1 ? '1 componente' : `${tooltip.count} componentes`}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setTooltip(null)}
+                    className="md:hidden p-2 -mr-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    aria-label="Fechar"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              {/* Conteúdo rolável */}
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-3 touch-pan-y overscroll-contain">
+                {tooltip.cities.length > 0 && (
+                  <section className="mb-3">
+                    <h4 className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">Cidades</h4>
+                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-0.5">
+                      {tooltip.cities.map(([city, n]) => (
+                        <li key={city}>{city}: {n}</li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+                {tooltip.instruments.length > 0 && (
+                  <section>
+                    <h4 className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">Instrumentos</h4>
+                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-0.5">
+                      {tooltip.instruments.map(([inst, n]) => (
+                        <li key={inst}>{inst}: {n}</li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </div>
             </div>
-            {tooltip.cities.length > 0 && (
-              <div className="mb-2">
-                <div className="text-amber-200/90 text-xs font-medium mb-0.5">Cidades</div>
-                <ul className="text-xs space-y-0.5 text-white/90">
-                  {tooltip.cities.slice(0, 8).map(([city, n]) => (
-                    <li key={city}>{city}: {n}</li>
-                  ))}
-                  {tooltip.cities.length > 8 && <li className="text-white/60">+{tooltip.cities.length - 8} mais</li>}
-                </ul>
-              </div>
-            )}
-            {tooltip.instruments.length > 0 && (
-              <div>
-                <div className="text-amber-200/90 text-xs font-medium mb-0.5">Instrumentos</div>
-                <ul className="text-xs space-y-0.5 text-white/90">
-                  {tooltip.instruments.slice(0, 6).map(([inst, n]) => (
-                    <li key={inst}>{inst}: {n}</li>
-                  ))}
-                  {tooltip.instruments.length > 6 && <li className="text-white/60">+{tooltip.instruments.length - 6} mais</li>}
-                </ul>
-              </div>
-            )}
-          </div>
+          </>
         )}
       </div>
       <div className="mt-4 space-y-4">
