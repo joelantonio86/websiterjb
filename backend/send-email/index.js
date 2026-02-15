@@ -1,5 +1,6 @@
 // Carregar variáveis de ambiente
 require('dotenv').config();
+console.log('Backend RJB: carregando...');
 
 const nodemailer = require('nodemailer');
 const express = require('express');
@@ -918,8 +919,8 @@ app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinance
     }
 });
 
-// Listener imediato para Health Check
-app.listen(PORT, () => {
+// Listener em 0.0.0.0 para o Cloud Run conseguir fazer o health check na porta 8080
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`RJB Backend Produção na porta ${PORT}`);
     setImmediate(initFirebaseAndGCS);
 });
