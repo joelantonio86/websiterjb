@@ -27,7 +27,7 @@ steps:
       - 'run'
       - 'deploy'
       - '${_SERVICE_NAME}'
-      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
+      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
