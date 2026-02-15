@@ -39,6 +39,8 @@ function getSortKey(instrument) {
     const cat = CATEGORY_ORDER[c]
     for (const kw of cat.keywords) {
       if (inst.includes(normalize(kw))) {
+        // "trombone baixo" é soprado (Graves), não Cordas e teclas
+        if (cat.id === 4 && normalize(kw) === 'baixo' && inst.includes('trombone')) continue
         if (cat.id === 5) {
           for (let i = 0; i < SOPRADO_ORDER.length; i++) {
             if (inst.includes(normalize(SOPRADO_ORDER[i]))) return [5, i, instrument]

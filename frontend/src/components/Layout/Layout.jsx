@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom'
 import { useAudio } from '../../contexts/AudioContext'
 import Header from './Header'
 import Footer from './Footer'
@@ -12,8 +13,10 @@ import OnboardingTour from '../OnboardingTour'
 import NowPlayingBar from '../NowPlayingBar'
 
 const Layout = ({ children }) => {
+  const { pathname } = useLocation()
   const { currentTrack } = useAudio()
-  
+  const isPlayerPage = pathname === '/player'
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Background gradient overlay - mesmo da Home */}
@@ -43,7 +46,13 @@ const Layout = ({ children }) => {
       <ScrollToTop />
       <GlobalSearch />
       <OnboardingTour />
-      <NowPlayingBar />
+      {isPlayerPage ? (
+        <div className="hidden lg:block">
+          <NowPlayingBar />
+        </div>
+      ) : (
+        <NowPlayingBar />
+      )}
     </div>
   )
 }

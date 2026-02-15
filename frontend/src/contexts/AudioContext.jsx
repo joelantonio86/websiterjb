@@ -87,6 +87,7 @@ export const AudioProvider = ({ children }) => {
   }
 
   const stopTrack = () => {
+    playAttemptIdRef.current += 1 // invalida callbacks de erro pendentes (ex.: ao trocar de aba, src = '' dispara error)
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
