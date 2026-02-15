@@ -9,11 +9,12 @@ substitutions:
 
 steps:
   # Use --no-cache apenas quando precisar forçar rebuild completo (pode dar timeout).
+  # Usar SHORT_SHA (7 chars) para build e deploy ficarem com a mesma tag no registry.
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${SHORT_SHA}'
       - '-t'
       - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
       - '-f'
@@ -27,7 +28,7 @@ steps:
       - 'run'
       - 'deploy'
       - '${_SERVICE_NAME}'
-      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
+      - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${SHORT_SHA}'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -36,7 +37,7 @@ steps:
     waitFor: ['build']
 
 images:
-  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:$COMMIT_SHA'
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:${SHORT_SHA}'
   - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE_NAME}:latest'
 
 options:
