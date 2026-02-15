@@ -94,27 +94,35 @@ const limiter = rateLimit({
     message: { status: 429, message: "Muitas requisições. Tente novamente após 15 minutos." }
 });
 
-// --- 3. Inicialização de Serviços (Firebase e GCS) ---
+// --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
 let db, membersCollection, keysCollection, bucket, BUCKET_NAME;
-try {
-    if (!admin.apps.length) {
-        admin.initializeApp({});
-        console.log('✅ Firebase Admin inicializado com sucesso.');
-    }
-    db = admin.firestore();
-    membersCollection = db.collection('members');
-    keysCollection = db.collection('inviteKeys'); // Coleção para controle de chaves únicas
 
-    const storage = new Storage();
-    BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
-    bucket = storage.bucket(BUCKET_NAME);
-    console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
-} catch (error) {
-    console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
-    console.error('📋 Detalhes do erro:', error.message);
-    // Lançar erro aqui porque o sistema precisa do Firebase para funcionar
-    throw new Error(`Erro crítico ao inicializar serviços: ${error.message}`);
+function initFirebaseAndGCS() {
+    try {
+        if (!admin.apps.length) {
+            admin.initializeApp({});
+            console.log('✅ Firebase Admin inicializado com sucesso.');
+        }
+        db = admin.firestore();
+        membersCollection = db.collection('members');
+        keysCollection = db.collection('inviteKeys');
+        const storage = new Storage();
+        BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
+        bucket = storage.bucket(BUCKET_NAME);
+        console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
+    } catch (error) {
+        console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
+        console.error('📋 Detalhes do erro:', error.message);
+    }
 }
+
+// Middleware: rotas que precisam do Firestore retornam 503 até os serviços estarem prontos
+app.use((req, res, next) => {
+    if (!membersCollection && req.path !== '/api/public/health' && !req.path.startsWith('/api/public/health')) {
+        return res.status(503).json({ message: 'Serviço temporariamente indisponível. Tente em alguns segundos.' });
+    }
+    next();
+});
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -911,4 +919,7 @@ app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinance
 });
 
 // Listener imediato para Health Check
-app.listen(PORT, () => console.log(`RJB Backend Produção na porta ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`RJB Backend Produção na porta ${PORT}`);
+    setImmediate(initFirebaseAndGCS);
+});
