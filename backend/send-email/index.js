@@ -28,56 +28,34 @@ if (!JWT_SECRET || JWT_SECRET === 'chave-secreta-muito-forte-da-rjb-987654321') 
     console.warn('⚠️  AVISO: JWT_SECRET usando valor padrão. Configure uma chave secreta forte em produção.');
 }
 
-// Carregar usuários administradores de variáveis de ambiente
+// Carregar usuários administradores — não derruba o processo se falhar (para o Cloud Run passar no health check)
 let ADMIN_USERS = [];
 try {
     if (process.env.ADMIN_USERS) {
-        // Validar se a string não está vazia ou truncada
         const adminUsersStr = process.env.ADMIN_USERS.trim();
         if (!adminUsersStr || adminUsersStr.length < 10) {
-            console.error('❌ ERRO: ADMIN_USERS parece estar vazio ou truncado.');
-            console.error('📝 Valor recebido:', adminUsersStr.substring(0, 100) + '...');
-            throw new Error('ADMIN_USERS está vazio ou truncado. Verifique a configuração no Cloud Run.');
-        }
-        
-        // Tentar fazer parse do JSON
-        try {
+            console.warn('⚠️ ADMIN_USERS vazio ou truncado. Login de admin ficará indisponível.');
+        } else {
             ADMIN_USERS = JSON.parse(adminUsersStr);
-        } catch (parseError) {
-            console.error('❌ ERRO: Falha ao fazer parse do JSON de ADMIN_USERS.');
-            console.error('📝 Erro de parse:', parseError.message);
-            console.error('📝 Primeiros 200 caracteres do valor:', adminUsersStr.substring(0, 200));
-            throw new Error(`Erro ao fazer parse do JSON de ADMIN_USERS: ${parseError.message}. Verifique se o JSON está válido.`);
-        }
-        
-        // Validar se é um array e tem pelo menos um usuário
-        if (!Array.isArray(ADMIN_USERS)) {
-            throw new Error('ADMIN_USERS deve ser um array JSON.');
-        }
-        if (ADMIN_USERS.length === 0) {
-            throw new Error('ADMIN_USERS está vazio. Configure pelo menos um usuário administrador.');
-        }
-        
-        // Validar estrutura de cada usuário
-        for (let i = 0; i < ADMIN_USERS.length; i++) {
-            const user = ADMIN_USERS[i];
-            if (!user.email || !user.password || !user.role) {
-                throw new Error(`Usuário ${i + 1} no ADMIN_USERS está incompleto. Cada usuário deve ter: email, password, role.`);
+            if (!Array.isArray(ADMIN_USERS) || ADMIN_USERS.length === 0) {
+                console.warn('⚠️ ADMIN_USERS inválido ou vazio.');
+                ADMIN_USERS = [];
+            } else {
+                const ok = ADMIN_USERS.every(u => u && u.email && u.password && u.role);
+                if (!ok) {
+                    console.warn('⚠️ ADMIN_USERS com usuário incompleto.');
+                    ADMIN_USERS = [];
+                } else {
+                    console.log(`✅ ADMIN_USERS carregado: ${ADMIN_USERS.length} usuário(s).`);
+                }
             }
         }
-        
-        console.log(`✅ ADMIN_USERS carregado com sucesso: ${ADMIN_USERS.length} usuário(s) configurado(s).`);
     } else {
-        // ⚠️ SEGURANÇA: NUNCA deixe senhas hardcoded no código!
-        console.error('❌ ERRO DE SEGURANÇA: ADMIN_USERS não definido nas variáveis de ambiente!');
-        console.error('⚠️  Configure a variável ADMIN_USERS no arquivo .env ou nas variáveis de ambiente do Cloud Run.');
-        console.error('📖 Consulte README-SECURITY.md para instruções de configuração.');
-        throw new Error('ADMIN_USERS não configurado. Configure via variáveis de ambiente para segurança. Consulte README-SECURITY.md');
+        console.warn('⚠️ ADMIN_USERS não definido. Login de admin ficará indisponível.');
     }
-} catch (error) {
-    console.error('❌ Erro ao carregar ADMIN_USERS das variáveis de ambiente:', error.message);
-    console.error('📋 Variáveis de ambiente disponíveis:', Object.keys(process.env).filter(k => k.includes('ADMIN') || k.includes('GMAIL') || k.includes('JWT') || k.includes('GCS')).join(', '));
-    throw new Error(`Erro ao carregar configuração de usuários administradores: ${error.message}`);
+} catch (e) {
+    console.warn('⚠️ Erro ao carregar ADMIN_USERS:', e.message, '- Login de admin indisponível.');
+    ADMIN_USERS = [];
 }
 
 const app = express();
