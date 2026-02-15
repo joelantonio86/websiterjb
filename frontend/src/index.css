@@ -458,3 +458,44 @@
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
   }
 }
+
+/* Stage Roster / Organograma — profissional e responsivo */
+.stage-roster-section {
+  animation: stageSectionFadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes stageSectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stage-seat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stage-seat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stage-seat-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.organogram-node {
+  min-height: 72px;
+}
+
+@media (max-width: 640px) {
+  .stage-seat-card {
+    min-height: 72px;
+    min-width: 0;
+  }
+}

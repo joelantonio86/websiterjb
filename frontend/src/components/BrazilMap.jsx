@@ -320,25 +320,32 @@ const BrazilMap = () => {
         )}
       </div>
       <div className="mt-4 space-y-4">
-        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-rjb-text/70 dark:text-rjb-text-dark/70">
-          <span>Total: <strong className="text-rjb-text dark:text-rjb-text-dark">{total}</strong> {total === 1 ? 'componente' : 'componentes'}</span>
+        <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-rjb-text/80 dark:text-rjb-text-dark/80">
+          <span className="font-medium">
+            Total: <strong className="text-rjb-text dark:text-rjb-text-dark">{total}</strong> {total === 1 ? 'componente' : 'componentes'}
+          </span>
           {maxCount > 0 && (
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm shadow-inner" style={{ background: '#e5e7eb' }} title="Nenhum" />
-              <span className="w-3 h-3 rounded-sm shadow-inner" style={{ background: getFillColor(1, 1) }} title="Poucos" />
-              <span className="w-3 h-3 rounded-sm shadow-inner" style={{ background: getFillColor(maxCount, maxCount) }} title="Maior quantidade" />
-              <span>menor → maior (por estado)</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-rjb-text/70 dark:text-rjb-text-dark/70">Quantidade por estado:</span>
+              <span className="flex items-center gap-1.5" role="img" aria-label="Escala: menos a mais componentes">
+                <span className="w-4 h-3 rounded-sm border border-gray-300/60 dark:border-gray-600/60" style={{ background: '#e5e7eb' }} title="0 componentes" />
+                <span className="text-[10px] text-rjb-text/60 dark:text-rjb-text-dark/60">0</span>
+                <span className="w-4 h-3 rounded-sm border border-gray-300/60 dark:border-gray-600/60" style={{ background: getFillColor(1, maxCount) }} title="Poucos" />
+                <span className="w-4 h-3 rounded-sm border border-gray-300/60 dark:border-gray-600/60" style={{ background: getFillColor(maxCount, maxCount) }} title="Máximo no estado" />
+                <span className="text-[10px] text-rjb-text/60 dark:text-rjb-text-dark/60">máx.</span>
+              </span>
+            </div>
           )}
         </div>
         {instrumentsLegend.length > 0 && (
-          <div className="rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light/80 dark:bg-rjb-card-dark/80 p-3 text-xs">
-            <div className="font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">Legenda — Instrumentos (total no Brasil)</div>
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-rjb-text/80 dark:text-rjb-text-dark/80">
+          <div className="rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light/80 dark:bg-rjb-card-dark/80 p-4 text-xs">
+            <h4 className="font-semibold text-rjb-text dark:text-rjb-text-dark mb-2.5">Instrumentos no Brasil</h4>
+            <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 mb-2">Quantidade total de componentes por instrumento em todos os estados:</p>
+            <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-rjb-text/85 dark:text-rjb-text-dark/85">
               {instrumentsLegend.map(([name, count]) => (
                 <li key={name} className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500/80" aria-hidden />
-                  <span>{name}: <strong>{count}</strong></span>
+                  <span className="w-2 h-2 rounded-full bg-amber-500/80 shrink-0" aria-hidden />
+                  <span>{name}: <strong className="text-rjb-text dark:text-rjb-text-dark">{count}</strong></span>
                 </li>
               ))}
             </ul>

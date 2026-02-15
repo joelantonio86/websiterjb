@@ -1,10 +1,9 @@
-# Arquivos de ambiente e secrets
+# Arquivos de ambiente e secrets (nunca commitar)
 .env
 .env.local
 .env.production
 *.env
 password.env
-generate-admin-users.js
 
 # Arquivos de documentação sensível
 README-SECURITY.md

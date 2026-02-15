@@ -269,8 +269,9 @@ app.get('/api/public/stats/stage-roster', async (req, res) => {
         const members = [];
         snapshot.forEach(doc => {
             const d = doc.data();
-            const state = (d.state || '').toUpperCase().trim();
-            if (!state || !UFS.includes(state)) return;
+            let state = (d.state || '').trim().toUpperCase();
+            if (state.length > 2) state = state.slice(0, 2);
+            if (!state || !UFS.includes(state)) state = '—';
             const name = (d.name || '').trim();
             if (!name) return;
             const instrument = (d.instrument || '').trim() || '(não informado)';
