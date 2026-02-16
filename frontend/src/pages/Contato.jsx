@@ -58,7 +58,7 @@ const Contato = () => {
               onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
               onFocus={() => setFocusedField('senderName')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full p-3 sm:p-4 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
+              className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
                 focusedField === 'senderName'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
@@ -82,7 +82,7 @@ const Contato = () => {
               onChange={(e) => setFormData({ ...formData, senderEmail: e.target.value })}
               onFocus={() => setFocusedField('senderEmail')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full p-3 sm:p-4 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
+              className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
                 focusedField === 'senderEmail'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
@@ -105,7 +105,7 @@ const Contato = () => {
               onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
               onFocus={() => setFocusedField('subject')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full p-3 sm:p-4 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
+              className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
                 focusedField === 'subject'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
@@ -129,7 +129,7 @@ const Contato = () => {
               onChange={(e) => setFormData({ ...formData, body: e.target.value })}
               onFocus={() => setFocusedField('body')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full p-3 sm:p-4 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark resize-none ${
+              className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark resize-none ${
                 focusedField === 'body'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'

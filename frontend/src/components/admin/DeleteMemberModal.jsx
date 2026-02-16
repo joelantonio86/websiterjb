@@ -67,7 +67,7 @@ const DeleteMemberModal = ({ member, onClose, onSuccess }) => {
             id="confirm-delete-name"
             value={confirmName}
             onChange={handleConfirmChange}
-            className={`w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border ${
+            className={`w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border ${
               error ? 'border-red-500' : 'border-red-300 dark:border-red-600'
             } text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-red-500 transition-all`}
             placeholder="Digite o nome completo do membro"

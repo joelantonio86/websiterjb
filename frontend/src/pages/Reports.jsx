@@ -132,7 +132,7 @@ const Reports = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-3 sm:p-3.5 text-sm sm:text-base rounded-lg sm:rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all placeholder:text-rjb-text/40 hover:border-rjb-yellow/50"
+                    className="w-full p-3 sm:p-3.5 text-base rounded-lg sm:rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all placeholder:text-rjb-text/40 hover:border-rjb-yellow/50"
                     placeholder="seu.email@exemplo.com"
                   />
                 </div>
@@ -149,7 +149,7 @@ const Reports = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-3 sm:p-3.5 text-sm sm:text-base rounded-lg sm:rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all placeholder:text-rjb-text/40 hover:border-rjb-yellow/50"
+                    className="w-full p-3 sm:p-3.5 text-base rounded-lg sm:rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-rjb-yellow focus:border-rjb-yellow transition-all placeholder:text-rjb-text/40 hover:border-rjb-yellow/50"
                     placeholder="••••••••"
                   />
                 </div>

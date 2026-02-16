@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 import EmptyState from '../components/EmptyState'
 import { AGENDA_EVENTS } from '../data/events'
@@ -63,9 +64,20 @@ const Agenda = () => {
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <span className="font-medium">{event.time}h</span>
+                        <span className="font-medium">{/^\d{1,2}:\d{2}$/.test(event.time) ? `${event.time}h` : event.time}</span>
                       </div>
                     </div>
+                    {event.link && (
+                      <Link
+                        to={event.link}
+                        className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-rjb-yellow hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+                        </svg>
+                        Ver repertório
+                      </Link>
+                    )}
                   </div>
                 </div>
               )

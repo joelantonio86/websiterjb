@@ -5,7 +5,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="relative bg-gradient-to-b from-rjb-card-light via-rjb-card-light/95 to-rjb-card-light/90 dark:from-rjb-card-dark dark:via-rjb-card-dark/95 dark:to-rjb-card-dark/90 border-t-2 border-rjb-yellow/20 mt-8 sm:mt-12 py-8 sm:py-10 md:py-12 z-20 transition-colors duration-500">
+    <footer className="relative bg-gradient-to-b from-rjb-card-light via-rjb-card-light/95 to-rjb-card-light/90 dark:from-rjb-card-dark dark:via-rjb-card-dark/95 dark:to-rjb-card-dark/90 border-t-2 border-rjb-yellow/20 mt-8 sm:mt-12 py-8 sm:py-10 md:py-12 safe-area-inset-bottom z-20 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="text-center md:text-left">
@@ -20,7 +20,7 @@ const Footer = () => {
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm md:text-base">
             <button
               onClick={() => navigate('/sobre')}
-              className="group px-2 sm:px-3 py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+              className="group min-h-[44px] inline-flex items-center px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
             >
               <span className="flex items-center gap-1 sm:gap-1.5">
                 Política de Privacidade
@@ -32,7 +32,7 @@ const Footer = () => {
             <span className="text-rjb-text/30 dark:text-rjb-text-dark/30 hidden sm:inline">•</span>
             <button
               onClick={() => navigate('/contato')}
-              className="group px-2 sm:px-3 py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+              className="group min-h-[44px] inline-flex items-center px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
             >
               <span className="flex items-center gap-1 sm:gap-1.5">
                 Termos de Uso
@@ -44,7 +44,7 @@ const Footer = () => {
             <span className="text-rjb-text/30 dark:text-rjb-text-dark/30 hidden sm:inline">•</span>
             <button
               onClick={() => navigate('/cadastro')}
-              className="group px-2 sm:px-3 py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+              className="group min-h-[44px] inline-flex items-center px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
             >
               <span className="flex items-center gap-1 sm:gap-1.5">
                 Trabalhe Conosco

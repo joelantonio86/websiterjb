@@ -51,10 +51,10 @@ const Header = () => {
   }
 
   const subMenuRJB = {
-    '/player': 'Player / Ouça nossas músicas',
+    '/player': 'Player / Repertório e músicas',
     '/apresentacoes': 'Apresentações / Nossas apresentações',
+    '/repertorio-apresentacoes': 'Repertório das Apresentações 2026',
     '/bastidores': 'Ensaios / Pessoas de diversos estados',
-    '/repertorio': 'Repertório / Músicas originais',
     '/partituras': 'Partituras / Área Exclusiva para Músicos',
     '/fotos': 'Fotos / Fotos de apresentações',
   }
@@ -101,8 +101,8 @@ const Header = () => {
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 rounded-xl shadow-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 ring-2 ring-rjb-yellow/30 dark:ring-rjb-yellow/50 z-50 animate-fade-in overflow-hidden">
                   <div className="py-2">
                     {[
-                      { path: '/repertorio', label: 'Repertório', icon: '🎵' },
                       { path: '/partituras', label: 'Área de Partituras', icon: '🎼' },
+                      { path: '/repertorio-apresentacoes', label: 'Repertório 2026', icon: '📋' },
                       { path: '/fotos', label: 'Galeria de Fotos', icon: '📸' },
                       { path: '/apresentacoes', label: 'Apresentações', icon: '🎬' },
                       { path: '/bastidores', label: 'Ensaios', icon: '🎤' }
@@ -126,7 +126,7 @@ const Header = () => {
               to="/player"
               className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/player') && 'nav-link-active'}`}
             >
-              Player
+              Músicas
             </Link>
 
             <Link
@@ -231,11 +231,11 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden fixed top-16 sm:top-20 left-0 right-0 z-50 mobile-menu-container bg-gradient-to-b from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-b-2 border-rjb-yellow/30 shadow-2xl max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] overflow-y-auto">
+          <div className="lg:hidden fixed top-16 sm:top-20 left-0 right-0 z-50 mobile-menu-container bg-gradient-to-b from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-b-2 border-rjb-yellow/30 shadow-2xl max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] overflow-y-auto safe-area-inset-bottom">
             <div className="px-2 pt-4 pb-6 space-y-2">
               <Link
                 to="/"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -249,7 +249,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/sobre"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/sobre')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -266,7 +266,7 @@ const Header = () => {
               <div className="relative mobile-menu-item">
                 <button
                   onClick={() => setRjbDropdownOpen(!rjbDropdownOpen)}
-                  className={`flex items-center justify-between w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                  className={`flex items-center justify-between w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                     isRjbPage
                       ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                       : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -286,8 +286,8 @@ const Header = () => {
                   <div className="mt-2 ml-4 space-y-1.5 bg-rjb-bg-light/50 dark:bg-rjb-card-dark/50 rounded-xl p-3 border border-rjb-yellow/20">
                     {[
                       { path: '/apresentacoes', label: 'Apresentações', icon: '🎬' },
+                      { path: '/repertorio-apresentacoes', label: 'Repertório 2026', icon: '📋' },
                       { path: '/bastidores', label: 'Ensaios', icon: '🎤' },
-                      { path: '/repertorio', label: 'Repertório', icon: '🎵' },
                       { path: '/partituras', label: 'Partituras', icon: '🎼' },
                       { path: '/fotos', label: 'Fotos', icon: '📸' }
                     ].map((item, idx) => (
@@ -315,7 +315,7 @@ const Header = () => {
 
               <Link
                 to="/player"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/player')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -323,14 +323,14 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="flex items-center gap-3">
-                  <span className="text-xl">🎧</span>
-                  <span>Player</span>
+                  <span className="text-xl">🎵</span>
+                  <span>Músicas</span>
                 </span>
               </Link>
 
               <Link
                 to="/agenda"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/agenda')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -344,7 +344,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/contato"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/contato')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -358,7 +358,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/cadastro"
-                className="mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                className="mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="flex items-center gap-3">
@@ -368,7 +368,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/relatorios"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/relatorios')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
@@ -383,7 +383,7 @@ const Header = () => {
               {user && (user.role === 'financeiro' || user.role === 'admin-financeiro' || user.role === 'financeiro-view') && (
                 <Link
                   to="/financeiro"
-                  className={`mobile-menu-item block w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                  className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                     isActive('/financeiro')
                       ? 'bg-gradient-to-r from-green-600/30 to-green-500/20 text-green-600 shadow-md'
                       : 'text-rjb-text dark:text-rjb-text-dark hover:bg-green-600/10 dark:hover:bg-green-600/5 hover:text-green-600 hover:shadow-sm'

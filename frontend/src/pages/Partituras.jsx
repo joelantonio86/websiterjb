@@ -93,28 +93,14 @@ const Partituras = () => {
             <div className="flex gap-2">
               <a
                 href={`${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf`}
-                download={`${sheet.title.replace(/ /g, '_')}.pdf`}
-                onClick={() => handleDownload('pdf', sheet.title)}
-                className={`group/btn flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2.5 px-4 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 text-sm transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl touch-manipulation ${
-                  isDownloading && downloading === `pdf-${sheet.title}` ? 'opacity-75 cursor-wait' : ''
-                }`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/btn flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2.5 px-4 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 text-sm transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl touch-manipulation"
               >
-                {downloading === `pdf-${sheet.title}` ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Baixando...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 group-hover/btn:translate-y-[-2px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <span>PDF</span>
-                  </>
-                )}
+                <svg className="w-4 h-4 group-hover/btn:translate-y-[-2px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                <span>PDF</span>
               </a>
 
               <a
@@ -191,28 +177,14 @@ const Partituras = () => {
           <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
             <a
               href={`${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf`}
-              download={`${sheet.title.replace(/ /g, '_')}.pdf`}
-              onClick={() => handleDownload('pdf', sheet.title)}
-              className={`group/btn flex items-center justify-center gap-2 bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 text-xs sm:text-sm transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex-1 sm:flex-none touch-manipulation ${
-                downloading === `pdf-${sheet.title}` ? 'opacity-75 cursor-wait' : ''
-              }`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/btn flex items-center justify-center gap-2 bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 text-xs sm:text-sm transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex-1 sm:flex-none touch-manipulation"
             >
-              {downloading === `pdf-${sheet.title}` ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Baixando...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-y-[-2px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                  <span>PDF</span>
-                </>
-              )}
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-y-[-2px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+              <span>PDF</span>
             </a>
 
             <a
@@ -407,7 +379,7 @@ const Partituras = () => {
               onFocus={() => setFocusedField(true)}
               onBlur={() => setFocusedField(false)}
               placeholder="Digite o nome da música para buscar..."
-              className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-2 transition-all duration-300 shadow-lg hover:shadow-xl placeholder-rjb-text/50 dark:placeholder-rjb-text-dark/50 ${
+              className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 text-base rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-2 transition-all duration-300 shadow-lg hover:shadow-xl placeholder-rjb-text/50 dark:placeholder-rjb-text-dark/50 ${
                 focusedField
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'

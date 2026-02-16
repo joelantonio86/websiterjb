@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
         <main 
           id="main-content"
           className={`flex-grow pt-16 sm:pt-20 md:pt-20 opacity-100 transition-opacity duration-500 relative z-10 transition-all duration-300 ${
-            currentTrack ? 'pb-20 sm:pb-24 md:pb-20' : 'pb-0'
+            currentTrack ? 'main-with-player-pb' : 'pb-0'
           }`}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { AudioProvider } from './contexts/AudioContext'
@@ -9,11 +9,11 @@ import Home from './pages/Home'
 import Sobre from './pages/Sobre'
 import Apresentacoes from './pages/Apresentacoes'
 import Bastidores from './pages/Bastidores'
-import Repertorio from './pages/Repertorio'
 import Partituras from './pages/Partituras'
 import Player from './pages/Player'
 import Fotos from './pages/Fotos'
 import Agenda from './pages/Agenda'
+import RepertorioApresentacoes from './pages/RepertorioApresentacoes'
 import Contato from './pages/Contato'
 import MemberRegistration from './pages/MemberRegistration'
 import Reports from './pages/Reports'
@@ -33,11 +33,12 @@ function App() {
                 <Route path="/sobre" element={<Sobre />} />
                 <Route path="/apresentacoes" element={<Apresentacoes />} />
                 <Route path="/bastidores" element={<Bastidores />} />
-                <Route path="/repertorio" element={<Repertorio />} />
+                <Route path="/repertorio" element={<Navigate to="/player" replace />} />
                 <Route path="/partituras" element={<Partituras />} />
                 <Route path="/player" element={<Player />} />
                 <Route path="/fotos" element={<Fotos />} />
                 <Route path="/agenda" element={<Agenda />} />
+                <Route path="/repertorio-apresentacoes" element={<RepertorioApresentacoes />} />
                 <Route path="/contato" element={<Contato />} />
                 <Route path="/cadastro" element={<MemberRegistration />} />
                 <Route path="/relatorios" element={<Reports />} />

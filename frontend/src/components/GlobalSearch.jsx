@@ -15,8 +15,9 @@ const GlobalSearch = () => {
     { path: '/sobre', label: 'Sobre', icon: '📖', category: 'Páginas' },
     { path: '/apresentacoes', label: 'Apresentações', icon: '🎬', category: 'A RJB' },
     { path: '/bastidores', label: 'Ensaios', icon: '🎤', category: 'A RJB' },
-    { path: '/repertorio', label: 'Repertório', icon: '🎵', category: 'A RJB' },
+    { path: '/player', label: 'Músicas', icon: '🎵', category: 'A RJB' },
     { path: '/partituras', label: 'Partituras', icon: '🎼', category: 'A RJB' },
+    { path: '/repertorio-apresentacoes', label: 'Repertório 2026', icon: '📋', category: 'A RJB' },
     { path: '/fotos', label: 'Galeria de Fotos', icon: '📸', category: 'A RJB' },
     { path: '/agenda', label: 'Agenda', icon: '📅', category: 'Páginas' },
     { path: '/contato', label: 'Contato', icon: '✉️', category: 'Páginas' },
@@ -103,7 +104,7 @@ const GlobalSearch = () => {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Buscar páginas... (Ctrl+K)"
-              className="w-full pl-12 pr-4 py-3 bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 rounded-xl focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none transition-all"
+              className="w-full pl-12 pr-4 py-3 text-base bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 rounded-xl focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none transition-all"
               autoFocus
             />
           </div>

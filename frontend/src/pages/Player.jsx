@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 import { racionais, diversas, R2_BASE_URL } from '../data/songs'
 import { useAudio } from '../contexts/AudioContext'
@@ -48,8 +49,15 @@ const Player = () => {
   const listContainerRef = useRef(null)
   const activeTrackRef = useRef(null)
 
+  const [reducedMotion, setReducedMotion] = useState(false)
   useEffect(() => {
+    document.title = 'Músicas — Racional Jazz Band'
     setIsVisible(true)
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReducedMotion(mq.matches)
+    const handler = () => setReducedMotion(mq.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   useEffect(() => {
@@ -188,7 +196,7 @@ const Player = () => {
                     if (isCurrent) togglePlayPause()
                     else playTrack(track.title, track.audioUrl)
                   }}
-                  className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 min-w-[48px] min-h-[48px] shadow-sm ${
+                  className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 min-w-[48px] min-h-[48px] shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${
                     isCurrent && isPlaying
                       ? 'bg-rjb-yellow text-rjb-text shadow-lg scale-105'
                       : 'bg-rjb-yellow/20 text-rjb-yellow hover:bg-rjb-yellow/30 hover:scale-105 active:scale-95'
@@ -227,26 +235,41 @@ const Player = () => {
   }
 
   return (
-    <PageWrapper title="Player / Ouça nossas músicas">
-      <div className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-0 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        {/* Header: compacto no mobile */}
+    <PageWrapper title="Músicas / Repertório e player">
+      <div className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-0 transition-all ${reducedMotion ? 'duration-200' : 'duration-500'} ${isVisible ? 'opacity-100 translate-y-0' : (reducedMotion ? 'opacity-0' : 'opacity-0 translate-y-4')}`}>
+        {/* Título e descrição: claros no desktop e no mobile */}
         <div className="mb-5 lg:mb-8 px-0">
           <h1 className="text-xl sm:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 sm:mb-2 text-center lg:text-left">
-            Player de Músicas
+            Repertório e músicas
           </h1>
-          <p className="text-xs sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 text-center lg:text-left">
-            Ouça as gravações originais ou as versões do Sibelius
+          <p className="text-xs sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 text-center lg:text-left mb-1">
+            Ouça as gravações originais ou as versões do Sibelius.
+          </p>
+          <p className="lg:hidden text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 text-center lg:text-left">
+            Escolha Originais ou Sibelius, toque em uma faixa na lista e use os controles acima.
+          </p>
+          <p className="mt-2 text-xs sm:text-sm text-rjb-text/50 dark:text-rjb-text-dark/50 text-center lg:text-left">
+            {source === SOURCE_ORIGINAL ? allTracksOriginal.length : allTracksSibelius.length} músicas
+            {searchTerm.trim() && ` · ${filteredTracks.length} na busca`}
           </p>
         </div>
 
         {/* Mobile: abas + card "Tocando" fixos ao rolar; desktop: só as abas em cima */}
         <div className="sticky top-16 sm:top-20 z-10 lg:static space-y-4 mb-5 lg:mb-8">
-          {/* Tabs: Design moderno e minimalista */}
-          <div className="flex gap-2 bg-rjb-card-light dark:bg-rjb-card-dark p-1.5 rounded-2xl border border-rjb-yellow/20 shadow-sm">
+          {/* Tabs: acessíveis (role tablist/tab, aria-selected) e com focus visível */}
+          <div
+            role="tablist"
+            aria-label="Tipo de gravação"
+            className="flex gap-2 bg-rjb-card-light dark:bg-rjb-card-dark p-1.5 rounded-2xl border border-rjb-yellow/20 shadow-sm"
+          >
             <button
               type="button"
+              role="tab"
+              aria-selected={source === SOURCE_ORIGINAL}
+              aria-controls="player-content"
+              id="tab-originais"
               onClick={() => setSource(SOURCE_ORIGINAL)}
-              className={`flex-1 min-h-[52px] sm:min-h-[48px] py-3 px-4 font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+              className={`flex-1 min-h-[52px] sm:min-h-[48px] py-3 px-4 font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 active:scale-[0.97] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${
                 source === SOURCE_ORIGINAL
                   ? 'bg-rjb-yellow text-rjb-text shadow-md'
                   : 'text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-text dark:hover:text-rjb-text-dark hover:bg-rjb-yellow/10'
@@ -257,8 +280,12 @@ const Player = () => {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={source === SOURCE_SIBELIUS}
+              aria-controls="player-content"
+              id="tab-sibelius"
               onClick={() => setSource(SOURCE_SIBELIUS)}
-              className={`flex-1 min-h-[52px] sm:min-h-[48px] py-3 px-4 font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+              className={`flex-1 min-h-[52px] sm:min-h-[48px] py-3 px-4 font-semibold text-sm sm:text-base rounded-xl transition-all duration-200 active:scale-[0.97] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${
                 source === SOURCE_SIBELIUS
                   ? 'bg-rjb-yellow text-rjb-text shadow-md'
                   : 'text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-text dark:hover:text-rjb-text-dark hover:bg-rjb-yellow/10'
@@ -289,13 +316,13 @@ const Player = () => {
                   </div>
                 )}
                 <div className="mb-4">
-                  <div
-                    role="progressbar"
-                    tabIndex={0}
-                    onClick={currentTrack ? handleSeek : undefined}
-                    onKeyDown={currentTrack ? (e) => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click() } : undefined}
-                    className={`h-2.5 rounded-full overflow-hidden bg-rjb-text/10 dark:bg-rjb-text-dark/10 touch-manipulation ${currentTrack ? 'cursor-pointer' : ''}`}
-                  >
+                <div
+                  role="progressbar"
+                  tabIndex={currentTrack ? 0 : -1}
+                  onClick={currentTrack ? handleSeek : undefined}
+                  onKeyDown={currentTrack ? (e) => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click() } : undefined}
+                  className={`h-2.5 rounded-full overflow-hidden bg-rjb-text/10 dark:bg-rjb-text-dark/10 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${currentTrack ? 'cursor-pointer' : ''}`}
+                >
                     <div className="h-full bg-rjb-yellow rounded-full transition-all duration-150" style={{ width: `${progress}%` }} />
                   </div>
                   <div className="flex justify-between text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1.5 font-medium">
@@ -305,7 +332,7 @@ const Player = () => {
                 </div>
                 <div className="flex items-center justify-center gap-5">
                   <button type="button" onClick={playPrev} disabled={!hasPrev}
-                    className="w-14 h-14 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 flex items-center justify-center disabled:opacity-30 touch-manipulation active:scale-95 min-w-[56px] min-h-[56px]"
+                    className="w-14 h-14 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 flex items-center justify-center disabled:opacity-30 touch-manipulation active:scale-95 min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                     aria-label="Anterior">
                     <svg className="w-7 h-7 text-rjb-text dark:text-rjb-text-dark" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8.445 14.832A1 1 0 0010 14V6a1 1 0 00-1.555-.832l-4 3a1 1 0 000 1.664l4 3z" />
@@ -313,7 +340,7 @@ const Player = () => {
                     </svg>
                   </button>
                   <button type="button" onClick={currentTrack ? togglePlayPause : playDisplayTrack}
-                    className="w-20 h-20 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center touch-manipulation active:scale-95 min-w-[72px] min-h-[72px] shadow-lg"
+                    className="w-20 h-20 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center touch-manipulation active:scale-95 min-w-[72px] min-h-[72px] shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                     aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}>
                     {isPlaying ? (
                       <svg className="w-9 h-9" fill="currentColor" viewBox="0 0 20 20">
@@ -326,7 +353,7 @@ const Player = () => {
                     )}
                   </button>
                   <button type="button" onClick={playNext} disabled={!hasNext}
-                    className="w-14 h-14 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 flex items-center justify-center disabled:opacity-30 touch-manipulation active:scale-95 min-w-[56px] min-h-[56px]"
+                    className="w-14 h-14 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 flex items-center justify-center disabled:opacity-30 touch-manipulation active:scale-95 min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                     aria-label="Próxima">
                     <svg className="w-7 h-7 text-rjb-text dark:text-rjb-text-dark" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 6l4 4-4 4V6z" />
@@ -338,7 +365,7 @@ const Player = () => {
             )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div id="player-content" role="tabpanel" aria-labelledby={source === SOURCE_ORIGINAL ? 'tab-originais' : 'tab-sibelius'} className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2 order-1 flex flex-col lg:block">
             <div className="lg:order-2">
               <p className="lg:hidden text-sm font-semibold text-rjb-text/70 dark:text-rjb-text-dark/70 uppercase tracking-wide mb-3">
@@ -350,7 +377,7 @@ const Player = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Buscar música..."
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow/20 focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 outline-none transition-all text-base shadow-sm"
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow/20 focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 focus-visible:ring-2 focus-visible:ring-rjb-yellow outline-none transition-all text-base shadow-sm"
                   aria-label="Buscar música"
                 />
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rjb-text/50 dark:text-rjb-text-dark/50 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,7 +386,7 @@ const Player = () => {
               </div>
             </div>
 
-            <div ref={listContainerRef} className="max-h-[calc(100vh-420px)] sm:max-h-[55vh] lg:max-h-[60vh] overflow-y-auto pr-1 sm:pr-2 lg:order-3">
+            <div ref={listContainerRef} className="max-h-[calc(100vh-420px)] sm:max-h-[55vh] lg:max-h-[60vh] min-h-[200px] sm:min-h-0 overflow-y-auto pr-1 sm:pr-2 lg:order-3 safe-area-inset-bottom">
               {renderTrackList(racionaisFiltered, 'Músicas Racionais', 'text-rjb-yellow', { sectionKey: 'racionais', isExpanded: sectionsOpen.racionais })}
               {renderTrackList(diversasFiltered, 'Outros Clássicos', 'text-blue-600 dark:text-blue-400', { sectionKey: 'diversas', isExpanded: sectionsOpen.diversas })}
               {filteredTracks.length === 0 && (
@@ -414,10 +441,10 @@ const Player = () => {
                   <div className="mb-4">
                     <div
                       role="progressbar"
-                      tabIndex={0}
+                      tabIndex={currentTrack ? 0 : -1}
                       onClick={currentTrack ? handleSeek : undefined}
                       onKeyDown={currentTrack ? (e) => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click() } : undefined}
-                      className={`h-2 bg-white/20 dark:bg-white/10 rounded-full overflow-hidden ${currentTrack ? 'cursor-pointer' : ''}`}
+                      className={`h-2 bg-white/20 dark:bg-white/10 rounded-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 ${currentTrack ? 'cursor-pointer' : ''}`}
                     >
                       <div
                         className="h-full bg-gradient-to-r from-rjb-yellow to-yellow-500 rounded-full transition-all duration-100"
@@ -436,7 +463,7 @@ const Player = () => {
                       type="button"
                       onClick={playPrev}
                       disabled={!hasPrev}
-                      className="w-12 h-12 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text dark:text-rjb-text-dark flex items-center justify-center hover:bg-rjb-text/20 dark:hover:bg-rjb-text-dark/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                      className="w-12 h-12 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text dark:text-rjb-text-dark flex items-center justify-center hover:bg-rjb-text/20 dark:hover:bg-rjb-text-dark/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
                       aria-label="Anterior"
                     >
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -447,7 +474,7 @@ const Player = () => {
                     <button
                       type="button"
                       onClick={currentTrack ? togglePlayPause : playDisplayTrack}
-                      className="w-14 h-14 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center hover:bg-yellow-500 transition-all shadow-lg"
+                      className="w-14 h-14 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center hover:bg-yellow-500 transition-all shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
                       aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                     >
                       {isPlaying ? (
@@ -464,7 +491,7 @@ const Player = () => {
                       type="button"
                       onClick={playNext}
                       disabled={!hasNext}
-                      className="w-12 h-12 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text dark:text-rjb-text-dark flex items-center justify-center hover:bg-rjb-text/20 dark:hover:bg-rjb-text-dark/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                      className="w-12 h-12 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text dark:text-rjb-text-dark flex items-center justify-center hover:bg-rjb-text/20 dark:hover:bg-rjb-text-dark/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
                       aria-label="Próxima"
                     >
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -485,6 +512,16 @@ const Player = () => {
           </div>
         </div>
 
+        <p className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-stone-200 dark:border-stone-600/60 text-center text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">
+          Procurando partituras?{' '}
+          <Link
+            to="/partituras"
+            className="font-semibold text-rjb-yellow hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
+            aria-label="Acessar a Área de Partituras"
+          >
+            Acesse a Área de Partituras
+          </Link>
+        </p>
       </div>
     </PageWrapper>
   )

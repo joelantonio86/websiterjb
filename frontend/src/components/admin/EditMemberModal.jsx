@@ -97,7 +97,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }) => {
                 const normalized = normalizeName(e.target.value)
                 setFormData(prev => ({ ...prev, name: normalized }))
               }}
-              className="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
+              className="w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -108,7 +108,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }) => {
                 inputMode="numeric"
                 value={formData.tefa}
                 onChange={(e) => handleChange('tefa', e.target.value)}
-                className="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
+                className="w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
               />
             </div>
             <div>
@@ -118,7 +118,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }) => {
                 required
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                className="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
+                className="w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
               />
             </div>
           </div>
@@ -129,7 +129,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }) => {
               required
               value={formData.instrument}
               onChange={(e) => handleChange('instrument', e.target.value)}
-              className="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
+              className="w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -140,7 +140,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }) => {
                 required
                 value={formData.city}
                 onChange={(e) => handleChange('city', e.target.value)}
-                className="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
+                className="w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
               />
             </div>
             <div>
@@ -151,7 +151,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }) => {
                 maxLength="2"
                 value={formData.state}
                 onChange={(e) => handleChange('state', e.target.value.toUpperCase())}
-                className="w-full p-3 rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
+                className="w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all"
               />
             </div>
           </div>

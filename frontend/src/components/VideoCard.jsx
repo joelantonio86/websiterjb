@@ -12,17 +12,30 @@ const VideoCard = ({ video, date }) => {
     setIsModalOpen(false)
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openVideo()
+    }
+  }
+
   return (
     <>
       <div
-        className="group relative bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 rounded-lg sm:rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-rjb-yellow/10 cursor-pointer transform hover:scale-[1.03] hover:-translate-y-1 active:scale-[0.98] touch-manipulation"
+        role="button"
+        tabIndex={0}
         onClick={openVideo}
+        onKeyDown={handleKeyDown}
+        className="group relative bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 rounded-lg sm:rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-rjb-yellow/10 cursor-pointer transform hover:scale-[1.03] hover:-translate-y-1 active:scale-[0.98] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+        aria-label={`Assistir vídeo: ${video.title}`}
       >
         <div className="relative aspect-video bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
           {!imageError ? (
             <img
               src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`}
               alt={video.title}
+              loading="lazy"
+              decoding="async"
               onError={() => setImageError(true)}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />

@@ -288,6 +288,21 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* Main content padding when Now Playing bar is visible (mobile safe area) */
+  .main-with-player-pb {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 640px) {
+    .main-with-player-pb {
+      padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  @media (min-width: 768px) {
+    .main-with-player-pb {
+      padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
   /* Now Playing Bar animations */
   @keyframes slideUp {
     from {

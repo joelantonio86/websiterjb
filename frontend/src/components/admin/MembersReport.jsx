@@ -316,7 +316,7 @@ const MembersReport = () => {
                       placeholder="Buscar por nome..."
                       value={filters.name}
                       onChange={(e) => handleFilterChange('name', e.target.value)}
-                      className="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md"
+                      className="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-base rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md"
                     />
                   </div>
                 </div>

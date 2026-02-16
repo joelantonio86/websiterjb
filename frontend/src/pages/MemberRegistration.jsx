@@ -150,7 +150,7 @@ const MemberRegistration = () => {
             required
             value={formData.inviteKey}
             onChange={(e) => setFormData({ ...formData, inviteKey: e.target.value.toUpperCase() })}
-            className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+            className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
             placeholder="Ex: RJB-MEMBER-2025"
           />
         </div>
@@ -166,7 +166,7 @@ const MemberRegistration = () => {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             onBlur={(e) => setFormData({ ...formData, name: normalizeName(e.target.value) })}
-            className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+            className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
           />
         </div>
 
@@ -181,7 +181,7 @@ const MemberRegistration = () => {
             pattern="[0-9]*"
             value={formData.tefa}
             onChange={(e) => setFormData({ ...formData, tefa: e.target.value })}
-            className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+            className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
           />
         </div>
 
@@ -195,7 +195,7 @@ const MemberRegistration = () => {
             required
             value={formData.instrument}
             onChange={(e) => setFormData({ ...formData, instrument: e.target.value })}
-            className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+            className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
           />
         </div>
 
@@ -209,7 +209,7 @@ const MemberRegistration = () => {
             required
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+            className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
           />
         </div>
 
@@ -223,7 +223,7 @@ const MemberRegistration = () => {
             required
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+            className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
           />
         </div>
 
@@ -237,7 +237,7 @@ const MemberRegistration = () => {
               required
               value={formData.state}
               onChange={(e) => setFormData({ ...formData, state: e.target.value, city: '' })}
-              className="w-full p-3 rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+              className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
             >
               <option value="">Selecione o Estado</option>
               {estados.map(estado => (

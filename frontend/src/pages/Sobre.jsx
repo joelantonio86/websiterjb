@@ -1,21 +1,33 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 
 const Sobre = () => {
   const [isVisible, setIsVisible] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
 
   useEffect(() => {
+    document.title = 'Sobre — Racional Jazz Band'
     setIsVisible(true)
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReducedMotion(mq.matches)
+    const handler = () => setReducedMotion(mq.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
+
+  const motionDuration = reducedMotion ? 'duration-300' : 'duration-700'
+  const motionEnter = 'opacity-100 translate-y-0'
+  const motionExit = reducedMotion ? 'opacity-0' : 'opacity-0 translate-y-5'
 
   return (
     <PageWrapper title="Sobre a RJB">
-      <div className={`space-y-6 sm:space-y-8 text-rjb-text dark:text-rjb-text-dark transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
-        <div className="relative">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow border-b-2 border-rjb-yellow/50 pb-2 sm:pb-3 inline-block">
+      <div className={`max-w-4xl mx-auto space-y-6 sm:space-y-8 text-rjb-text dark:text-rjb-text-dark transition-all ${motionDuration} ${isVisible ? motionEnter : motionExit}`}>
+        <section id="expressao" className="relative" aria-labelledby="expressao-heading">
+          <h2 id="expressao-heading" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow border-b-2 border-rjb-yellow/50 pb-2 sm:pb-3 inline-block">
             A Expressão Musical do Saber
           </h2>
-        </div>
+        </section>
 
         <div className="relative border-l-4 border-rjb-yellow pl-4 sm:pl-6 pr-3 sm:pr-4 py-4 sm:py-5 bg-gradient-to-r from-rjb-yellow/5 via-rjb-yellow/5 to-transparent dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-transparent rounded-r-xl shadow-lg hover:shadow-xl transition-all duration-300">
           <div className="absolute -left-2 top-5 sm:top-6 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-rjb-yellow border-2 border-rjb-bg-light dark:border-rjb-bg-dark shadow-lg"></div>
@@ -30,9 +42,9 @@ const Sobre = () => {
           </p>
         </div>
         
-        <div className="relative mt-8 sm:mt-10 pt-6 sm:pt-8 border-t-2 border-rjb-yellow/20">
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-rjb-yellow to-yellow-500 rounded-full"></div>
+        <section id="conceito" className="relative mt-8 sm:mt-10 pt-6 sm:pt-8 border-t-2 border-rjb-yellow/20" aria-labelledby="conceito-heading">
+          <h3 id="conceito-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-rjb-yellow to-yellow-500 rounded-full" aria-hidden></div>
             <span>O Conceito Racional</span>
           </h3>
 
@@ -45,12 +57,12 @@ const Sobre = () => {
               Cada apresentação, cada nota e cada melodia da RJB é um convite para o público refletir sobre sua essência e o universo que o cerca, encontrando a harmonia entre o macrocosmo e o próprio ser.
             </p>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-8 sm:mt-12 p-5 sm:p-6 md:p-8 bg-gradient-to-br from-rjb-yellow/10 via-rjb-yellow/5 to-transparent dark:from-rjb-yellow/20 dark:via-rjb-yellow/10 dark:to-transparent rounded-xl sm:rounded-2xl border-2 border-rjb-yellow/30 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]">
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+        <section id="missao" className="mt-8 sm:mt-12 p-5 sm:p-6 md:p-8 bg-gradient-to-br from-rjb-yellow/10 via-rjb-yellow/5 to-transparent dark:from-rjb-yellow/20 dark:via-rjb-yellow/10 dark:to-transparent rounded-xl sm:rounded-2xl border-2 border-rjb-yellow/30 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]" aria-labelledby="missao-heading">
+          <h3 id="missao-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
             <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-rjb-yellow/30 to-rjb-yellow/20 dark:from-rjb-yellow/20 dark:to-rjb-yellow/10">
-              <svg className="w-5 h-5 sm:w-6 sm:h-7 md:w-7 md:h-7 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-7 md:w-7 md:h-7 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
@@ -68,7 +80,35 @@ const Sobre = () => {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
+
+        <nav className="mt-10 sm:mt-12 pt-8 sm:pt-10 border-t border-stone-200 dark:border-stone-600/60" aria-label="Próximos passos">
+          <p className="text-sm font-semibold text-rjb-text/70 dark:text-rjb-text-dark/70 mb-4">Explore mais</p>
+          <div className="flex flex-wrap gap-3 sm:gap-4">
+            <Link
+              to="/player"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rjb-yellow/15 dark:bg-rjb-yellow/10 border border-rjb-yellow/40 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/25 dark:hover:bg-rjb-yellow/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              aria-label="Ouça nossas músicas no player"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" /></svg>
+              Ouça nossas músicas
+            </Link>
+            <Link
+              to="/apresentacoes"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              aria-label="Ver apresentações da banda"
+            >
+              Ver apresentações
+            </Link>
+            <Link
+              to="/player"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              aria-label="Ouça o repertório na página Músicas"
+            >
+              Ouça o repertório
+            </Link>
+          </div>
+        </nav>
       </div>
     </PageWrapper>
   )

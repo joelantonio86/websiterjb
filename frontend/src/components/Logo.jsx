@@ -39,10 +39,11 @@ const Logo = () => {
   return (
     <Link to="/" className="hover:opacity-80 transition-opacity flex items-center space-x-2">
       {!imageError && currentUrlIndex < currentUrls.length ? (
-        <img 
-          src={currentUrls[currentUrlIndex]} 
+        <img
+          src={currentUrls[currentUrlIndex]}
           alt="Racional Jazz Band Logo"
           className="h-16 w-auto rjb-logo-image"
+          decoding="async"
           onError={handleImageError}
           key={currentUrlIndex}
         />

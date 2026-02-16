@@ -44,6 +44,7 @@ const ImageModal = ({ imageUrl, isOpen, onClose }) => {
           <img
             src={imageUrl}
             alt="Imagem Ampliada"
+            decoding="async"
             className="max-h-[85vh] sm:max-h-[85vh] w-auto mx-auto object-contain"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>

@@ -346,7 +346,7 @@ const Financeiro = () => {
                     placeholder="Buscar por nome..."
                     value={contributionSearch}
                     onChange={e => setContributionSearch(e.target.value)}
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
+                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
                   />
                 </div>
                 <div className="mb-6 p-4 sm:p-5 rounded-xl bg-green-50/80 dark:bg-green-900/20 border border-green-200/80 dark:border-green-800/80 flex flex-wrap items-center justify-between gap-3">
@@ -391,7 +391,7 @@ const Financeiro = () => {
                     placeholder="Buscar por nome..."
                     value={depositSearch}
                     onChange={e => setDepositSearch(e.target.value)}
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
+                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
                   />
                 </div>
                 <div className="mb-6 p-4 sm:p-5 rounded-xl bg-green-50/80 dark:bg-green-900/20 border border-green-200/80 dark:border-green-800/80 flex flex-wrap items-center justify-between gap-3">
@@ -436,7 +436,7 @@ const Financeiro = () => {
                     placeholder="Buscar por descrição..."
                     value={expenseSearch}
                     onChange={e => setExpenseSearch(e.target.value)}
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-red-500/40 focus:border-red-500 outline-none transition-all"
+                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-red-500/40 focus:border-red-500 outline-none transition-all"
                   />
                 </div>
                 <div className="mb-6 p-4 sm:p-5 rounded-xl bg-red-50/80 dark:bg-red-900/20 border border-red-200/80 dark:border-red-800/80 flex flex-wrap items-center justify-between gap-3">
@@ -470,7 +470,7 @@ const Financeiro = () => {
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
-                    <input type="search" placeholder="Buscar por nome..." value={reportSearch} onChange={e => setReportSearch(e.target.value)} className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none" />
+                    <input type="search" placeholder="Buscar por nome..." value={reportSearch} onChange={e => setReportSearch(e.target.value)} className="w-full min-h-[44px] pl-10 pr-4 py-2 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none" />
                   </div>
                   <select value={reportYear} onChange={e => setReportYear(e.target.value)} className="min-h-[44px] sm:min-h-[42px] px-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 outline-none">
                     <option value="">Todos os anos</option>
@@ -913,7 +913,7 @@ function ContributionModal ({ initial, members, onClose, onSave, canWrite }) {
               value={memberId}
               onChange={e => { setMemberId(e.target.value); const m = members.find(x => x.id === e.target.value); if (m) setMemberName(m.name) }}
               required
-              className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+              className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
             >
               <option value="">Selecione um membro</option>
               {members.map(m => (
@@ -927,7 +927,7 @@ function ContributionModal ({ initial, members, onClose, onSave, canWrite }) {
               value={month}
               onChange={e => setMonth(e.target.value)}
               required
-              className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
+              className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
             >
               {MONTH_NAMES.map((name, i) => (
                 <option key={i} value={i + 1}>{name}</option>
@@ -936,22 +936,22 @@ function ContributionModal ({ initial, members, onClose, onSave, canWrite }) {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Ano</label>
-            <input type="number" value={year} onChange={e => setYear(e.target.value)} required min={2020} max={2100} className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="number" value={year} onChange={e => setYear(e.target.value)} required min={2020} max={2100} className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Valor (R$)</label>
-            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min={0} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min={0} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Status</label>
-            <select value={status} onChange={e => setStatus(e.target.value)} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+            <select value={status} onChange={e => setStatus(e.target.value)} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
               <option value="pending">Pendente</option>
               <option value="paid">Pago</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Comprovante (opcional)</label>
-            <input type="file" accept="image/*,.pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="file" accept="image/*,.pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
             {initial.receiptUrl && !receiptFile && <a href={initial.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 text-sm mt-1 inline-block">Ver comprovante atual</a>}
           </div>
           <div className="flex gap-3 pt-2">
@@ -1001,7 +1001,7 @@ function DepositModal ({ initial, members, onClose, onSave, canWrite }) {
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Membro</label>
-            <select value={memberId} onChange={e => { setMemberId(e.target.value); const m = members.find(x => x.id === e.target.value); if (m) setMemberName(m.name) }} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+            <select value={memberId} onChange={e => { setMemberId(e.target.value); const m = members.find(x => x.id === e.target.value); if (m) setMemberName(m.name) }} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
               <option value="">Selecione um membro</option>
               {members.map(m => (
                 <option key={m.id} value={m.id}>{m.name}</option>
@@ -1010,19 +1010,19 @@ function DepositModal ({ initial, members, onClose, onSave, canWrite }) {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Data do Depósito</label>
-            <input type="date" value={depositDate} onChange={e => setDepositDate(e.target.value)} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="date" value={depositDate} onChange={e => setDepositDate(e.target.value)} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Valor (R$)</label>
-            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min={0} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min={0} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Descrição (opcional)</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Comprovante</label>
-            <input type="file" accept="image/*,.pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="file" accept="image/*,.pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
             {initial.receiptUrl && !receiptFile && <a href={initial.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 text-sm mt-1 inline-block">Ver comprovante atual</a>}
           </div>
           <div className="flex gap-3 pt-2">
@@ -1067,19 +1067,19 @@ function ExpenseModal ({ initial, onClose, onSave, canWrite }) {
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Descrição</label>
-            <input type="text" value={description} onChange={e => setDescription(e.target.value)} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="text" value={description} onChange={e => setDescription(e.target.value)} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Valor (R$)</label>
-            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min={0} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min={0} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Data</label>
-            <input type="date" value={expenseDate} onChange={e => setExpenseDate(e.target.value)} required className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="date" value={expenseDate} onChange={e => setExpenseDate(e.target.value)} required className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Categoria</label>
-            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
+            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark">
               {EXPENSE_CATEGORIES.map(c => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
@@ -1087,7 +1087,7 @@ function ExpenseModal ({ initial, onClose, onSave, canWrite }) {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Comprovante (opcional)</label>
-            <input type="file" accept="image/*,.pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} className="w-full p-3 rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
+            <input type="file" accept="image/*,.pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} className="w-full p-3 text-base rounded-lg border border-green-600/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark" />
             {initial.receiptUrl && !receiptFile && <a href={initial.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 text-sm mt-1 inline-block">Ver comprovante atual</a>}
           </div>
           <div className="flex gap-3 pt-2">

@@ -43,7 +43,7 @@ const getFillColor = (count, maxCount) => {
 
 const MAP_CENTER = [-54, -15]
 
-const BrazilMap = () => {
+const BrazilMap = ({ onTotalLoad }) => {
   const [byState, setByState] = useState({})
   const [byStateDetail, setByStateDetail] = useState({})
   const [total, setTotal] = useState(0)
@@ -71,15 +71,18 @@ const BrazilMap = () => {
         try {
           const statsRes = await api.get('/api/public/stats/members-by-state')
           if (!cancelled) {
+            const tot = statsRes.data.total ?? 0
             setByState(statsRes.data.byState || emptyByState())
             setByStateDetail(statsRes.data.byStateDetail || {})
-            setTotal(statsRes.data.total ?? 0)
+            setTotal(tot)
+            onTotalLoad?.(tot)
           }
         } catch (err) {
           if (!cancelled) {
             setByState(emptyByState())
             setByStateDetail({})
             setTotal(0)
+            onTotalLoad?.(0)
             setStatsError(err.response?.data?.message || err.message || 'Não foi possível carregar as quantidades. Verifique se o backend está no ar e se a API está acessível.')
           }
         }

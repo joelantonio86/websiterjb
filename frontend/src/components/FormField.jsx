@@ -76,7 +76,7 @@ const FormField = ({
           onFocus={handleFocus}
           placeholder={placeholder}
           required={required}
-          className={`w-full ${icon ? 'pl-10 sm:pl-12' : 'pl-3 sm:pl-4'} pr-3 sm:pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-rjb-text/40 dark:placeholder:text-rjb-text-dark/40 ${
+          className={`w-full ${icon ? 'pl-10 sm:pl-12' : 'pl-3 sm:pl-4'} pr-3 sm:pr-4 py-3 sm:py-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-rjb-text/40 dark:placeholder:text-rjb-text-dark/40 ${
             hasError
               ? 'border-red-500 ring-2 ring-red-500/20'
               : focused

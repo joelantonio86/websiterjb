@@ -6,10 +6,9 @@ const PageWrapper = ({ title, subtitle, children }) => {
   const [isVisible, setIsVisible] = useState(false)
   
   const subMenuRJB = {
-    '/player': 'Player / Ouça nossas músicas',
+    '/player': 'Músicas / Repertório e player',
     '/apresentacoes': 'Apresentações / Nossas apresentações',
     '/bastidores': 'Ensaios / Pessoas de diversos estados',
-    '/repertorio': 'Repertório / Músicas originais',
     '/partituras': 'Partituras / Área Exclusiva para Músicos',
     '/fotos': 'Fotos / Fotos de apresentações',
   }
