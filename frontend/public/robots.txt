@@ -1,0 +1,10 @@
+# Racional Jazz Band - permitir rastreamento para motores de busca
+User-agent: *
+Allow: /
+
+# Áreas restritas (login/admin) - não indexar
+Disallow: /relatorios
+Disallow: /financeiro
+
+# Local do sitemap (ajuste o domínio se publicar em outro endereço)
+Sitemap: https://www.racionaljazzband.com.br/sitemap.xml
