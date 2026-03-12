@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 import { REPERTORIO_APRESENTACOES_2026, REPERTORIO_MAIO_2026 } from '../data/repertorioApresentacoes2026'
+import DownloadMaioRepertoireButton from '../components/DownloadMaioRepertoireButton'
 
 const RepertorioApresentacoes = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -59,6 +60,7 @@ const RepertorioApresentacoes = () => {
               >
                 🎼 Partituras do repertório
               </Link>
+              <DownloadMaioRepertoireButton variant="primary" />
             </div>
           </div>
         </div>

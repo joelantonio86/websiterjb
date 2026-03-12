@@ -6,6 +6,7 @@ import { AGENDA_EVENTS } from '../data/events'
 import { APRESENTACOES_BY_EVENT } from '../data/videos'
 import { racionais, diversas } from '../data/songs'
 import { REPERTORIO_MAIO_2026 } from '../data/repertorioApresentacoes2026'
+import DownloadMaioRepertoireButton from '../components/DownloadMaioRepertoireButton'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -202,6 +203,7 @@ const Home = () => {
               >
                 🎼 Partituras do repertório
               </Link>
+              <DownloadMaioRepertoireButton variant="primary" />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
