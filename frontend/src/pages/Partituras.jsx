@@ -2,6 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
 import { racionais, diversas, R2_BASE_URL } from '../data/songs'
+import { API_BASE } from '../services/api'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
 import AudioPlayer from '../components/AudioPlayer'
@@ -79,23 +80,42 @@ const Partituras = () => {
     const toDownload = filteredSheets.filter(s => selectedSheets.has(getSheetId(s)))
     if (toDownload.length === 0) return
     setBatchDownloading(true)
+    const failed = []
     try {
       const zip = new JSZip()
-      const racionaisFolder = zip.folder('Racionais')
-      const diversasFolder = zip.folder('Outros_Classicos')
+      const racionaisFiles = []
+      const diversasFiles = []
+      const proxyUrl = (folder, file) => `${API_BASE}/api/public/partituras/proxy?folder=${encodeURIComponent(folder)}&file=${encodeURIComponent(file)}`
       for (const sheet of toDownload) {
-        const url = `${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf`
+        const url = proxyUrl(sheet.folder, sheet.mp3)
         try {
           const res = await fetch(url)
           if (res.ok) {
             const blob = await res.blob()
             const fileName = `${sheet.title.replace(/[/\\?%*:|"<>]/g, '_')}.pdf`
-            const folder = sheet.folder === 'racionais' ? racionaisFolder : diversasFolder
-            folder.file(fileName, blob)
+            const entry = { fileName, blob }
+            if (sheet.folder === 'racionais') racionaisFiles.push(entry)
+            else diversasFiles.push(entry)
+          } else {
+            failed.push(sheet.title)
           }
         } catch (e) {
           console.warn(`Falha ao baixar ${sheet.title}:`, e)
+          failed.push(sheet.title)
         }
+      }
+      if (racionaisFiles.length > 0) {
+        const racionaisFolder = zip.folder('Racionais')
+        racionaisFiles.forEach(({ fileName, blob }) => racionaisFolder.file(fileName, blob))
+      }
+      if (diversasFiles.length > 0) {
+        const diversasFolder = zip.folder('Outros_Classicos')
+        diversasFiles.forEach(({ fileName, blob }) => diversasFolder.file(fileName, blob))
+      }
+      const totalOk = racionaisFiles.length + diversasFiles.length
+      if (totalOk === 0) {
+        alert('Nenhum PDF pôde ser baixado. Verifique sua conexão e tente novamente.')
+        return
       }
       const content = await zip.generateAsync({ type: 'blob' })
       const a = document.createElement('a')
@@ -104,8 +124,13 @@ const Partituras = () => {
       a.click()
       URL.revokeObjectURL(a.href)
       setSelectedSheets(new Set())
+      if (failed.length > 0) {
+        console.warn(`${failed.length} arquivo(s) não baixados:`, failed)
+        alert(`Baixados: ${totalOk}. Não foi possível baixar ${failed.length}: ${failed.slice(0, 3).join(', ')}${failed.length > 3 ? '...' : ''}`)
+      }
     } catch (e) {
       console.error('Erro ao gerar ZIP:', e)
+      alert('Erro ao gerar o arquivo ZIP. Tente novamente.')
     } finally {
       setBatchDownloading(false)
     }

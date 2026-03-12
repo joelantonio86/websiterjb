@@ -101,8 +101,9 @@ function initFirebaseAndGCS() {
 }
 
 // Middleware: rotas que precisam do Firestore retornam 503 até os serviços estarem prontos
+const publicPathsNoFirebase = ['/api/public/health', '/api/public/partituras/proxy'];
 app.use((req, res, next) => {
-    if (!membersCollection && req.path !== '/api/public/health' && !req.path.startsWith('/api/public/health')) {
+    if (!membersCollection && !publicPathsNoFirebase.includes(req.path)) {
         return res.status(503).json({ message: 'Serviço temporariamente indisponível. Tente em alguns segundos.' });
     }
     next();
@@ -231,6 +232,36 @@ app.post('/api/register-member', limiter, async (req, res) => {
 // --- Rotas públicas (sem autenticação) ---
 app.get('/api/public/health', (req, res) => {
     res.json({ ok: true, version: 'with-members-by-state', service: 'rjb-email-sender' });
+});
+
+// Proxy para PDFs de partituras (evita CORS ao fazer fetch do R2 no browser)
+const R2_BASE = 'https://pub-934c96bc6fb449a7ad7b3491065976d3.r2.dev';
+app.get('/api/public/partituras/proxy', async (req, res) => {
+    const { folder, file } = req.query;
+    if (!folder || !file) {
+        return res.status(400).json({ message: 'Parâmetros folder e file são obrigatórios.' });
+    }
+    if (!['racionais', 'diversas'].includes(folder)) {
+        return res.status(400).json({ message: 'Pasta inválida.' });
+    }
+    const safeFile = String(file).replace(/[^a-zA-Z0-9_-]/g, '');
+    if (!safeFile || safeFile !== file) {
+        return res.status(400).json({ message: 'Nome de arquivo inválido.' });
+    }
+    const url = `${R2_BASE}/${folder}/pdf/${safeFile}.pdf`;
+    try {
+        const r = await fetch(url);
+        if (!r.ok) {
+            return res.status(r.status).json({ message: 'PDF não encontrado.' });
+        }
+        const buffer = await r.arrayBuffer();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${safeFile}.pdf"`);
+        res.send(Buffer.from(buffer));
+    } catch (e) {
+        console.error('Erro ao buscar PDF:', e.message);
+        res.status(502).json({ message: 'Erro ao buscar o arquivo.' });
+    }
 });
 
 // --- Estatísticas públicas (mapa da Home: componentes por estado) ---
