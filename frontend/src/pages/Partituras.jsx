@@ -83,6 +83,7 @@ const Partituras = () => {
   const [downloading, setDownloading] = useState(null)
   const [selectedSheets, setSelectedSheets] = useState(new Set())
   const [batchDownloading, setBatchDownloading] = useState(false)
+  const [batchProgress, setBatchProgress] = useState(0) // 0-100 durante o download
   const [downloadFailedModal, setDownloadFailedModal] = useState(null) // { totalOk, failed }
 
   useEffect(() => {
@@ -146,13 +147,16 @@ const Partituras = () => {
     const toDownload = filteredSheets.filter(s => selectedSheets.has(getSheetId(s)))
     if (toDownload.length === 0) return
     setBatchDownloading(true)
+    setBatchProgress(0)
     const failed = []
+    const total = toDownload.length
     try {
       const zip = new JSZip()
       const racionaisFiles = []
       const diversasFiles = []
       const proxyUrl = (folder, file) => `${API_BASE}/api/public/partituras/proxy?folder=${encodeURIComponent(folder)}&file=${encodeURIComponent(file)}`
-      for (const sheet of toDownload) {
+      for (let i = 0; i < toDownload.length; i++) {
+        const sheet = toDownload[i]
         const url = proxyUrl(sheet.folder, sheet.mp3)
         try {
           const res = await fetch(url)
@@ -169,6 +173,7 @@ const Partituras = () => {
           console.warn(`Falha ao baixar ${sheet.title}:`, e)
           failed.push(sheet.title)
         }
+        setBatchProgress(Math.round(((i + 1) / total) * 85))
       }
       if (racionaisFiles.length > 0) {
         const racionaisFolder = zip.folder('Racionais')
@@ -180,10 +185,14 @@ const Partituras = () => {
       }
       const totalOk = racionaisFiles.length + diversasFiles.length
       if (totalOk === 0) {
+        setBatchProgress(0)
         alert('Nenhum PDF pôde ser baixado. Verifique sua conexão e tente novamente.')
         return
       }
+      setBatchProgress(90)
       const content = await zip.generateAsync({ type: 'blob' })
+      setBatchProgress(100)
+      await new Promise(r => setTimeout(r, 400))
       const a = document.createElement('a')
       a.href = URL.createObjectURL(content)
       a.download = `Partituras_RJB_${new Date().toISOString().slice(0, 10)}.zip`
@@ -200,6 +209,7 @@ const Partituras = () => {
       console.error('Erro ao gerar ZIP:', e)
       alert('Erro ao gerar o arquivo ZIP. Tente novamente.')
     } finally {
+      setBatchProgress(0)
       setBatchDownloading(false)
     }
   }
@@ -645,6 +655,34 @@ const Partituras = () => {
           />
         )}
       </div>
+
+      {/* Overlay de progresso durante o download em lote */}
+      {batchDownloading && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-gradient-to-br from-rjb-card-light to-rjb-card-light/95 dark:from-rjb-card-dark dark:to-rjb-card-dark/95 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-fade-in">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-rjb-yellow/20 flex items-center justify-center">
+                <svg className="w-6 h-6 text-rjb-yellow animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark">Gerando ZIP</h3>
+                <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-0.5">
+                  Baixando partituras... {batchProgress}%
+                </p>
+              </div>
+            </div>
+            <div className="h-2.5 bg-rjb-bg-light dark:bg-rjb-bg-dark rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-rjb-yellow to-yellow-500 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${batchProgress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de partituras não disponíveis */}
       {downloadFailedModal && (
