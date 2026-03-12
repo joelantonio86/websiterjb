@@ -1,5 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+
+const RJB_MENU_SECTIONS = [
+  {
+    title: 'Repertório',
+    subtitle: 'Ouça e estude',
+    items: [
+      { path: '/player', label: 'Músicas', icon: '🎵', description: 'Ouça o repertório completo' },
+      { path: '/partituras', label: 'Partituras', icon: '🎼', description: 'Partituras em PDF para músicos' },
+      { path: '/repertorio-apresentacoes', label: 'Repertório 2026', icon: '📋', description: 'Músicas previstas para cada show' },
+    ],
+  },
+  {
+    title: 'Vídeos e Fotos',
+    subtitle: 'Assista e veja',
+    items: [
+      { path: '/apresentacoes', label: 'Apresentações', icon: '🎬', description: 'Shows e apresentações oficiais' },
+      { path: '/bastidores', label: 'Ensaios', icon: '🎤', description: 'Bastidores e ensaios da banda' },
+      { path: '/fotos', label: 'Fotos', icon: '📸', description: 'Galeria de fotos dos eventos' },
+    ],
+  },
+]
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext'
 import Logo from '../Logo'
@@ -8,6 +29,7 @@ import Tooltip from '../Tooltip'
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [rjbDropdownOpen, setRjbDropdownOpen] = useState(false)
+  const rjbHoverTimeoutRef = useRef(null)
   const { isDark, cycleTheme, themeLabel, nextThemeLabel } = useTheme()
   const { user } = useAuth()
   const location = useLocation()
@@ -86,11 +108,25 @@ const Header = () => {
               Sobre
             </Link>
 
-            {/* RJB Dropdown */}
-            <div className="relative group">
+            {/* RJB Mega Menu - hover para abrir no desktop */}
+            <div
+              className="relative"
+              onMouseEnter={() => {
+                if (rjbHoverTimeoutRef.current) {
+                  clearTimeout(rjbHoverTimeoutRef.current)
+                  rjbHoverTimeoutRef.current = null
+                }
+                setRjbDropdownOpen(true)
+              }}
+              onMouseLeave={() => {
+                rjbHoverTimeoutRef.current = setTimeout(() => setRjbDropdownOpen(false), 150)
+              }}
+            >
               <button
                 onClick={() => setRjbDropdownOpen(!rjbDropdownOpen)}
                 className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-all duration-300 font-semibold py-5 text-sm xl:text-base ${isRjbPage && 'nav-link-active'}`}
+                aria-expanded={rjbDropdownOpen}
+                aria-haspopup="true"
               >
                 A RJB
                 <svg className={`ml-1 w-4 h-4 transition-transform duration-300 ${rjbDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,36 +134,36 @@ const Header = () => {
                 </svg>
               </button>
               {rjbDropdownOpen && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 rounded-xl shadow-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 ring-2 ring-rjb-yellow/30 dark:ring-rjb-yellow/50 z-50 animate-fade-in overflow-hidden">
-                  <div className="py-2">
-                    {[
-                      { path: '/partituras', label: 'Área de Partituras', icon: '🎼' },
-                      { path: '/repertorio-apresentacoes', label: 'Repertório 2026', icon: '📋' },
-                      { path: '/fotos', label: 'Galeria de Fotos', icon: '📸' },
-                      { path: '/apresentacoes', label: 'Apresentações', icon: '🎬' },
-                      { path: '/bastidores', label: 'Ensaios', icon: '🎤' }
-                    ].map((item, idx) => (
-                      <Link
-                        key={idx}
-                        to={item.path}
-                        className="group/item flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm font-medium text-rjb-text dark:text-rjb-text-dark hover:bg-gradient-to-r hover:from-rjb-yellow hover:to-yellow-500 hover:text-rjb-text transition-all duration-300 transform hover:translate-x-1"
-                        onClick={() => setRjbDropdownOpen(false)}
-                      >
-                        <span className="text-base group-hover/item:scale-110 transition-transform duration-300">{item.icon}</span>
-                        <span>{item.label}</span>
-                      </Link>
-                    ))}
+                <div className="absolute left-1/2 transform -translate-x-1/2 pt-2 top-full z-50">
+                  <div className="w-[420px] sm:w-[480px] rounded-2xl shadow-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 ring-2 ring-rjb-yellow/30 dark:ring-rjb-yellow/50 overflow-hidden animate-fade-in">
+                    <div className="grid grid-cols-2 gap-0 p-4">
+                      {RJB_MENU_SECTIONS.map((section, sIdx) => (
+                        <div key={sIdx} className={sIdx === 0 ? 'pr-4 border-r border-rjb-yellow/20 dark:border-rjb-text-dark/20' : 'pl-4'}>
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-rjb-yellow mb-1 px-1">{section.title}</h4>
+                          <p className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mb-3 px-1">{section.subtitle}</p>
+                          <div className="space-y-1">
+                            {section.items.map((item) => (
+                              <Link
+                                key={item.path}
+                                to={item.path}
+                                className="group/item flex flex-col gap-0.5 px-3 py-2.5 rounded-xl hover:bg-gradient-to-r hover:from-rjb-yellow/20 hover:to-yellow-500/10 transition-all duration-200"
+                                onClick={() => setRjbDropdownOpen(false)}
+                              >
+                                <span className="flex items-center gap-2.5">
+                                  <span className="text-lg group-hover/item:scale-110 transition-transform">{item.icon}</span>
+                                  <span className="font-semibold text-sm text-rjb-text dark:text-rjb-text-dark group-hover/item:text-rjb-yellow">{item.label}</span>
+                                </span>
+                                <span className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 pl-7 leading-tight">{item.description}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
-
-            <Link
-              to="/player"
-              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/player') && 'nav-link-active'}`}
-            >
-              Músicas
-            </Link>
 
             <Link
               to="/agenda"
@@ -143,12 +179,14 @@ const Header = () => {
               Contato
             </Link>
             
-            <Link
-              to="/relatorios"
-              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/relatorios') && 'nav-link-active'}`}
-            >
-              Área Administrativa
-            </Link>
+            {(user?.role === 'admin' || user?.role === 'admin-financeiro' || user?.role === 'financeiro' || user?.role === 'financeiro-view') && (
+              <Link
+                to="/relatorios"
+                className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/relatorios') && 'nav-link-active'}`}
+              >
+                Área Administrativa
+              </Link>
+            )}
 
             {/* Tema: Sistema / Claro / Escuro */}
             <Tooltip content={`Tema: ${themeLabel} · Clique para: ${nextThemeLabel}`} position="bottom">
@@ -281,52 +319,37 @@ const Header = () => {
                   </svg>
                 </button>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  rjbDropdownOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  rjbDropdownOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
                 }`}>
-                  <div className="mt-2 ml-4 space-y-1.5 bg-rjb-bg-light/50 dark:bg-rjb-card-dark/50 rounded-xl p-3 border border-rjb-yellow/20">
-                    {[
-                      { path: '/apresentacoes', label: 'Apresentações', icon: '🎬' },
-                      { path: '/repertorio-apresentacoes', label: 'Repertório 2026', icon: '📋' },
-                      { path: '/bastidores', label: 'Ensaios', icon: '🎤' },
-                      { path: '/partituras', label: 'Partituras', icon: '🎼' },
-                      { path: '/fotos', label: 'Fotos', icon: '📸' }
-                    ].map((item, idx) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
-                          isActive(item.path)
-                            ? 'bg-rjb-yellow/30 text-rjb-yellow shadow-sm'
-                            : 'text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-yellow'
-                        }`}
-                        onClick={() => {
-                          setMobileMenuOpen(false)
-                          setRjbDropdownOpen(false)
-                        }}
-                        style={{ animationDelay: `${0.2 + idx * 0.05}s` }}
-                      >
-                        <span className="text-lg">{item.icon}</span>
-                        <span>{item.label}</span>
-                      </Link>
+                  <div className="mt-2 ml-4 space-y-3 bg-rjb-bg-light/50 dark:bg-rjb-card-dark/50 rounded-xl p-3 border border-rjb-yellow/20">
+                    {RJB_MENU_SECTIONS.map((section, sIdx) => (
+                      <div key={sIdx}>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-rjb-yellow mb-1.5 px-2">{section.title}</h4>
+                        <div className="space-y-1">
+                          {section.items.map((item, idx) => (
+                            <Link
+                              key={item.path}
+                              to={item.path}
+                              className={`flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                                isActive(item.path)
+                                  ? 'bg-rjb-yellow/30 text-rjb-yellow shadow-sm'
+                                  : 'text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-yellow'
+                              }`}
+                              onClick={() => {
+                                setMobileMenuOpen(false)
+                                setRjbDropdownOpen(false)
+                              }}
+                            >
+                              <span className="text-lg">{item.icon}</span>
+                              <span>{item.label}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
-
-              <Link
-                to="/player"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
-                  isActive('/player')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="flex items-center gap-3">
-                  <span className="text-xl">🎵</span>
-                  <span>Músicas</span>
-                </span>
-              </Link>
 
               <Link
                 to="/agenda"
@@ -366,20 +389,22 @@ const Header = () => {
                   <span>Cadastro</span>
                 </span>
               </Link>
-              <Link
-                to="/relatorios"
-                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
-                  isActive('/relatorios')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="flex items-center gap-3">
-                  <span className="text-xl">🔐</span>
-                  <span>Área Administrativa</span>
-                </span>
-              </Link>
+              {(user?.role === 'admin' || user?.role === 'admin-financeiro' || user?.role === 'financeiro' || user?.role === 'financeiro-view') && (
+                <Link
+                  to="/relatorios"
+                  className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                    isActive('/relatorios')
+                      ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
+                      : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-xl">🔐</span>
+                    <span>Área Administrativa</span>
+                  </span>
+                </Link>
+              )}
               {user && (user.role === 'financeiro' || user.role === 'admin-financeiro' || user.role === 'financeiro-view') && (
                 <Link
                   to="/financeiro"

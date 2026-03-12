@@ -13,6 +13,7 @@ export const useAudio = () => {
 export const AudioProvider = ({ children }) => {
   const [currentTrack, setCurrentTrack] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
@@ -40,18 +41,22 @@ export const AudioProvider = ({ children }) => {
       setIsPlaying(false)
       setDuration(0)
       setCurrentTime(0)
+      setIsLoading(false)
     }
+    const handleCanPlay = () => setIsLoading(false)
 
     audio.addEventListener('timeupdate', updateTime)
     audio.addEventListener('loadedmetadata', updateDuration)
     audio.addEventListener('ended', handleEnded)
     audio.addEventListener('error', handleError)
+    audio.addEventListener('canplay', handleCanPlay)
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime)
       audio.removeEventListener('loadedmetadata', updateDuration)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('error', handleError)
+      audio.removeEventListener('canplay', handleCanPlay)
     }
   }, [])
 
@@ -94,6 +99,7 @@ export const AudioProvider = ({ children }) => {
       audioRef.current.src = ''
     }
     setIsPlaying(false)
+    setIsLoading(false)
     setCurrentTrack(null)
     setCurrentTime(0)
     setTrackError(false)
@@ -125,6 +131,7 @@ export const AudioProvider = ({ children }) => {
 
     setCurrentTrack({ title, audioUrl })
     setIsPlaying(true)
+    setIsLoading(true)
 
     const audio = audioRef.current
     if (!audio) return
@@ -133,6 +140,7 @@ export const AudioProvider = ({ children }) => {
       if (playAttemptIdRef.current === thisAttempt) {
         setTrackError(true)
         setIsPlaying(false)
+        setIsLoading(false)
       }
     }
     audio.addEventListener('error', onError, { once: true })
@@ -143,6 +151,7 @@ export const AudioProvider = ({ children }) => {
       if (playAttemptIdRef.current === thisAttempt) {
         setTrackError(true)
         setIsPlaying(false)
+        setIsLoading(false)
       }
     })
   }
@@ -162,6 +171,7 @@ export const AudioProvider = ({ children }) => {
         setVolume,
         trackError,
         setTrackError,
+        isLoading,
         playTrack,
         pauseTrack,
         resumeTrack,

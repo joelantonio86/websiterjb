@@ -7,10 +7,11 @@ const PageWrapper = ({ title, subtitle, children }) => {
   
   const subMenuRJB = {
     '/player': 'Músicas / Repertório e player',
-    '/apresentacoes': 'Apresentações / Nossas apresentações',
-    '/bastidores': 'Ensaios / Pessoas de diversos estados',
-    '/partituras': 'Partituras / Área Exclusiva para Músicos',
-    '/fotos': 'Fotos / Fotos de apresentações',
+    '/partituras': 'Partituras / Área exclusiva para músicos',
+    '/repertorio-apresentacoes': 'Repertório 2026 / Músicas previstas para cada show',
+    '/apresentacoes': 'Apresentações / Shows e apresentações oficiais',
+    '/bastidores': 'Ensaios / Bastidores e ensaios da banda',
+    '/fotos': 'Fotos / Galeria de fotos dos eventos',
   }
 
   useEffect(() => {

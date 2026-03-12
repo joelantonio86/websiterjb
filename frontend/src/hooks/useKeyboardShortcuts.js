@@ -13,20 +13,24 @@ const useKeyboardShortcuts = (shortcuts) => {
       }
 
       const key = event.key.toLowerCase()
-      const ctrlOrCmd = event.ctrlKey || event.metaKey
+      const modKey = event.metaKey ? 'meta' : (event.ctrlKey ? 'ctrl' : null)
       const shift = event.shiftKey
       const alt = event.altKey
 
-      // Criar string de combinação de teclas
+      // Criar string de combinação (meta para Mac Cmd, ctrl para Ctrl)
       const combination = [
-        ctrlOrCmd && 'ctrl',
+        modKey,
         shift && 'shift',
         alt && 'alt',
         key
       ].filter(Boolean).join('+')
 
-      // Procurar atalho correspondente
-      const shortcut = shortcuts.find(s => s.keys === combination || s.keys === key)
+      // Procurar atalho correspondente (aceita ctrl+k e meta+k para busca)
+      const shortcut = shortcuts.find(s => {
+        if (s.keys === combination || s.keys === key) return true
+        if ((combination === 'ctrl+k' || combination === 'meta+k') && (s.keys === 'ctrl+k' || s.keys === 'meta+k')) return true
+        return false
+      })
 
       if (shortcut) {
         event.preventDefault()

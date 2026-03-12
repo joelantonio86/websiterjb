@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 import EmptyState from '../components/EmptyState'
 import { AGENDA_EVENTS } from '../data/events'
 
 const Agenda = () => {
+  const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -91,7 +92,9 @@ const Agenda = () => {
               </svg>
             }
             title="Agenda em Atualização"
-            description="Em breve, nossa agenda de eventos será atualizada aqui. Fique atento para não perder nossos próximos shows!"
+            description="Em breve, nossa agenda de eventos será atualizada aqui. Fique atento para não perder nossos próximos shows! Enquanto isso, conheça nosso repertório."
+            actionLabel="Ouça nossas músicas"
+            onAction={() => navigate('/player')}
             variant="info"
           />
         )}

@@ -1,4 +1,5 @@
 import { useState, useEffect, Fragment } from 'react'
+import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
 import { racionais, diversas, R2_BASE_URL } from '../data/songs'
 import EmptyState from '../components/EmptyState'
@@ -14,6 +15,8 @@ const Partituras = () => {
   const [viewMode, setViewMode] = useState('list') // 'list' or 'grid'
   const [isLoading, setIsLoading] = useState(true)
   const [downloading, setDownloading] = useState(null)
+  const [selectedSheets, setSelectedSheets] = useState(new Set())
+  const [batchDownloading, setBatchDownloading] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -54,20 +57,84 @@ const Partituras = () => {
     setDownloading(`${type}-${title}`)
   }
 
+  const getSheetId = (sheet) => `${sheet.folder}-${sheet.mp3}`
+
+  const toggleSheetSelection = (sheet) => {
+    const id = getSheetId(sheet)
+    setSelectedSheets(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const selectAllFiltered = () => {
+    setSelectedSheets(new Set(filteredSheets.map(getSheetId)))
+  }
+
+  const clearSelection = () => setSelectedSheets(new Set())
+
+  const downloadSelectedAsZip = async () => {
+    const toDownload = filteredSheets.filter(s => selectedSheets.has(getSheetId(s)))
+    if (toDownload.length === 0) return
+    setBatchDownloading(true)
+    try {
+      const zip = new JSZip()
+      const racionaisFolder = zip.folder('Racionais')
+      const diversasFolder = zip.folder('Outros_Classicos')
+      for (const sheet of toDownload) {
+        const url = `${R2_BASE_URL}/${sheet.folder}/pdf/${sheet.mp3}.pdf`
+        try {
+          const res = await fetch(url)
+          if (res.ok) {
+            const blob = await res.blob()
+            const fileName = `${sheet.title.replace(/[/\\?%*:|"<>]/g, '_')}.pdf`
+            const folder = sheet.folder === 'racionais' ? racionaisFolder : diversasFolder
+            folder.file(fileName, blob)
+          }
+        } catch (e) {
+          console.warn(`Falha ao baixar ${sheet.title}:`, e)
+        }
+      }
+      const content = await zip.generateAsync({ type: 'blob' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(content)
+      a.download = `Partituras_RJB_${new Date().toISOString().slice(0, 10)}.zip`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      setSelectedSheets(new Set())
+    } catch (e) {
+      console.error('Erro ao gerar ZIP:', e)
+    } finally {
+      setBatchDownloading(false)
+    }
+  }
+
   const renderSheetCard = (sheet, idx, isRacional) => {
     const isDownloading = downloading === `pdf-${sheet.title}` || downloading === `sib-${sheet.title}`
+    const isSelected = selectedSheets.has(getSheetId(sheet))
     
     if (viewMode === 'grid') {
       return (
         <div
-          className={`group p-5 rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 flex flex-col gap-4 shadow-lg hover:shadow-2xl border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-blue-500'} transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 animate-fade-in`}
+          className={`group p-5 rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 flex flex-col gap-4 shadow-lg hover:shadow-2xl border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-blue-500'} transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 animate-fade-in ${isSelected ? 'ring-2 ring-rjb-yellow' : ''}`}
           style={{ animationDelay: `${idx * 30}ms` }}
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-2">
-              <p className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 break-words flex-1">
+              <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSheetSelection(sheet)}
+                  className="w-4 h-4 rounded border-rjb-yellow text-rjb-yellow focus:ring-rjb-yellow"
+                  aria-label={`Selecionar ${sheet.title} para download em lote`}
+                />
+              <p className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 break-words">
                 {sheet.title}
               </p>
+              </label>
               {isRacional && (
                 <span className="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow rounded-full">
                   Racional
@@ -137,14 +204,23 @@ const Partituras = () => {
     // List view (original melhorado)
     return (
       <div
-        className={`group p-4 sm:p-5 rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 flex flex-col gap-3 sm:gap-4 shadow-md hover:shadow-xl border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-blue-500'} transition-all duration-300 transform hover:scale-[1.01] hover:-translate-y-0.5 animate-fade-in`}
+        className={`group p-4 sm:p-5 rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 flex flex-col gap-3 sm:gap-4 shadow-md hover:shadow-xl border-l-4 ${isRacional ? 'border-rjb-yellow' : 'border-blue-500'} transition-all duration-300 transform hover:scale-[1.01] hover:-translate-y-0.5 animate-fade-in ${isSelected ? 'ring-2 ring-rjb-yellow' : ''}`}
         style={{ animationDelay: `${idx * 30}ms` }}
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <p className="text-base sm:text-lg md:text-xl font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 break-words flex-1">
+            <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => toggleSheetSelection(sheet)}
+                className="w-4 h-4 rounded border-rjb-yellow text-rjb-yellow focus:ring-rjb-yellow"
+                aria-label={`Selecionar ${sheet.title} para download em lote`}
+              />
+            <p className="text-base sm:text-lg md:text-xl font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 break-words">
               {sheet.title}
             </p>
+            </label>
             {isRacional && (
               <span className="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow rounded-full">
                 Racional
@@ -386,6 +462,49 @@ const Partituras = () => {
               }`}
             />
           </div>
+
+          {/* Download em lote */}
+          {filteredSheets.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={selectAllFiltered}
+                className="px-3 py-2 text-sm font-medium rounded-lg border border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 transition-colors"
+              >
+                Selecionar todas
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="px-3 py-2 text-sm font-medium rounded-lg border border-rjb-text/20 text-rjb-text/70 dark:text-rjb-text-dark/70 hover:bg-rjb-text/5 transition-colors"
+              >
+                Desmarcar
+              </button>
+              <button
+                type="button"
+                onClick={downloadSelectedAsZip}
+                disabled={selectedSheets.size === 0 || batchDownloading}
+                className="px-3 py-2 text-sm font-bold rounded-lg bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                {batchDownloading ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Gerando ZIP...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Baixar selecionadas ({selectedSheets.size})
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Toggle de visualização */}
           <div className="flex rounded-xl overflow-hidden border-2 border-rjb-yellow/30 shadow-lg">

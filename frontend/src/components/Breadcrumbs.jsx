@@ -17,6 +17,8 @@ const Breadcrumbs = () => {
       fotos: 'Fotos',
       agenda: 'Agenda',
       contato: 'Contato',
+      'politica-privacidade': 'Política de Privacidade',
+      'termos-uso': 'Termos de Uso',
       cadastro: 'Cadastro',
       relatorios: 'Área Administrativa',
       financeiro: 'Financeiro'

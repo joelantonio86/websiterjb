@@ -15,6 +15,8 @@ import Fotos from './pages/Fotos'
 import Agenda from './pages/Agenda'
 import RepertorioApresentacoes from './pages/RepertorioApresentacoes'
 import Contato from './pages/Contato'
+import PoliticaPrivacidade from './pages/PoliticaPrivacidade'
+import TermosUso from './pages/TermosUso'
 import MemberRegistration from './pages/MemberRegistration'
 import Reports from './pages/Reports'
 import Financeiro from './pages/Financeiro'
@@ -40,6 +42,8 @@ function App() {
                 <Route path="/agenda" element={<Agenda />} />
                 <Route path="/repertorio-apresentacoes" element={<RepertorioApresentacoes />} />
                 <Route path="/contato" element={<Contato />} />
+                <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
+                <Route path="/termos-uso" element={<TermosUso />} />
                 <Route path="/cadastro" element={<MemberRegistration />} />
                 <Route path="/relatorios" element={<Reports />} />
                 <Route 

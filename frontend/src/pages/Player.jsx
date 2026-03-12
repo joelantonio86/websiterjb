@@ -41,7 +41,7 @@ const formatTime = (seconds) => {
 }
 
 const Player = () => {
-  const { currentTrack, isPlaying, currentTime, duration, trackError, playTrack, togglePlayPause, seekTo, stopTrack, setOnTrackEnded } = useAudio()
+  const { currentTrack, isPlaying, isLoading, currentTime, duration, trackError, playTrack, togglePlayPause, seekTo, stopTrack, setOnTrackEnded } = useAudio()
   const [source, setSource] = useState(SOURCE_ORIGINAL)
   const [searchTerm, setSearchTerm] = useState('')
   const [isVisible, setIsVisible] = useState(false)
@@ -197,13 +197,18 @@ const Player = () => {
                     else playTrack(track.title, track.audioUrl)
                   }}
                   className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 min-w-[48px] min-h-[48px] shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${
-                    isCurrent && isPlaying
+                    isCurrent && (isPlaying || isLoading)
                       ? 'bg-rjb-yellow text-rjb-text shadow-lg scale-105'
                       : 'bg-rjb-yellow/20 text-rjb-yellow hover:bg-rjb-yellow/30 hover:scale-105 active:scale-95'
                   }`}
-                  aria-label={isCurrent && isPlaying ? 'Pausar' : `Tocar ${track.title}`}
+                  aria-label={isCurrent && isLoading ? 'Carregando...' : isCurrent && isPlaying ? 'Pausar' : `Tocar ${track.title}`}
                 >
-                  {isCurrent && isPlaying ? (
+                  {isCurrent && isLoading ? (
+                    <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : isCurrent && isPlaying ? (
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
@@ -331,7 +336,7 @@ const Player = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-center gap-5">
-                  <button type="button" onClick={playPrev} disabled={!hasPrev}
+                  <button type="button" onClick={playPrev} disabled={!hasPrev || isLoading}
                     className="w-14 h-14 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 flex items-center justify-center disabled:opacity-30 touch-manipulation active:scale-95 min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                     aria-label="Anterior">
                     <svg className="w-7 h-7 text-rjb-text dark:text-rjb-text-dark" fill="currentColor" viewBox="0 0 20 20">
@@ -339,10 +344,16 @@ const Player = () => {
                       <path fillRule="evenodd" d="M14 5a1 1 0 011 1v8a1 1 0 11-2 0V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
                   </button>
-                  <button type="button" onClick={currentTrack ? togglePlayPause : playDisplayTrack}
-                    className="w-20 h-20 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center touch-manipulation active:scale-95 min-w-[72px] min-h-[72px] shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-                    aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}>
-                    {isPlaying ? (
+                  <button type="button" onClick={currentTrack && !isLoading ? togglePlayPause : playDisplayTrack}
+                    disabled={isLoading}
+                    className="w-20 h-20 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center touch-manipulation active:scale-95 min-w-[72px] min-h-[72px] shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 disabled:opacity-80"
+                    aria-label={isLoading ? 'Carregando...' : isPlaying ? 'Pausar' : 'Reproduzir'}>
+                    {isLoading ? (
+                      <svg className="w-9 h-9 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    ) : isPlaying ? (
                       <svg className="w-9 h-9" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>
@@ -352,7 +363,7 @@ const Player = () => {
                       </svg>
                     )}
                   </button>
-                  <button type="button" onClick={playNext} disabled={!hasNext}
+                  <button type="button" onClick={playNext} disabled={!hasNext || isLoading}
                     className="w-14 h-14 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 flex items-center justify-center disabled:opacity-30 touch-manipulation active:scale-95 min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                     aria-label="Próxima">
                     <svg className="w-7 h-7 text-rjb-text dark:text-rjb-text-dark" fill="currentColor" viewBox="0 0 20 20">
@@ -462,7 +473,7 @@ const Player = () => {
                     <button
                       type="button"
                       onClick={playPrev}
-                      disabled={!hasPrev}
+                      disabled={!hasPrev || isLoading}
                       className="w-12 h-12 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text dark:text-rjb-text-dark flex items-center justify-center hover:bg-rjb-text/20 dark:hover:bg-rjb-text-dark/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
                       aria-label="Anterior"
                     >
@@ -473,11 +484,17 @@ const Player = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={currentTrack ? togglePlayPause : playDisplayTrack}
-                      className="w-14 h-14 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center hover:bg-yellow-500 transition-all shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
-                      aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
+                      onClick={currentTrack && !isLoading ? togglePlayPause : playDisplayTrack}
+                      disabled={isLoading}
+                      className="w-14 h-14 rounded-full bg-rjb-yellow text-rjb-text flex items-center justify-center hover:bg-yellow-500 transition-all shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 disabled:opacity-80"
+                      aria-label={isLoading ? 'Carregando...' : isPlaying ? 'Pausar' : 'Reproduzir'}
                     >
-                      {isPlaying ? (
+                      {isLoading ? (
+                        <svg className="w-7 h-7 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      ) : isPlaying ? (
                         <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
@@ -490,7 +507,7 @@ const Player = () => {
                     <button
                       type="button"
                       onClick={playNext}
-                      disabled={!hasNext}
+                      disabled={!hasNext || isLoading}
                       className="w-12 h-12 rounded-full bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text dark:text-rjb-text-dark flex items-center justify-center hover:bg-rjb-text/20 dark:hover:bg-rjb-text-dark/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
                       aria-label="Próxima"
                     >

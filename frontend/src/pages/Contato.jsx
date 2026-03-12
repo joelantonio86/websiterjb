@@ -4,6 +4,13 @@ import { showMessage } from '../components/MessageBox'
 import { showLoader } from '../components/LoadingOverlay'
 import api from '../services/api'
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_NAME = 2
+const MAX_NAME = 100
+const MAX_SUBJECT = 200
+const MIN_BODY = 10
+const MAX_BODY = 2000
+
 const Contato = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [formData, setFormData] = useState({
@@ -13,19 +20,57 @@ const Contato = () => {
     body: ''
   })
   const [focusedField, setFocusedField] = useState(null)
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     setIsVisible(true)
   }, [])
 
+  const validate = () => {
+    const newErrors = {}
+    const name = formData.senderName.trim()
+    const email = formData.senderEmail.trim()
+    const subject = formData.subject.trim()
+    const body = formData.body.trim()
+
+    if (name.length < MIN_NAME) {
+      newErrors.senderName = `Nome deve ter pelo menos ${MIN_NAME} caracteres.`
+    } else if (name.length > MAX_NAME) {
+      newErrors.senderName = `Nome deve ter no máximo ${MAX_NAME} caracteres.`
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      newErrors.senderEmail = 'Informe um e-mail válido.'
+    }
+    if (subject.length > MAX_SUBJECT) {
+      newErrors.subject = `Assunto deve ter no máximo ${MAX_SUBJECT} caracteres.`
+    }
+    if (body.length < MIN_BODY) {
+      newErrors.body = `Mensagem deve ter pelo menos ${MIN_BODY} caracteres.`
+    } else if (body.length > MAX_BODY) {
+      newErrors.body = `Mensagem deve ter no máximo ${MAX_BODY} caracteres.`
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!validate()) {
+      showMessage('Verifique os campos e tente novamente.', true)
+      return
+    }
     showLoader(true, 'Enviando mensagem...')
 
     try {
-      await api.post('/', formData)
+      await api.post('/', {
+        senderName: formData.senderName.trim(),
+        senderEmail: formData.senderEmail.trim(),
+        subject: formData.subject.trim(),
+        body: formData.body.trim()
+      })
       showMessage('Mensagem enviada com sucesso!')
       setFormData({ senderName: '', senderEmail: '', subject: '', body: '' })
+      setErrors({})
     } catch (error) {
       showMessage('Erro ao enviar mensagem. Tente novamente.', true)
     } finally {
@@ -54,17 +99,22 @@ const Contato = () => {
               id="senderName"
               type="text"
               required
+              minLength={MIN_NAME}
+              maxLength={MAX_NAME}
               value={formData.senderName}
-              onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, senderName: e.target.value }); setErrors(prev => ({ ...prev, senderName: '' })) }}
               onFocus={() => setFocusedField('senderName')}
               onBlur={() => setFocusedField(null)}
               className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
-                focusedField === 'senderName'
+                errors.senderName ? 'border-red-500' : focusedField === 'senderName'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
               }`}
               placeholder="Seu nome completo"
+              aria-invalid={!!errors.senderName}
+              aria-describedby={errors.senderName ? 'name-error' : undefined}
             />
+            {errors.senderName && <p id="name-error" className="text-sm text-red-500 mt-1">{errors.senderName}</p>}
           </div>
 
           <div className="space-y-2">
@@ -79,16 +129,19 @@ const Contato = () => {
               type="email"
               required
               value={formData.senderEmail}
-              onChange={(e) => setFormData({ ...formData, senderEmail: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, senderEmail: e.target.value }); setErrors(prev => ({ ...prev, senderEmail: '' })) }}
               onFocus={() => setFocusedField('senderEmail')}
               onBlur={() => setFocusedField(null)}
               className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
-                focusedField === 'senderEmail'
+                errors.senderEmail ? 'border-red-500' : focusedField === 'senderEmail'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
               }`}
               placeholder="seu.email@exemplo.com"
+              aria-invalid={!!errors.senderEmail}
+              aria-describedby={errors.senderEmail ? 'email-error' : undefined}
             />
+            {errors.senderEmail && <p id="email-error" className="text-sm text-red-500 mt-1">{errors.senderEmail}</p>}
           </div>
 
           <div className="space-y-2">
@@ -101,17 +154,21 @@ const Contato = () => {
             <input
               id="subject"
               type="text"
+              maxLength={MAX_SUBJECT}
               value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, subject: e.target.value }); setErrors(prev => ({ ...prev, subject: '' })) }}
               onFocus={() => setFocusedField('subject')}
               onBlur={() => setFocusedField(null)}
               className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark ${
-                focusedField === 'subject'
+                errors.subject ? 'border-red-500' : focusedField === 'subject'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
               }`}
-              placeholder="Assunto da mensagem"
+              placeholder="Assunto da mensagem (opcional)"
+              aria-invalid={!!errors.subject}
+              aria-describedby={errors.subject ? 'subject-error' : undefined}
             />
+            {errors.subject && <p id="subject-error" className="text-sm text-red-500 mt-1">{errors.subject}</p>}
           </div>
 
           <div className="space-y-2">
@@ -125,17 +182,25 @@ const Contato = () => {
               id="body"
               required
               rows="5"
+              minLength={MIN_BODY}
+              maxLength={MAX_BODY}
               value={formData.body}
-              onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, body: e.target.value }); setErrors(prev => ({ ...prev, body: '' })) }}
               onFocus={() => setFocusedField('body')}
               onBlur={() => setFocusedField(null)}
               className={`w-full p-3 sm:p-4 text-base rounded-lg sm:rounded-xl border-2 transition-all duration-300 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark resize-none ${
-                focusedField === 'body'
+                errors.body ? 'border-red-500' : focusedField === 'body'
                   ? 'border-rjb-yellow ring-2 sm:ring-4 ring-rjb-yellow/20'
                   : 'border-rjb-yellow/30 hover:border-rjb-yellow/50'
               }`}
-              placeholder="Sua mensagem..."
+              placeholder="Sua mensagem... (mín. 10 caracteres)"
+              aria-invalid={!!errors.body}
+              aria-describedby={errors.body ? 'body-error' : undefined}
             />
+            <div className="flex justify-between mt-1">
+              {errors.body ? <p id="body-error" className="text-sm text-red-500">{errors.body}</p> : <span />}
+              <span className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50">{formData.body.length}/{MAX_BODY}</span>
+            </div>
           </div>
 
           <button

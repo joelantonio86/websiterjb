@@ -21,18 +21,20 @@ const GlobalSearch = () => {
     { path: '/fotos', label: 'Galeria de Fotos', icon: '📸', category: 'A RJB' },
     { path: '/agenda', label: 'Agenda', icon: '📅', category: 'Páginas' },
     { path: '/contato', label: 'Contato', icon: '✉️', category: 'Páginas' },
+    { path: '/politica-privacidade', label: 'Política de Privacidade', icon: '🔒', category: 'Páginas' },
+    { path: '/termos-uso', label: 'Termos de Uso', icon: '📜', category: 'Páginas' },
     { path: '/cadastro', label: 'Cadastro de Membros', icon: '👤', category: 'Páginas' },
     { path: '/relatorios', label: 'Área Administrativa', icon: '🔐', category: 'Admin' }
   ]
 
+  const openSearch = () => {
+    setIsOpen(true)
+    setTimeout(() => inputRef.current?.focus(), 100)
+  }
+
   useKeyboardShortcuts([
-    {
-      keys: 'ctrl+k',
-      handler: () => {
-        setIsOpen(true)
-        setTimeout(() => inputRef.current?.focus(), 100)
-      }
-    },
+    { keys: 'ctrl+k', handler: openSearch },
+    { keys: 'meta+k', handler: openSearch },
     {
       keys: 'escape',
       handler: () => {
@@ -103,7 +105,7 @@ const GlobalSearch = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Buscar páginas... (Ctrl+K)"
+              placeholder="Buscar páginas... (Ctrl+K ou ⌘K)"
               className="w-full pl-12 pr-4 py-3 text-base bg-rjb-bg-light dark:bg-rjb-bg-dark border-2 border-rjb-yellow/30 rounded-xl focus:border-rjb-yellow focus:ring-2 focus:ring-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none transition-all"
               autoFocus
             />
@@ -159,6 +161,8 @@ const GlobalSearch = () => {
             <p className="text-rjb-text/60 dark:text-rjb-text-dark/60 mb-4">Digite para buscar...</p>
             <div className="flex flex-wrap gap-2 justify-center text-xs text-rjb-text/40 dark:text-rjb-text-dark/40">
               <kbd className="px-2 py-1 bg-rjb-bg-light dark:bg-rjb-bg-dark rounded border border-rjb-text/20">Ctrl</kbd>
+              <span>/</span>
+              <kbd className="px-2 py-1 bg-rjb-bg-light dark:bg-rjb-bg-dark rounded border border-rjb-text/20">⌘</kbd>
               <span>+</span>
               <kbd className="px-2 py-1 bg-rjb-bg-light dark:bg-rjb-bg-dark rounded border border-rjb-text/20">K</kbd>
               <span>para abrir busca</span>
