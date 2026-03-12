@@ -5,6 +5,7 @@ import StageRoster from '../components/StageRoster'
 import { AGENDA_EVENTS } from '../data/events'
 import { APRESENTACOES_BY_EVENT } from '../data/videos'
 import { racionais, diversas } from '../data/songs'
+import { REPERTORIO_MAIO_2026 } from '../data/repertorioApresentacoes2026'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -162,6 +163,65 @@ const Home = () => {
           >
             Repertório 2026
           </Link>
+        </div>
+
+        {/* Repertório de Maio em destaque */}
+        <div className="mt-10 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-rjb-yellow/15 via-yellow-500/10 to-rjb-yellow/5 dark:from-rjb-yellow/10 dark:via-yellow-500/5 dark:to-rjb-yellow/5 border-2 border-rjb-yellow/40 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark flex items-center gap-2">
+                <span>📋</span> Repertório de Maio
+              </h3>
+              <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">
+                13 de maio de 2026 — 17 músicas na entrada
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to="/repertorio-apresentacoes"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rjb-yellow text-rjb-text font-bold text-sm hover:bg-yellow-500 transition-colors"
+              >
+                Ver repertório completo →
+              </Link>
+              <a
+                href={`data:text/plain;charset=utf-8,${encodeURIComponent(
+                  'REPERTÓRIO RJB - MAIO 2026\n13 de maio de 2026 - Entrada\n\n' +
+                  REPERTORIO_MAIO_2026.map((m, i) => `${i + 1}. ${m.title}${m.inProduction ? ' (em produção)' : ''}`).join('\n')
+                )}`}
+                download="Repertorio_RJB_Maio_2026.txt"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-rjb-yellow/60 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm hover:bg-rjb-yellow/15 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Baixar lista (TXT)
+              </a>
+              <Link
+                to="/partituras?repertorio=maio"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-rjb-yellow/60 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm hover:bg-rjb-yellow/15 transition-colors"
+              >
+                🎼 Partituras do repertório
+              </Link>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+            {REPERTORIO_MAIO_2026.map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-rjb-yellow/30 text-rjb-yellow font-semibold text-xs flex items-center justify-center">
+                  {i + 1}
+                </span>
+                <span className="text-rjb-text dark:text-rjb-text-dark">
+                  {item.title}
+                  {item.inProduction && (
+                    <span className="ml-1.5 text-amber-600 dark:text-amber-400 text-xs font-medium">(em produção)</span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-4">
+            Onde está <strong>em produção</strong>, a música está sendo preparada pelo regente.
+          </p>
         </div>
       </section>
 

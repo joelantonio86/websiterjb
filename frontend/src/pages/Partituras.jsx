@@ -1,7 +1,9 @@
 import { useState, useEffect, Fragment } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
 import { racionais, diversas, R2_BASE_URL } from '../data/songs'
+import { REPERTORIO_MAIO_SHEET_IDS } from '../data/repertorioApresentacoes2026'
 import { API_BASE } from '../services/api'
 import { showToast } from '../components/Toast'
 import EmptyState from '../components/EmptyState'
@@ -73,6 +75,7 @@ function DownloadFailedModal({ totalOk, failed, onClose }) {
 }
 
 const Partituras = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const [racionaisOpen, setRacionaisOpen] = useState(false)
   const [diversasOpen, setDiversasOpen] = useState(false)
@@ -91,6 +94,21 @@ const Partituras = () => {
     // Simular loading inicial
     setTimeout(() => setIsLoading(false), 500)
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get('repertorio') === 'maio') {
+      const ids = new Set(REPERTORIO_MAIO_SHEET_IDS.filter(id => {
+        const dashIdx = id.indexOf('-')
+        const folder = id.slice(0, dashIdx)
+        const mp3 = id.slice(dashIdx + 1)
+        return (folder === 'racionais' ? racionais : diversas).some(s => s.mp3 === mp3)
+      }))
+      setSelectedSheets(ids)
+      setRacionaisOpen(true)
+      setDiversasOpen(true)
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     // Resetar estado de download após 2 segundos
@@ -139,6 +157,19 @@ const Partituras = () => {
 
   const selectAllFiltered = () => {
     setSelectedSheets(new Set(filteredSheets.map(getSheetId)))
+  }
+
+  const selectMayRepertoire = () => {
+    const ids = new Set(REPERTORIO_MAIO_SHEET_IDS.filter(id => {
+      const dashIdx = id.indexOf('-')
+      const folder = id.slice(0, dashIdx)
+      const mp3 = id.slice(dashIdx + 1)
+      return (folder === 'racionais' ? racionais : diversas).some(s => s.mp3 === mp3)
+    }))
+    setSelectedSheets(ids)
+    setRacionaisOpen(true)
+    setDiversasOpen(true)
+    showToast(`${ids.size} partituras do repertório de maio selecionadas`, 'success', 3000)
   }
 
   const clearSelection = () => setSelectedSheets(new Set())
@@ -582,6 +613,14 @@ const Partituras = () => {
                 className="px-3 py-2 text-sm font-medium rounded-lg border border-rjb-text/20 text-rjb-text/70 dark:text-rjb-text-dark/70 hover:bg-rjb-text/5 transition-colors"
               >
                 Desmarcar
+              </button>
+              <button
+                type="button"
+                onClick={selectMayRepertoire}
+                className="px-3 py-2 text-sm font-medium rounded-lg border border-rjb-yellow/50 bg-rjb-yellow/10 text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/20 transition-colors"
+                title="Seleciona as partituras do repertório de maio (13/05/2026)"
+              >
+                📋 Repertório de Maio
               </button>
               <button
                 type="button"
