@@ -3,9 +3,74 @@ import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
 import { racionais, diversas, R2_BASE_URL } from '../data/songs'
 import { API_BASE } from '../services/api'
+import { showToast } from '../components/Toast'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
 import AudioPlayer from '../components/AudioPlayer'
+
+function DownloadFailedModal({ totalOk, failed, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+  useEffect(() => {
+    const fn = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', fn)
+    return () => document.removeEventListener('keydown', fn)
+  }, [onClose])
+  const copyList = () => {
+    navigator.clipboard.writeText(failed.join(', '))
+    showToast('Lista copiada para a área de transferência', 'success', 2500)
+  }
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+      <div
+        className="bg-gradient-to-br from-rjb-card-light to-rjb-card-light/95 dark:from-rjb-card-dark dark:to-rjb-card-dark/95 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6 sm:p-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-yellow-500/20 mb-4">
+            <svg className="w-7 h-7 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-rjb-text dark:text-rjb-text-dark mb-2">Download parcial</h3>
+          <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 mb-4">
+            <strong>{totalOk}</strong> partitura{totalOk !== 1 ? 's' : ''} baixada{totalOk !== 1 ? 's' : ''} com sucesso. 
+            {failed.length} {failed.length === 1 ? 'não estava disponível' : 'não estavam disponíveis'}:
+          </p>
+          <div className="bg-rjb-bg-light/50 dark:bg-rjb-bg-dark/50 rounded-xl p-4 max-h-48 overflow-y-auto border border-yellow-500/20">
+            <ul className="space-y-2 text-sm text-rjb-text dark:text-rjb-text-dark">
+              {failed.map((item, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <span className="text-yellow-600 dark:text-yellow-400">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-5">
+            <button
+              onClick={copyList}
+              className="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl border border-yellow-500/50 text-rjb-text dark:text-rjb-text-dark hover:bg-yellow-500/10 transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copiar lista
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text hover:from-yellow-500 hover:to-yellow-600 transition-colors"
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const Partituras = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -18,6 +83,7 @@ const Partituras = () => {
   const [downloading, setDownloading] = useState(null)
   const [selectedSheets, setSelectedSheets] = useState(new Set())
   const [batchDownloading, setBatchDownloading] = useState(false)
+  const [downloadFailedModal, setDownloadFailedModal] = useState(null) // { totalOk, failed }
 
   useEffect(() => {
     setIsVisible(true)
@@ -124,9 +190,11 @@ const Partituras = () => {
       a.click()
       URL.revokeObjectURL(a.href)
       setSelectedSheets(new Set())
-      if (failed.length > 0) {
-        console.warn(`${failed.length} arquivo(s) não baixados:`, failed)
-        alert(`Baixados: ${totalOk}. Não foi possível baixar ${failed.length}: ${failed.slice(0, 3).join(', ')}${failed.length > 3 ? '...' : ''}`)
+      if (failed.length === 0) {
+        showToast(`${totalOk} partitura${totalOk !== 1 ? 's' : ''} baixada${totalOk !== 1 ? 's' : ''} com sucesso!`, 'success', 4000)
+      } else {
+        console.warn(`[Partituras] ${failed.length} arquivo(s) não baixados:`, failed)
+        setDownloadFailedModal({ totalOk, failed })
       }
     } catch (e) {
       console.error('Erro ao gerar ZIP:', e)
@@ -577,6 +645,15 @@ const Partituras = () => {
           />
         )}
       </div>
+
+      {/* Modal de partituras não disponíveis */}
+      {downloadFailedModal && (
+        <DownloadFailedModal
+          totalOk={downloadFailedModal.totalOk}
+          failed={downloadFailedModal.failed}
+          onClose={() => setDownloadFailedModal(null)}
+        />
+      )}
     </PageWrapper>
   )
 }
