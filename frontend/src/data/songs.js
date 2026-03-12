@@ -19,6 +19,7 @@ export const racionais = [
   { title: 'Paz Interior', time: '3:00', mp3: 'Paz_Interior' },
   { title: 'Salve o Retiro Racional', time: '3:00', mp3: 'Salve_O_Retiro_Racional' },
   { title: 'Ser Iluminado', time: '3:00', mp3: 'Ser_Iluminado' },
+  { title: 'Imunizar', time: '3:00', mp3: 'Imunizar' },
 ]
 
 export const diversas = [
@@ -27,7 +28,7 @@ export const diversas = [
   { title: 'Ária Cantinela', time: '3:20', mp3: 'Aria_Cantinela' },
   { title: 'As Forças da Natureza', time: '4:55', mp3: 'As_Forcas_Da_Natureza' },
   { title: 'Billie Jean', time: '4:50', mp3: 'Billie_Jean' },
-  { title: 'Boleto de Ravel', time: '4:50', mp3: 'Bolero_De_Ravel' },
+  { title: 'Bolero de Ravel', time: '4:50', mp3: 'Bolero_De_Ravel' },
   { title: 'Caruso', time: '4:20', mp3: 'Caruso' },
   { title: 'Cheia de Manias', time: '3:50', mp3: 'Cheia_De_Manias' },
   { title: 'Colo de Menina', time: '3:55', mp3: 'Colo_De_Menina' },
@@ -56,6 +57,7 @@ export const diversas = [
   { title: 'Trompeta de Espanha', time: '3:08', mp3: 'Trompeta_De_Espanha' },
   { title: 'Vilarejo', time: '3:18', mp3: 'Vilarejo' },
   { title: 'Whisky a Go Go', time: '3:33', mp3: 'Whisky_A_Go_Go' },
+  { title: 'Still Loving You', time: '3:00', mp3: 'Still_Loving_You' },
 ]
 
 export const R2_BASE_URL = 'https://pub-934c96bc6fb449a7ad7b3491065976d3.r2.dev'
