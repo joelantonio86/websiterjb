@@ -109,6 +109,18 @@ const Home = () => {
                   Ouça nossas músicas
                 </span>
               </button>
+              <button
+                onClick={() => navigate('/relatorios')}
+                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                aria-label="Acessar a Área Administrativa (login)"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5 group-hover:translate-y-[-1px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Área Administrativa
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -495,6 +507,8 @@ const Home = () => {
           <Link to="/repertorio-apresentacoes" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Repertório 2026</Link>
           <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
           <Link to="/contato" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Contato</Link>
+          <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
+          <Link to="/relatorios" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Área Administrativa</Link>
         </div>
       </nav>
     </>

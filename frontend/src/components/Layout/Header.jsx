@@ -179,14 +179,12 @@ const Header = () => {
               Contato
             </Link>
             
-            {(user?.role === 'admin' || user?.role === 'admin-financeiro' || user?.role === 'financeiro' || user?.role === 'financeiro-view') && (
-              <Link
-                to="/relatorios"
-                className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/relatorios') && 'nav-link-active'}`}
-              >
-                Área Administrativa
-              </Link>
-            )}
+            <Link
+              to="/relatorios"
+              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/relatorios') && 'nav-link-active'}`}
+            >
+              Área Administrativa
+            </Link>
 
             {/* Tema: Sistema / Claro / Escuro */}
             <Tooltip content={`Tema: ${themeLabel} · Clique para: ${nextThemeLabel}`} position="bottom">
@@ -389,22 +387,20 @@ const Header = () => {
                   <span>Cadastro</span>
                 </span>
               </Link>
-              {(user?.role === 'admin' || user?.role === 'admin-financeiro' || user?.role === 'financeiro' || user?.role === 'financeiro-view') && (
-                <Link
-                  to="/relatorios"
-                  className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
-                    isActive('/relatorios')
-                      ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                      : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="text-xl">🔐</span>
-                    <span>Área Administrativa</span>
-                  </span>
-                </Link>
-              )}
+              <Link
+                to="/relatorios"
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                  isActive('/relatorios')
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="text-xl">🔐</span>
+                  <span>Área Administrativa</span>
+                </span>
+              </Link>
               {user && (user.role === 'financeiro' || user.role === 'admin-financeiro' || user.role === 'financeiro-view') && (
                 <Link
                   to="/financeiro"

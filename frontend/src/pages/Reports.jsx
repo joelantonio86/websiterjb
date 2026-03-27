@@ -13,16 +13,39 @@ const Reports = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [activeSection, setActiveSection] = useState('admin-convites')
   const [stats, setStats] = useState({
     totalMembers: 0,
     totalAttachments: 0,
     recentActivity: 0
   })
 
+  const ADMIN_SECTIONS = [
+    { id: 'admin-convites', label: 'Convites', icon: '🔑' },
+    { id: 'admin-membros', label: 'Membros', icon: '👥' },
+    { id: 'admin-anexos', label: 'Anexos', icon: '📎' },
+  ]
+
   useEffect(() => {
     if (user) {
       fetchStats()
     }
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    const onHashChange = () => {
+      const raw = window.location.hash || ''
+      const next = raw.replace('#', '')
+      if (next && ADMIN_SECTIONS.some(s => s.id === next)) {
+        setActiveSection(next)
+        const el = document.getElementById(next)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+    onHashChange()
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
   }, [user])
 
   const fetchStats = async () => {
@@ -61,6 +84,13 @@ const Reports = () => {
     logout()
     navigate('/')
     showMessage('Você saiu da Área Administrativa.')
+  }
+
+  const goToSection = (id) => {
+    setActiveSection(id)
+    window.history.replaceState(null, '', `#${id}`)
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   // Mostrar loading enquanto verifica autenticação
@@ -277,21 +307,59 @@ const Reports = () => {
             </div>
           )}
 
+          {/* Menu interno da Área Administrativa (atalhos) */}
+          <div
+            className="sticky top-16 sm:top-20 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pb-4 mb-2 bg-gradient-to-b from-rjb-bg-light via-rjb-bg-light/95 to-transparent dark:from-rjb-bg-dark dark:via-rjb-bg-dark/95"
+            data-tour="admin-menu"
+          >
+            <div className="rounded-2xl border border-rjb-yellow/20 bg-gradient-to-br from-rjb-card-light/90 to-rjb-card-light/70 dark:from-rjb-card-dark/80 dark:to-rjb-card-dark/60 backdrop-blur shadow-lg">
+              <div className="flex flex-wrap gap-2 p-3 sm:p-4">
+                {ADMIN_SECTIONS.map((s) => {
+                  const isActive = activeSection === s.id
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => goToSection(s.id)}
+                      className={`px-3 sm:px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+                        isActive
+                          ? 'bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text border-rjb-yellow shadow-md'
+                          : 'bg-transparent text-rjb-text/80 dark:text-rjb-text-dark/80 border-rjb-yellow/30 hover:bg-rjb-yellow/10 hover:border-rjb-yellow/60'
+                      }`}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <span className="text-base" aria-hidden="true">{s.icon}</span>
+                        <span>{s.label}</span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
           {/* Admin Dashboard Area */}
           <div className="space-y-6">
             {/* Gerenciamento de Convites */}
             <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <InvitesManagement />
+              <section id="admin-convites" className="scroll-mt-28 sm:scroll-mt-32">
+                <InvitesManagement />
+              </section>
             </div>
 
             {/* Gerenciamento de Membros */}
             <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              <MembersReport />
+              <section id="admin-membros" className="scroll-mt-28 sm:scroll-mt-32">
+                <MembersReport />
+              </section>
             </div>
 
             {/* Gerenciamento de Anexos */}
             <div className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              <AttachmentsManagement />
+              <section id="admin-anexos" className="scroll-mt-28 sm:scroll-mt-32">
+                <AttachmentsManagement />
+              </section>
             </div>
           </div>
         </div>
