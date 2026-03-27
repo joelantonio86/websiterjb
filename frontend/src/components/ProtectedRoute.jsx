@@ -13,13 +13,13 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   if (!user) {
-    return <Navigate to="/relatorios" replace />
+    return <Navigate to="/admin/login" replace />
   }
 
   if (requiredRole && !requiredRole.includes(user.role)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-red-600">Acesso negado. Você não tem permissão para acessar esta página.</div>
+        <div className="text-xl text-red-600">Acesso negado. VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.</div>
       </div>
     )
   }

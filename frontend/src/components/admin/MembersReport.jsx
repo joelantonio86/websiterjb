@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
 import api from '../../services/api'
@@ -7,7 +7,7 @@ import DeleteMemberModal from './DeleteMemberModal'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 
-const MEMBERS_PER_PAGE = 20
+const MEMBERS_PER_PAGE = 10
 
 const MembersReport = () => {
   const [members, setMembers] = useState([])
@@ -753,3 +753,4 @@ const MembersReport = () => {
 }
 
 export default MembersReport
+

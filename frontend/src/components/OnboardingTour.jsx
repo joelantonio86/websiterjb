@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const OnboardingTour = () => {
@@ -31,7 +31,7 @@ const OnboardingTour = () => {
         position: 'bottom'
       }
     ],
-    '/relatorios': [
+    '/admin': [
       {
         target: '[data-tour="stats"]',
         title: 'Dashboard Administrativo',
@@ -144,3 +144,4 @@ const OnboardingTour = () => {
 }
 
 export default OnboardingTour
+

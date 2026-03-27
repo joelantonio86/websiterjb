@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const RJB_MENU_SECTIONS = [
@@ -202,8 +202,8 @@ const Header = () => {
           {/* Ações Desktop (Área Administrativa + Cadastro) */}
           <div className="hidden lg:flex items-center gap-2">
             <Link
-              to="/relatorios"
-              className={`group nav-link bg-gradient-to-r from-rjb-card-light to-rjb-card-light/80 dark:from-rjb-card-dark dark:to-rjb-card-dark/80 border border-rjb-yellow/40 text-rjb-text dark:text-rjb-text-dark font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:bg-rjb-yellow/10 hover:border-rjb-yellow/70 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 flex items-center gap-2 ${isActive('/relatorios') ? 'ring-2 ring-rjb-yellow/40' : ''}`}
+              to="/admin"
+              className={`group nav-link bg-gradient-to-r from-rjb-card-light to-rjb-card-light/80 dark:from-rjb-card-dark dark:to-rjb-card-dark/80 border border-rjb-yellow/40 text-rjb-text dark:text-rjb-text-dark font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:bg-rjb-yellow/10 hover:border-rjb-yellow/70 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 flex items-center gap-2 ${isActive('/admin') ? 'ring-2 ring-rjb-yellow/40' : ''}`}
             >
               <span>Área Administrativa</span>
               <svg className="w-3 h-3 xl:w-4 xl:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -393,9 +393,9 @@ const Header = () => {
                 </span>
               </Link>
               <Link
-                to="/relatorios"
+                to="/admin"
                 className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
-                  isActive('/relatorios')
+                  isActive('/admin')
                     ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
                     : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
                 }`}
@@ -431,3 +431,4 @@ const Header = () => {
 }
 
 export default Header
+

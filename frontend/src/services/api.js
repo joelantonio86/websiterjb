@@ -9,7 +9,7 @@ const api = axios.create({
   },
 })
 
-// Interceptor para adicionar token em todas as requisições
+// Interceptor para adicionar token em todas as requisiÃ§Ãµes
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -23,14 +23,14 @@ api.interceptors.request.use(
   }
 )
 
-// Interceptor para tratar erros de autenticação
+// Interceptor para tratar erros de autenticaÃ§Ã£o
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/relatorios'
+      window.location.href = '/admin/login'
     }
     return Promise.reject(error)
   }

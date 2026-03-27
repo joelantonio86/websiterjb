@@ -18,9 +18,14 @@ import Contato from './pages/Contato'
 import PoliticaPrivacidade from './pages/PoliticaPrivacidade'
 import TermosUso from './pages/TermosUso'
 import MemberRegistration from './pages/MemberRegistration'
-import Reports from './pages/Reports'
 import Financeiro from './pages/Financeiro'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminInvites from './pages/admin/AdminInvites'
+import AdminMembers from './pages/admin/AdminMembers'
+import AdminMedia from './pages/admin/AdminMedia'
 
 function App() {
   return (
@@ -45,7 +50,20 @@ function App() {
                 <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
                 <Route path="/termos-uso" element={<TermosUso />} />
                 <Route path="/cadastro" element={<MemberRegistration />} />
-                <Route path="/relatorios" element={<Reports />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="convites" element={<AdminInvites />} />
+                  <Route path="membros" element={<AdminMembers />} />
+                  <Route path="midia" element={<AdminMedia />} />
+                </Route>
                 <Route 
                   path="/financeiro" 
                   element={

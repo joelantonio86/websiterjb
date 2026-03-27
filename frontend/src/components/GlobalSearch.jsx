@@ -24,7 +24,7 @@ const GlobalSearch = () => {
     { path: '/politica-privacidade', label: 'Política de Privacidade', icon: '🔒', category: 'Páginas' },
     { path: '/termos-uso', label: 'Termos de Uso', icon: '📜', category: 'Páginas' },
     { path: '/cadastro', label: 'Cadastro de Membros', icon: '👤', category: 'Páginas' },
-    { path: '/relatorios', label: 'Área Administrativa', icon: '🔐', category: 'Admin' }
+    { path: '/admin', label: 'Área Administrativa', icon: '🔐', category: 'Admin' }
   ]
 
   const openSearch = () => {
