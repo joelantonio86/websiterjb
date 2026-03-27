@@ -85,7 +85,7 @@ const InvitesManagement = () => {
           </div>
           <button
             onClick={generateKey}
-            className="group bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3.5 sm:py-4 px-6 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
+            className="group w-full sm:w-auto bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3.5 sm:py-4 px-6 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <svg className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>

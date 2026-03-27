@@ -13,6 +13,7 @@ const admin = require('firebase-admin');
 const jwt = require('jsonwebtoken');
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
+const storageAdapter = require('./storageAdapter');
 
 // --- 1. Constantes e Ambiente (Preservadas do Original) ---
 // Validar variáveis de ambiente críticas
@@ -76,7 +77,7 @@ const limiter = rateLimit({
 });
 
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
-let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, bucket, BUCKET_NAME;
+let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, bucket, BUCKET_NAME;
 
 function initFirebaseAndGCS() {
     try {
@@ -90,10 +91,23 @@ function initFirebaseAndGCS() {
         contributionsCollection = db.collection('contributions');
         depositsCollection = db.collection('deposits');
         expensesCollection = db.collection('expenses');
+        youtubeVideosCollection = db.collection('youtubeVideos');
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
         console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
+
+        const wantR2 = String(process.env.STORAGE_PROVIDER || '').toLowerCase() === 'r2';
+        const r2Ok = wantR2 && storageAdapter.initR2FromEnv();
+        if (!r2Ok) {
+            storageAdapter.initGCS({ bucket, bucketName: BUCKET_NAME });
+            if (wantR2) {
+                console.warn('⚠️ STORAGE_PROVIDER=r2 mas credenciais R2 incompletas; usando Google Cloud Storage para ficheiros.');
+            }
+            console.log('📦 Armazenamento de ficheiros: Google Cloud Storage');
+        } else {
+            console.log('📦 Armazenamento de ficheiros: Cloudflare R2');
+        }
     } catch (error) {
         console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
         console.error('📋 Detalhes do erro:', error.message);
@@ -111,7 +125,8 @@ app.use((req, res, next) => {
 
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }
+    // Permite vídeos maiores para galeria; ajuste conforme política de custo.
+    limits: { fileSize: 100 * 1024 * 1024 }
 });
 
 // --- 4. Middlewares de Segurança ---
@@ -371,38 +386,308 @@ app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => {
 
 // --- 8. Rotas de Anexos GCS (Preservadas e Completas) ---
 
+function normalizeAttachmentNameParam(name) {
+    if (!name || typeof name !== 'string') return '';
+    try {
+        return decodeURIComponent(name);
+    } catch {
+        return name;
+    }
+}
+
+function safeAttachmentName(name) {
+    const n = normalizeAttachmentNameParam(name);
+    if (!n || n.includes('/') || n.includes('\\') || n.includes('..')) return null;
+    return n;
+}
+
+/** @returns {{ media: string, period: string|null, rest: string }|null} */
+function parseAttachmentName(name) {
+    const n = normalizeAttachmentNameParam(name);
+    const withPeriod = n.match(/^(foto|video)__(\d{4}-\d{2})__(.+)$/i);
+    if (withPeriod) {
+        return { media: withPeriod[1].toLowerCase(), period: withPeriod[2], rest: withPeriod[3] };
+    }
+    const legacy = n.match(/^(foto|video)__(.+)$/i);
+    if (legacy) {
+        return { media: legacy[1].toLowerCase(), period: null, rest: legacy[2] };
+    }
+    return null;
+}
+
+function extractYoutubeId(input) {
+    const raw = String(input || '').trim();
+    if (!raw) return null;
+    if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+    try {
+        const u = new URL(raw);
+        if (u.hostname.includes('youtu.be')) {
+            const id = u.pathname.replace('/', '').trim();
+            return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+        }
+        if (u.hostname.includes('youtube.com')) {
+            const v = u.searchParams.get('v');
+            if (/^[a-zA-Z0-9_-]{11}$/.test(v || '')) return v;
+            const parts = u.pathname.split('/').filter(Boolean);
+            const last = parts[parts.length - 1] || '';
+            return /^[a-zA-Z0-9_-]{11}$/.test(last) ? last : null;
+        }
+    } catch {
+        return null;
+    }
+    return null;
+}
+
 app.get('/api/attachments/list', authenticateJWT, async (req, res) => {
     try {
-        const [files] = await bucket.getFiles();
-        const fileList = files.map(file => ({
-            name: file.name,
-            size: file.metadata.size,
-            uploaded: file.metadata.timeCreated,
-            downloadUrl: `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(file.name)}`
-        }));
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        const fileList = await storageAdapter.listFiles();
         res.status(200).json(fileList);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao listar arquivos.' });
     }
 });
 
+app.get('/api/public/photos', async (req, res) => {
+    try {
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        const files = await storageAdapter.listFiles();
+        const photos = files
+            .filter((f) => String(f.name || '').toLowerCase().startsWith('foto__'))
+            .map((f) => {
+                const parsed = parseAttachmentName(f.name);
+                return {
+                    name: f.name,
+                    periodKey: parsed?.period || null,
+                    uploaded: f.uploaded || null,
+                    url: f.downloadUrl
+                };
+            });
+        res.status(200).json(photos);
+    } catch (error) {
+        console.error('public/photos:', error);
+        res.status(500).json({ message: 'Erro ao listar fotos.' });
+    }
+});
+
 app.post('/api/attachments/upload', authenticateJWT, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
-    const fileName = `${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
-    const blob = bucket.file(fileName);
-    const blobStream = blob.createWriteStream({ resumable: false, metadata: { contentType: req.file.mimetype } });
+    const mediaType = 'foto';
+    const isImage = req.file.mimetype.startsWith('image/');
+    if (!isImage) {
+        return res.status(400).json({ message: 'Apenas imagens sao permitidas nesta area.' });
+    }
+    const periodKey = String(req.body.periodKey || '').trim();
+    if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
+        return res.status(400).json({ message: 'Selecione um período válido (dezembro de 2025 em diante).' });
+    }
+    const safeOriginal = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileName = `${mediaType}__${periodKey}__${Date.now()}-${safeOriginal}`;
+    if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+    try {
+        const publicUrl = await storageAdapter.uploadBuffer(fileName, req.file.buffer, req.file.mimetype);
+        res.status(200).json({ status: 200, message: 'Upload concluído.', publicUrl });
+    } catch (e) {
+        res.status(500).json({ message: 'Erro no upload.' });
+    }
+});
 
-    blobStream.on('error', () => res.status(500).json({ message: 'Erro no upload.' }));
-    blobStream.on('finish', () => res.status(200).json({ status: 200, message: 'Upload concluído.', publicUrl: blob.publicUrl() }));
-    blobStream.end(req.file.buffer);
+app.patch('/api/attachments/move', authenticateJWT, async (req, res) => {
+    try {
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        const fileName = safeAttachmentName(req.body?.fileName);
+        const periodKey = String(req.body?.periodKey || '').trim();
+        if (!fileName) return res.status(400).json({ message: 'Nome de arquivo inválido.' });
+        if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
+            return res.status(400).json({ message: 'Período inválido.' });
+        }
+        const parsed = parseAttachmentName(fileName);
+        if (!parsed) return res.status(400).json({ message: 'Arquivo não reconhecido.' });
+        const destName = `${parsed.media}__${periodKey}__${parsed.rest}`;
+        if (destName === fileName) {
+            return res.status(200).json({ status: 200, message: 'Sem alterações.', newName: destName });
+        }
+        const exists = await storageAdapter.objectExists(fileName);
+        if (!exists) return res.status(404).json({ message: 'Arquivo não encontrado.' });
+        const destExists = await storageAdapter.objectExists(destName);
+        if (destExists) {
+            return res.status(409).json({ message: 'Já existe um arquivo no período de destino com o mesmo sufixo. Exclua ou renomeie antes.' });
+        }
+        await storageAdapter.copyObject(fileName, destName);
+        await storageAdapter.deleteObject(fileName);
+        res.status(200).json({ status: 200, message: 'Período atualizado.', newName: destName });
+    } catch (error) {
+        console.error('attachments/move:', error);
+        res.status(500).json({ message: 'Erro ao mover arquivo.' });
+    }
+});
+
+app.post('/api/attachments/replace', authenticateJWT, upload.single('file'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
+    try {
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        const existingFileName = safeAttachmentName(req.body?.existingFileName);
+        if (!existingFileName) return res.status(400).json({ message: 'Nome do arquivo inválido.' });
+        const parsed = parseAttachmentName(existingFileName);
+        if (!parsed) return res.status(400).json({ message: 'Arquivo não reconhecido.' });
+        const mediaType = parsed.media;
+        let periodKey = parsed.period;
+        if (!periodKey) {
+            periodKey = String(req.body?.periodKey || '').trim();
+        }
+        if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
+            return res.status(400).json({
+                message: 'Para arquivos antigos sem período, escolha o mês/ano no formulário de substituição.'
+            });
+        }
+        const isImage = req.file.mimetype.startsWith('image/');
+        const isVideo = req.file.mimetype.startsWith('video/');
+        if ((mediaType === 'foto' && !isImage) || (mediaType === 'video' && !isVideo)) {
+            return res.status(400).json({ message: 'O novo arquivo deve ser do mesmo tipo (foto ou vídeo).' });
+        }
+        const exists = await storageAdapter.objectExists(existingFileName);
+        if (!exists) return res.status(404).json({ message: 'Arquivo original não encontrado.' });
+        const safeOriginal = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const newName = `${mediaType}__${periodKey}__${Date.now()}-${safeOriginal}`;
+        const publicUrl = await storageAdapter.uploadBuffer(newName, req.file.buffer, req.file.mimetype);
+        try {
+            await storageAdapter.deleteObject(existingFileName);
+        } catch (delErr) {
+            console.error('attachments/replace: falha ao remover arquivo antigo', delErr);
+        }
+        res.status(200).json({
+            status: 200,
+            message: 'Arquivo substituído.',
+            publicUrl,
+            newName
+        });
+    } catch (error) {
+        console.error('attachments/replace:', error);
+        res.status(500).json({ message: 'Erro ao substituir arquivo.' });
+    }
 });
 
 app.delete('/api/attachments/delete/:fileName', authenticateJWT, async (req, res) => {
     try {
-        await bucket.file(req.params.fileName).delete();
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        const fileName = safeAttachmentName(req.params.fileName);
+        if (!fileName) return res.status(400).json({ message: 'Nome inválido.' });
+        await storageAdapter.deleteObject(fileName);
         res.status(200).json({ status: 200, message: 'Arquivo excluído.' });
     } catch (error) {
         res.status(error.code === 404 ? 404 : 500).json({ message: 'Erro ao excluir.' });
+    }
+});
+
+// --- 8.1 Rotas de videos YouTube (admin) ---
+
+app.get('/api/admin/youtube-videos', authenticateJWT, async (req, res) => {
+    try {
+        const periodKey = String(req.query.periodKey || '').trim();
+        let query = youtubeVideosCollection.orderBy('createdAt', 'desc');
+        if (/^\d{4}-\d{2}$/.test(periodKey)) {
+            query = youtubeVideosCollection.where('periodKey', '==', periodKey).orderBy('createdAt', 'desc');
+        }
+        const snapshot = await query.get();
+        const data = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            data.push({
+                id: doc.id,
+                title: d.title || '',
+                youtubeId: d.youtubeId || '',
+                url: d.url || '',
+                periodKey: d.periodKey || '',
+                visibility: d.visibility || 'unlisted',
+                category: d.category || 'bastidor',
+                createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null
+            });
+        });
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('youtube-videos/list:', error);
+        res.status(500).json({ message: 'Erro ao listar videos.' });
+    }
+});
+
+app.post('/api/admin/youtube-videos', authenticateJWT, async (req, res) => {
+    try {
+        const title = String(req.body?.title || '').trim();
+        const source = String(req.body?.url || req.body?.youtubeId || '').trim();
+        const periodKey = String(req.body?.periodKey || '').trim();
+        const categoryRaw = String(req.body?.category || 'bastidor').trim().toLowerCase();
+        const category = categoryRaw === 'apresentacao' ? 'apresentacao' : 'bastidor';
+        const visibility = String(req.body?.visibility || 'unlisted').trim().toLowerCase() === 'public' ? 'public' : 'unlisted';
+
+        if (!title) return res.status(400).json({ message: 'Informe o titulo do video.' });
+        if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
+            return res.status(400).json({ message: 'Periodo invalido.' });
+        }
+        const youtubeId = extractYoutubeId(source);
+        if (!youtubeId) return res.status(400).json({ message: 'Link/ID do YouTube invalido.' });
+
+        const url = `https://www.youtube.com/watch?v=${youtubeId}`;
+        const docRef = await youtubeVideosCollection.add({
+            title,
+            youtubeId,
+            url,
+            periodKey,
+            category,
+            visibility,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user?.userId || 'admin'
+        });
+
+        res.status(200).json({ status: 200, id: docRef.id, message: 'Video cadastrado.' });
+    } catch (error) {
+        console.error('youtube-videos/create:', error);
+        res.status(500).json({ message: 'Erro ao cadastrar video.' });
+    }
+});
+
+app.delete('/api/admin/youtube-videos/:id', authenticateJWT, async (req, res) => {
+    try {
+        await youtubeVideosCollection.doc(req.params.id).delete();
+        res.status(200).json({ status: 200, message: 'Video removido.' });
+    } catch (error) {
+        console.error('youtube-videos/delete:', error);
+        res.status(500).json({ message: 'Erro ao remover video.' });
+    }
+});
+
+app.get('/api/public/youtube-videos', async (req, res) => {
+    try {
+        const periodKey = String(req.query.periodKey || '').trim();
+        const categoryRaw = String(req.query.category || '').trim().toLowerCase();
+        const category = categoryRaw === 'apresentacao' ? 'apresentacao' : (categoryRaw === 'bastidor' ? 'bastidor' : '');
+
+        let query = youtubeVideosCollection.orderBy('createdAt', 'desc');
+        if (/^\d{4}-\d{2}$/.test(periodKey)) {
+            query = query.where('periodKey', '==', periodKey);
+        }
+        if (category) {
+            query = query.where('category', '==', category);
+        }
+
+        const snapshot = await query.get();
+        const data = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            data.push({
+                id: doc.id,
+                title: d.title || '',
+                youtubeId: d.youtubeId || '',
+                url: d.url || '',
+                periodKey: d.periodKey || '',
+                category: d.category || 'bastidor',
+                visibility: d.visibility || 'unlisted',
+                createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null
+            });
+        });
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('public/youtube-videos:', error);
+        res.status(500).json({ message: 'Erro ao listar videos.' });
     }
 });
 
@@ -609,18 +894,12 @@ app.post('/api/finance/deposits', authenticateJWT, requireFinanceWriteAccess, as
 // Upload de comprovante de depósito
 app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceWriteAccess, upload.single('receipt'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
-    
-    try {
-        const fileName = `deposits/${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
-        const blob = bucket.file(fileName);
-        const blobStream = blob.createWriteStream({ resumable: false, metadata: { contentType: req.file.mimetype } });
 
-        blobStream.on('error', () => res.status(500).json({ message: 'Erro no upload.' }));
-        blobStream.on('finish', () => {
-            const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(fileName)}`;
-            res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });
-        });
-        blobStream.end(req.file.buffer);
+    try {
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        const fileName = `deposits/${Date.now()}-${req.file.originalname.replace(/ /g, '_')}`;
+        const publicUrl = await storageAdapter.uploadBuffer(fileName, req.file.buffer, req.file.mimetype);
+        res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });
     } catch (error) {
         console.error('Erro ao fazer upload do comprovante:', error);
         res.status(500).json({ message: 'Erro ao fazer upload.' });

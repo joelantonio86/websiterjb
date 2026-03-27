@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
 import { racionais, diversas, R2_BASE_URL } from '../data/songs'
+import { INSTRUMENTOS_NAIPE, buildConsolidadoNaipeUrl } from '../data/instrumentosNaipe'
 import { REPERTORIO_MAIO_SHEET_IDS } from '../data/repertorioApresentacoes2026'
 import { API_BASE } from '../services/api'
 import { showToast } from '../components/Toast'
@@ -88,6 +89,10 @@ const Partituras = () => {
   const [batchDownloading, setBatchDownloading] = useState(false)
   const [batchProgress, setBatchProgress] = useState(0) // 0-100 durante o download
   const [downloadFailedModal, setDownloadFailedModal] = useState(null) // { totalOk, failed }
+  // Impressão por naipe — download direto do R2 (PDFs pré-gerados)
+  const [naipeInstrumento, setNaipeInstrumento] = useState(INSTRUMENTOS_NAIPE[0]?.slug || 'clarinete')
+  const [naipeCategoria, setNaipeCategoria] = useState('racionais')
+  const [naipeOpen, setNaipeOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -571,6 +576,100 @@ const Partituras = () => {
               <div className="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">Outros</div>
             </div>
           </div>
+        </div>
+
+        {/* Impressão por naipe — PDF único por instrumento (arquivo pré-gerado no R2) */}
+        <div className="mb-6 sm:mb-8 rounded-2xl shadow-xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/15 via-emerald-600/10 to-emerald-500/5 dark:from-emerald-500/10 dark:via-emerald-600/5 dark:to-emerald-500/5 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setNaipeOpen(!naipeOpen)}
+            className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 sm:gap-4 text-left touch-manipulation min-h-[3.5rem]"
+          >
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl bg-emerald-500/30 flex items-center justify-center text-2xl">
+                📄
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                  Impressão por naipe
+                </h2>
+                <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 break-words">
+                  PDF único com todas as músicas do seu instrumento (arquivo no acervo)
+                </p>
+              </div>
+            </div>
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <svg
+                className={`w-5 h-5 text-emerald-600 dark:text-emerald-400 transform transition-transform ${naipeOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+          {naipeOpen && (
+            <div className="px-5 sm:p-6 pt-0 pb-6 border-t border-emerald-500/20">
+              <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mb-4">
+                Os arquivos ficam no armazenamento público da banda. Se algo não abrir, avise a diretoria — pode ser atualização de repertório em andamento.
+              </p>
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-stretch">
+                  <div className="flex-1 space-y-2">
+                    <label className="block text-sm font-medium text-rjb-text dark:text-rjb-text-dark">Instrumento</label>
+                    <select
+                      value={naipeInstrumento}
+                      onChange={(e) => setNaipeInstrumento(e.target.value)}
+                      className="w-full min-h-[48px] px-4 py-3 text-base rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark border-2 border-emerald-500/30 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-rjb-text dark:text-rjb-text-dark touch-manipulation"
+                    >
+                      {INSTRUMENTOS_NAIPE.map((i) => (
+                        <option key={i.slug} value={i.slug}>{i.nome}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <label className="block text-sm font-medium text-rjb-text dark:text-rjb-text-dark">Categoria</label>
+                    <div className="flex rounded-xl overflow-hidden border-2 border-emerald-500/30 min-h-[48px]">
+                      <button
+                        type="button"
+                        onClick={() => setNaipeCategoria('racionais')}
+                        className={`flex-1 min-h-[48px] px-3 sm:px-4 py-3 text-sm font-medium transition-colors touch-manipulation ${
+                          naipeCategoria === 'racionais'
+                            ? 'bg-rjb-yellow text-rjb-text'
+                            : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/70 hover:text-rjb-yellow'
+                        }`}
+                      >
+                        Racionais
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNaipeCategoria('diversas')}
+                        className={`flex-1 min-h-[48px] px-3 sm:px-4 py-3 text-sm font-medium transition-colors border-l-2 border-emerald-500/30 touch-manipulation ${
+                          naipeCategoria === 'diversas'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/70 hover:text-blue-500'
+                        }`}
+                      >
+                        Diversas
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <a
+                  href={buildConsolidadoNaipeUrl(naipeCategoria, naipeInstrumento)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full min-h-[48px] px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold hover:from-emerald-600 hover:to-emerald-700 transition-all flex items-center justify-center gap-2 touch-manipulation active:opacity-90"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Abrir / baixar PDF
+                </a>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Barra de controles */}

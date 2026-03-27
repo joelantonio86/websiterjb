@@ -3,18 +3,21 @@ import PageWrapper from '../components/PageWrapper'
 import ImageModal from '../components/ImageModal'
 import EmptyState from '../components/EmptyState'
 import { PHOTOS_BY_EVENT } from '../data/photos'
+import { fetchAdminPhotosPublic, mergeEventsWithAdminPhotos } from '../services/publicMedia'
 
 const Fotos = () => {
   const [selectedImage, setSelectedImage] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-
-  const sortedEvents = [...PHOTOS_BY_EVENT].sort((a, b) => {
-    return new Date(b.date) - new Date(a.date)
-  })
+  const [sortedEvents, setSortedEvents] = useState([...PHOTOS_BY_EVENT].sort((a, b) => new Date(b.date) - new Date(a.date)))
 
   useEffect(() => {
     setIsVisible(true)
+    const loadPhotos = async () => {
+      const adminPhotos = await fetchAdminPhotosPublic()
+      setSortedEvents(mergeEventsWithAdminPhotos(PHOTOS_BY_EVENT, adminPhotos))
+    }
+    loadPhotos()
   }, [])
 
   const openModal = (imageUrl) => {

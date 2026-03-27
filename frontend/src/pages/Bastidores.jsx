@@ -4,16 +4,20 @@ import PageWrapper from '../components/PageWrapper'
 import VideoCard from '../components/VideoCard'
 import EmptyState from '../components/EmptyState'
 import { BASTIDORES_BY_EVENT } from '../data/videos'
+import { fetchAdminYoutubeVideosPublic, mergeEventsWithAdminYoutube } from '../services/publicMedia'
 
 const Bastidores = () => {
   const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(false)
-  const sortedEvents = [...BASTIDORES_BY_EVENT].sort((a, b) => {
-    return new Date(b.date) - new Date(a.date)
-  })
+  const [sortedEvents, setSortedEvents] = useState([...BASTIDORES_BY_EVENT].sort((a, b) => new Date(b.date) - new Date(a.date)))
 
   useEffect(() => {
     setIsVisible(true)
+    const load = async () => {
+      const adminVideos = await fetchAdminYoutubeVideosPublic('bastidor')
+      setSortedEvents(mergeEventsWithAdminYoutube(BASTIDORES_BY_EVENT, adminVideos, 'Bastidores'))
+    }
+    load()
   }, [])
 
   return (

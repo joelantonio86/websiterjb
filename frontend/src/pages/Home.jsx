@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import BrazilMap from '../components/BrazilMap'
 import StageRoster from '../components/StageRoster'
 import { AGENDA_EVENTS } from '../data/events'
 import { APRESENTACOES_BY_EVENT } from '../data/videos'
+import { fetchAdminYoutubeVideosPublic, mergeEventsWithAdminYoutube } from '../services/publicMedia'
 import { racionais, diversas } from '../data/songs'
 import { REPERTORIO_MAIO_2026 } from '../data/repertorioApresentacoes2026'
 import DownloadMaioRepertoireButton from '../components/DownloadMaioRepertoireButton'
@@ -33,13 +34,23 @@ const Home = () => {
   const [featuredVideoModalOpen, setFeaturedVideoModalOpen] = useState(false)
   const featuredVideoCloseRef = useRef(null)
   const [totalComponents, setTotalComponents] = useState(null)
-  const totalSongs = racionais.length + diversas.length
-  const nextShowsCount = AGENDA_EVENTS.filter(e => e.date.startsWith('2026')).length
-  const featuredVideo = useMemo(() => {
+  const [featuredVideo, setFeaturedVideo] = useState(() => {
     const sorted = [...APRESENTACOES_BY_EVENT].sort((a, b) => new Date(b.date) - new Date(a.date))
     const event = sorted[0]
     if (!event?.videos?.length) return null
     return { ...event.videos[0], eventTitle: event.eventTitle, dateFormatted: event.dateFormatted }
+  })
+  const totalSongs = racionais.length + diversas.length
+  const nextShowsCount = AGENDA_EVENTS.filter(e => e.date.startsWith('2026')).length
+  useEffect(() => {
+    const loadFeatured = async () => {
+      const adminVideos = await fetchAdminYoutubeVideosPublic('apresentacao')
+      const merged = mergeEventsWithAdminYoutube(APRESENTACOES_BY_EVENT, adminVideos, 'Apresentações')
+      const event = merged[0]
+      if (!event?.videos?.length) return
+      setFeaturedVideo({ ...event.videos[0], eventTitle: event.eventTitle, dateFormatted: event.dateFormatted })
+    }
+    loadFeatured()
   }, [])
 
   useEffect(() => {

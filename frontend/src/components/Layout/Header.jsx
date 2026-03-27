@@ -179,15 +179,6 @@ const Header = () => {
               Contato
             </Link>
             
-            {(user?.role === 'admin' || user?.role === 'admin-financeiro' || user?.role === 'financeiro' || user?.role === 'financeiro-view') && (
-              <Link
-                to="/relatorios"
-                className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/relatorios') && 'nav-link-active'}`}
-              >
-                Área Administrativa
-              </Link>
-            )}
-
             {/* Tema: Sistema / Claro / Escuro */}
             <Tooltip content={`Tema: ${themeLabel} · Clique para: ${nextThemeLabel}`} position="bottom">
               <button
@@ -208,16 +199,28 @@ const Header = () => {
             </Tooltip>
           </div>
 
-          {/* Cadastro Button - Desktop */}
-          <Link
-            to="/cadastro"
-            className="group nav-link bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 hidden lg:flex items-center gap-2"
-          >
-            <span>Cadastro</span>
-            <svg className="w-3 h-3 xl:w-4 xl:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </Link>
+          {/* Ações Desktop (Área Administrativa + Cadastro) */}
+          <div className="hidden lg:flex items-center gap-2">
+            <Link
+              to="/relatorios"
+              className={`group nav-link bg-gradient-to-r from-rjb-card-light to-rjb-card-light/80 dark:from-rjb-card-dark dark:to-rjb-card-dark/80 border border-rjb-yellow/40 text-rjb-text dark:text-rjb-text-dark font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:bg-rjb-yellow/10 hover:border-rjb-yellow/70 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 flex items-center gap-2 ${isActive('/relatorios') ? 'ring-2 ring-rjb-yellow/40' : ''}`}
+            >
+              <span>Área Administrativa</span>
+              <svg className="w-3 h-3 xl:w-4 xl:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </Link>
+
+            <Link
+              to="/cadastro"
+              className="group nav-link bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-2"
+            >
+              <span>Cadastro</span>
+              <svg className="w-3 h-3 xl:w-4 xl:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </Link>
+          </div>
 
           {/* Mobile Menu Controls */}
           <div className="lg:hidden flex items-center gap-2">
@@ -389,22 +392,20 @@ const Header = () => {
                   <span>Cadastro</span>
                 </span>
               </Link>
-              {(user?.role === 'admin' || user?.role === 'admin-financeiro' || user?.role === 'financeiro' || user?.role === 'financeiro-view') && (
-                <Link
-                  to="/relatorios"
-                  className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
-                    isActive('/relatorios')
-                      ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                      : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="text-xl">🔐</span>
-                    <span>Área Administrativa</span>
-                  </span>
-                </Link>
-              )}
+              <Link
+                to="/relatorios"
+                className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
+                  isActive('/relatorios')
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="text-xl">🔐</span>
+                  <span>Área Administrativa</span>
+                </span>
+              </Link>
               {user && (user.role === 'financeiro' || user.role === 'admin-financeiro' || user.role === 'financeiro-view') && (
                 <Link
                   to="/financeiro"
