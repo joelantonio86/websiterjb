@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { showMessage } from '../components/MessageBox'
@@ -24,11 +24,11 @@ const StatCard = ({ title, value, tone = 'yellow' }) => {
 
 const SectionCard = ({ title, subtitle, children }) => (
   <section className="rounded-2xl border border-rjb-yellow/20 bg-rjb-card-light/70 dark:bg-rjb-card-dark/70 backdrop-blur-sm shadow-lg overflow-hidden">
-    <header className="px-5 sm:px-6 py-4 border-b border-rjb-yellow/15 bg-rjb-yellow/5">
-      <h3 className="text-base sm:text-lg font-bold text-rjb-text dark:text-rjb-text-dark">{title}</h3>
-      {subtitle ? <p className="text-xs sm:text-sm text-rjb-text/65 dark:text-rjb-text-dark/65 mt-0.5">{subtitle}</p> : null}
+    <header className="px-5 sm:px-6 py-4 border-b border-rjb-yellow/15 bg-rjb-yellow/5 space-y-1">
+      <h3 className="text-base sm:text-lg font-bold text-rjb-text dark:text-rjb-text-dark leading-tight">{title}</h3>
+      {subtitle ? <p className="text-xs sm:text-sm text-rjb-text/65 dark:text-rjb-text-dark/65">{subtitle}</p> : null}
     </header>
-    <div className="p-4 sm:p-6">{children}</div>
+    <div className="p-0">{children}</div>
   </section>
 )
 

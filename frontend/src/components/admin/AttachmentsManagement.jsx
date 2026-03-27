@@ -246,8 +246,9 @@ const AttachmentsManagement = () => {
               {periods.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
             </select>
             <input type="file" required accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="w-full sm:flex-1 p-3 text-sm border-2 border-rjb-yellow/30 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-rjb-yellow file:text-rjb-text" />
-            <button type="submit" className="bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3 px-6 rounded-xl text-sm">Enviar foto</button>
+            <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3 px-6 rounded-xl text-sm">Enviar foto</button>
           </div>
+          <p className="text-[11px] sm:text-xs text-rjb-text/60 dark:text-rjb-text-dark/60">Dica: prefira imagens até 2MB para carregamento mais rápido no celular.</p>
         </form>
 
         <form onSubmit={handleAddYoutube} className="rounded-xl border border-rjb-yellow/25 bg-rjb-yellow/5 px-4 py-4 space-y-3">
@@ -268,7 +269,7 @@ const AttachmentsManagement = () => {
               <option value="unlisted">Não listado</option>
               <option value="public">Público</option>
             </select>
-            <button type="submit" className="bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2.5 px-5 rounded-xl text-sm">Salvar vídeo</button>
+            <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2.5 px-5 rounded-xl text-sm">Salvar vídeo</button>
           </div>
 
           <div className="border-t border-rjb-yellow/20 pt-3 space-y-2">
@@ -287,7 +288,7 @@ const AttachmentsManagement = () => {
                         <a href={`https://www.youtube.com/watch?v=${encodeURIComponent(v.youtubeId)}`} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline min-w-0 truncate" title={v.title}>
                           {v.title} ({v.category === 'apresentacao' ? 'Apresentação' : 'Bastidor'} - {v.visibility === 'public' ? 'Público' : 'Não listado'})
                         </a>
-                        <button type="button" onClick={() => handleDeleteYoutube(v.id)} className="text-red-500 hover:text-red-700 font-bold shrink-0 self-start sm:self-auto">Excluir</button>
+                        <button type="button" onClick={() => handleDeleteYoutube(v.id)} className="text-red-500 hover:text-red-700 font-bold shrink-0 self-start sm:self-auto py-1.5 px-2 rounded-md hover:bg-red-500/10">Excluir</button>
                       </div>
                     ))}
                   </div>
@@ -388,10 +389,10 @@ const AttachmentsManagement = () => {
                         <span className="font-medium text-sm truncate max-w-[min(100%,280px)]">{displayName(attachment.name)}</span>
                         <span className="text-[10px] opacity-50">{new Date(attachment.uploaded).toLocaleString()}</span>
                       </div>
-                      <div className="flex flex-wrap gap-3 shrink-0 sm:justify-end">
-                        <a href={attachment.downloadUrl} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline text-xs font-bold">Ver / baixar</a>
-                        <button type="button" onClick={() => openEdit(attachment)} className="text-stone-700 dark:text-stone-200 hover:text-rjb-yellow text-xs font-bold">Editar</button>
-                        <button type="button" onClick={() => handleDelete(attachment.name)} className="text-red-500 hover:text-red-700 text-xs font-bold">Excluir</button>
+                      <div className="flex flex-wrap gap-2 shrink-0 sm:justify-end">
+                        <a href={attachment.downloadUrl} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline text-xs font-bold py-1.5 px-2 rounded-md hover:bg-rjb-yellow/10">Ver / baixar</a>
+                        <button type="button" onClick={() => openEdit(attachment)} className="text-stone-700 dark:text-stone-200 hover:text-rjb-yellow text-xs font-bold py-1.5 px-2 rounded-md hover:bg-rjb-yellow/10">Editar</button>
+                        <button type="button" onClick={() => handleDelete(attachment.name)} className="text-red-500 hover:text-red-700 text-xs font-bold py-1.5 px-2 rounded-md hover:bg-red-500/10">Excluir</button>
                       </div>
                     </div>
                   ))}
