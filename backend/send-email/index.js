@@ -77,7 +77,7 @@ const limiter = rateLimit({
 });
 
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
-let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, bucket, BUCKET_NAME;
+let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, bucket, BUCKET_NAME;
 
 function initFirebaseAndGCS() {
     try {
@@ -92,6 +92,7 @@ function initFirebaseAndGCS() {
         depositsCollection = db.collection('deposits');
         expensesCollection = db.collection('expenses');
         youtubeVideosCollection = db.collection('youtubeVideos');
+        repertoriosCollection = db.collection('repertorios');
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
@@ -688,6 +689,126 @@ app.get('/api/public/youtube-videos', async (req, res) => {
     } catch (error) {
         console.error('public/youtube-videos:', error);
         res.status(500).json({ message: 'Erro ao listar videos.' });
+    }
+});
+
+// --- 8.2 Rotas de Repertórios (CRUD admin + leitura pública) ---
+
+function sanitizeRepertorioSongs(rawSongs) {
+    if (!Array.isArray(rawSongs)) return [];
+    return rawSongs
+        .filter(s => s && typeof s === 'object' && String(s.title || '').trim())
+        .map(s => ({
+            title: String(s.title).trim(),
+            folder: String(s.folder || '').trim(),
+            mp3: String(s.mp3 || '').trim()
+        }))
+        .slice(0, 200);
+}
+
+function validateRepertorioPayload(body) {
+    const name = String(body?.name || '').trim();
+    const date = String(body?.date || '').trim();
+    const location = String(body?.location || '').trim();
+    const songs = sanitizeRepertorioSongs(body?.songs);
+
+    if (!name) return { error: 'Informe o nome do repertório.' };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: 'Informe uma data de apresentação válida.' };
+
+    return { value: { name, date, location, songs } };
+}
+
+function serializeRepertorio(doc) {
+    const d = doc.data();
+    return {
+        id: doc.id,
+        name: d.name || '',
+        date: d.date || '',
+        location: d.location || '',
+        songs: Array.isArray(d.songs) ? d.songs : [],
+        createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
+        updatedAt: d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toISOString() : null
+    };
+}
+
+// Lista completa para o painel admin (CRUD)
+app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
+    try {
+        const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
+        const data = snapshot.docs.map(serializeRepertorio);
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('admin/repertorios/list:', error);
+        res.status(500).json({ message: 'Erro ao listar repertórios.' });
+    }
+});
+
+// Criação de um novo repertório
+app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
+    try {
+        const { error, value } = validateRepertorioPayload(req.body);
+        if (error) return res.status(400).json({ message: error });
+
+        const docRef = await repertoriosCollection.add({
+            ...value,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user?.userId || req.user?.email || 'admin'
+        });
+
+        res.status(200).json({ status: 200, id: docRef.id, message: 'Repertório criado com sucesso.' });
+    } catch (error) {
+        console.error('admin/repertorios/create:', error);
+        res.status(500).json({ message: 'Erro ao criar repertório.' });
+    }
+});
+
+// Atualização de um repertório existente
+app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
+    try {
+        const { error, value } = validateRepertorioPayload(req.body);
+        if (error) return res.status(400).json({ message: error });
+
+        const ref = repertoriosCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Repertório não encontrado.' });
+
+        await ref.update({
+            ...value,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        res.status(200).json({ status: 200, message: 'Repertório atualizado com sucesso.' });
+    } catch (error) {
+        console.error('admin/repertorios/update:', error);
+        res.status(500).json({ message: 'Erro ao atualizar repertório.' });
+    }
+});
+
+// Exclusão de um repertório
+app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
+    try {
+        const ref = repertoriosCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Repertório não encontrado.' });
+
+        await ref.delete();
+        res.status(200).json({ status: 200, message: 'Repertório excluído com sucesso.' });
+    } catch (error) {
+        console.error('admin/repertorios/delete:', error);
+        res.status(500).json({ message: 'Erro ao excluir repertório.' });
+    }
+});
+
+// Leitura pública (usada em /repertorio-apresentacoes e no filtro de /partituras)
+app.get('/api/public/repertorios', async (req, res) => {
+    try {
+        const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
+        const data = snapshot.docs.map(serializeRepertorio);
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('public/repertorios/list:', error);
+        res.status(500).json({ message: 'Erro ao listar repertórios.' });
     }
 });
 
