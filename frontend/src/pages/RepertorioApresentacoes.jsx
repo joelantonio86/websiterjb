@@ -1,11 +1,42 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
-import { REPERTORIO_APRESENTACOES_2026, REPERTORIO_MAIO_2026 } from '../data/repertorioApresentacoes2026'
+import { REPERTORIO_MAIO_2026 } from '../data/repertorioApresentacoes2026'
 import DownloadMaioRepertoireButton from '../components/DownloadMaioRepertoireButton'
+import SkeletonLoader from '../components/SkeletonLoader'
+import EmptyState from '../components/EmptyState'
+import api from '../services/api'
+
+const MESES_ABREV = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
+const MESES_COMPLETOS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
+
+// Converte um repertório vindo da API (name, date, location, songs) no formato
+// usado para renderizar cada card da lista (dia/mês/ano, título, etc.)
+const mapRepertorioToEvento = (repertorio) => {
+  const [year, month, day] = String(repertorio.date || '').split('-')
+  const monthIndex = Number(month) - 1
+  const dateLabel = day && month && year
+    ? `${day} de ${MESES_COMPLETOS[monthIndex] || month} de ${year}`
+    : 'Data a confirmar'
+  const dateShort = day && month && year
+    ? `${day} ${MESES_ABREV[monthIndex] || month} ${year}`
+    : '-- --- ----'
+
+  return {
+    id: repertorio.id,
+    dateShort,
+    dateLabel,
+    title: repertorio.name,
+    location: repertorio.location || 'Local a confirmar',
+    songs: (repertorio.songs || []).map((s) => ({ title: s.title })),
+  }
+}
 
 const RepertorioApresentacoes = () => {
   const [isVisible, setIsVisible] = useState(false)
+  const [eventos, setEventos] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     document.title = 'Repertório das Apresentações 2026 | RJB'
@@ -14,6 +45,27 @@ const RepertorioApresentacoes = () => {
 
   useEffect(() => {
     setIsVisible(true)
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchRepertorios = async () => {
+      setIsLoading(true)
+      setLoadError(false)
+      try {
+        const { data } = await api.get('/api/public/repertorios')
+        if (!isMounted) return
+        const mapped = Array.isArray(data) ? data.map(mapRepertorioToEvento) : []
+        setEventos(mapped)
+      } catch (error) {
+        if (!isMounted) return
+        setLoadError(true)
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+    fetchRepertorios()
+    return () => { isMounted = false }
   }, [])
 
   return (
@@ -66,7 +118,22 @@ const RepertorioApresentacoes = () => {
         </div>
 
         <div className="space-y-4 sm:space-y-6">
-          {REPERTORIO_APRESENTACOES_2026.map((evento, index) => (
+          {isLoading ? (
+            <SkeletonLoader type="card" count={3} />
+          ) : loadError ? (
+            <EmptyState
+              icon="⚠️"
+              variant="error"
+              title="Não foi possível carregar os repertórios"
+              description="Tente novamente mais tarde."
+            />
+          ) : eventos.length === 0 ? (
+            <EmptyState
+              icon="🎼"
+              title="Nenhum repertório publicado ainda"
+              description="Assim que a diretoria cadastrar um repertório de apresentação, ele aparecerá aqui automaticamente."
+            />
+          ) : eventos.map((evento, index) => (
             <article
               key={evento.id}
               className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-l-4 sm:border-l-8 border-rjb-yellow shadow-xl overflow-hidden transition-all duration-500 hover:shadow-2xl animate-fade-in"

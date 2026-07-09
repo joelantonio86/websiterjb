@@ -14,6 +14,7 @@ const AdminLayout = () => {
     { to: '/admin/convites', label: 'Convites' },
     { to: '/admin/membros', label: 'Membros' },
     { to: '/admin/midia', label: 'Mídia' },
+    { to: '/admin/repertorios', label: 'Repertório' },
   ]
 
   const canFinance =

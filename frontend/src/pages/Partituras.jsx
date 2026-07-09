@@ -6,6 +6,7 @@ import { racionais, diversas, R2_BASE_URL } from '../data/songs'
 import { INSTRUMENTOS_NAIPE, buildConsolidadoNaipeUrl } from '../data/instrumentosNaipe'
 import { REPERTORIO_MAIO_SHEET_IDS } from '../data/repertorioApresentacoes2026'
 import { API_BASE } from '../services/api'
+import api from '../services/api'
 import { showToast } from '../components/Toast'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
@@ -86,6 +87,7 @@ const Partituras = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [downloading, setDownloading] = useState(null)
   const [selectedSheets, setSelectedSheets] = useState(new Set())
+  const [showOnlySelectedSheets, setShowOnlySelectedSheets] = useState(false)
   const [batchDownloading, setBatchDownloading] = useState(false)
   const [batchProgress, setBatchProgress] = useState(0) // 0-100 durante o download
   const [downloadFailedModal, setDownloadFailedModal] = useState(null) // { totalOk, failed }
@@ -93,6 +95,9 @@ const Partituras = () => {
   const [naipeInstrumento, setNaipeInstrumento] = useState(INSTRUMENTOS_NAIPE[0]?.slug || 'clarinete')
   const [naipeCategoria, setNaipeCategoria] = useState('racionais')
   const [naipeOpen, setNaipeOpen] = useState(false)
+  // Filtro de partituras por repertório cadastrado no admin
+  const [repertorios, setRepertorios] = useState([])
+  const [selectedRepertorioId, setSelectedRepertorioId] = useState('')
 
   useEffect(() => {
     setIsVisible(true)
@@ -109,6 +114,7 @@ const Partituras = () => {
         return (folder === 'racionais' ? racionais : diversas).some(s => s.mp3 === mp3)
       }))
       setSelectedSheets(ids)
+      setShowOnlySelectedSheets(true)
       setRacionaisOpen(true)
       setDiversasOpen(true)
       setSearchParams({}, { replace: true })
@@ -123,16 +129,48 @@ const Partituras = () => {
     }
   }, [downloading])
 
+  useEffect(() => {
+    if (showOnlySelectedSheets && selectedSheets.size === 0) {
+      setShowOnlySelectedSheets(false)
+    }
+  }, [selectedSheets, showOnlySelectedSheets])
+
+  useEffect(() => {
+    let isMounted = true
+    api.get('/api/public/repertorios')
+      .then(({ data }) => {
+        if (isMounted) setRepertorios(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (isMounted) setRepertorios([])
+      })
+    return () => { isMounted = false }
+  }, [])
+
+  const getSheetId = (sheet) => `${sheet.folder}-${sheet.mp3}`
+
   const allSheets = [
     ...racionais.map(s => ({ ...s, category: 'Músicas Racionais', folder: 'racionais', categoryId: 'racionais' })),
     ...diversas.map(s => ({ ...s, category: 'Outros Clássicos', folder: 'diversas', categoryId: 'diversas' })),
   ].sort((a, b) => a.title.localeCompare(b.title))
 
-  // Filtro de busca
-  const filteredSheets = allSheets.filter(sheet => {
+  const visibleSheets = showOnlySelectedSheets
+    ? allSheets.filter(sheet => selectedSheets.has(getSheetId(sheet)))
+    : allSheets
+
+  const selectedRepertorio = repertorios.find(r => r.id === selectedRepertorioId) || null
+
+  const repertorioSheetIds = selectedRepertorio
+    ? new Set((selectedRepertorio.songs || []).map(s => `${s.folder}-${s.mp3}`))
+    : null
+
+  // Filtro de busca + filtro por repertório selecionado
+  const filteredSheets = visibleSheets.filter(sheet => {
     const normalizedSearch = searchTerm.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     const normalizedTitle = sheet.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    return normalizedTitle.includes(normalizedSearch)
+    const matchesSearch = normalizedTitle.includes(normalizedSearch)
+    const matchesRepertorio = !repertorioSheetIds || repertorioSheetIds.has(getSheetId(sheet))
+    return matchesSearch && matchesRepertorio
   })
 
   const sheetsByCategory = filteredSheets.reduce((acc, sheet) => {
@@ -147,8 +185,6 @@ const Partituras = () => {
   const handleDownload = (type, title) => {
     setDownloading(`${type}-${title}`)
   }
-
-  const getSheetId = (sheet) => `${sheet.folder}-${sheet.mp3}`
 
   const toggleSheetSelection = (sheet) => {
     const id = getSheetId(sheet)
@@ -172,15 +208,19 @@ const Partituras = () => {
       return (folder === 'racionais' ? racionais : diversas).some(s => s.mp3 === mp3)
     }))
     setSelectedSheets(ids)
+    setShowOnlySelectedSheets(true)
     setRacionaisOpen(true)
     setDiversasOpen(true)
     showToast(`${ids.size} partituras do repertório de maio selecionadas`, 'success', 3000)
   }
 
-  const clearSelection = () => setSelectedSheets(new Set())
+  const clearSelection = () => {
+    setSelectedSheets(new Set())
+    setShowOnlySelectedSheets(false)
+  }
 
   const downloadSelectedAsZip = async () => {
-    const toDownload = filteredSheets.filter(s => selectedSheets.has(getSheetId(s)))
+    const toDownload = allSheets.filter(s => selectedSheets.has(getSheetId(s)))
     if (toDownload.length === 0) return
     setBatchDownloading(true)
     setBatchProgress(0)
@@ -235,6 +275,7 @@ const Partituras = () => {
       a.click()
       URL.revokeObjectURL(a.href)
       setSelectedSheets(new Set())
+      setShowOnlySelectedSheets(false)
       if (failed.length === 0) {
         showToast(`${totalOk} partitura${totalOk !== 1 ? 's' : ''} baixada${totalOk !== 1 ? 's' : ''} com sucesso!`, 'success', 4000)
       } else {
@@ -696,6 +737,28 @@ const Partituras = () => {
             />
           </div>
 
+          {/* Filtro por repertório cadastrado */}
+          {repertorios.length > 0 && (
+            <div className="relative sm:w-64">
+              <select
+                value={selectedRepertorioId}
+                onChange={(e) => setSelectedRepertorioId(e.target.value)}
+                aria-label="Filtrar partituras por repertório"
+                className="w-full h-full pl-4 pr-8 py-3 sm:py-4 text-base rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-2 border-rjb-yellow/30 hover:border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark shadow-lg hover:shadow-xl transition-all duration-300 appearance-none cursor-pointer"
+              >
+                <option value="">Todos os repertórios</option>
+                {repertorios.map((rep) => (
+                  <option key={rep.id} value={rep.id}>{rep.name}</option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg className="w-4 h-4 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          )}
+
           {/* Download em lote */}
           {filteredSheets.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
@@ -788,8 +851,14 @@ const Partituras = () => {
         {filteredSheets.length === 0 && (
           <EmptyState
             icon="🎵"
-            title={searchTerm ? "Nenhuma música encontrada" : "Nenhuma partitura disponível"}
-            description={searchTerm ? `Não encontramos resultados para "${searchTerm}". Tente buscar com outros termos.` : "Não há partituras disponíveis no momento."}
+            title={searchTerm || selectedRepertorio ? "Nenhuma música encontrada" : "Nenhuma partitura disponível"}
+            description={
+              searchTerm
+                ? `Não encontramos resultados para "${searchTerm}". Tente buscar com outros termos.`
+                : selectedRepertorio
+                ? `O repertório "${selectedRepertorio.name}" ainda não possui partituras correspondentes.`
+                : "Não há partituras disponíveis no momento."
+            }
           />
         )}
       </div>
