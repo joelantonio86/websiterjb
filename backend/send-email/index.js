@@ -471,26 +471,45 @@ app.get('/api/public/photos', async (req, res) => {
     }
 });
 
-app.post('/api/attachments/upload', authenticateJWT, upload.single('file'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
+app.post('/api/attachments/upload', authenticateJWT, upload.array('files', 20), async (req, res) => {
+    if (!req.files || req.files.length === 0) return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
     const mediaType = 'foto';
-    const isImage = req.file.mimetype.startsWith('image/');
-    if (!isImage) {
-        return res.status(400).json({ message: 'Apenas imagens sao permitidas nesta area.' });
-    }
     const periodKey = String(req.body.periodKey || '').trim();
     if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
         return res.status(400).json({ message: 'Selecione um período válido (dezembro de 2025 em diante).' });
     }
-    const safeOriginal = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const fileName = `${mediaType}__${periodKey}__${Date.now()}-${safeOriginal}`;
     if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
-    try {
-        const publicUrl = await storageAdapter.uploadBuffer(fileName, req.file.buffer, req.file.mimetype);
-        res.status(200).json({ status: 200, message: 'Upload concluído.', publicUrl });
-    } catch (e) {
-        res.status(500).json({ message: 'Erro no upload.' });
+
+    const uploaded = [];
+    const errors = [];
+
+    for (let i = 0; i < req.files.length; i++) {
+        const currentFile = req.files[i];
+        if (!currentFile.mimetype.startsWith('image/')) {
+            errors.push({ originalName: currentFile.originalname, message: 'Apenas imagens são permitidas nesta área.' });
+            continue;
+        }
+        try {
+            const safeOriginal = currentFile.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const fileName = `${mediaType}__${periodKey}__${Date.now()}-${i}-${safeOriginal}`;
+            const publicUrl = await storageAdapter.uploadBuffer(fileName, currentFile.buffer, currentFile.mimetype);
+            uploaded.push({ originalName: currentFile.originalname, fileName, publicUrl });
+        } catch (e) {
+            console.error('attachments/upload item:', e);
+            errors.push({ originalName: currentFile.originalname, message: 'Erro ao enviar este arquivo.' });
+        }
     }
+
+    if (uploaded.length === 0) {
+        return res.status(500).json({ message: 'Nenhuma foto pôde ser enviada.', errors });
+    }
+
+    res.status(200).json({
+        status: 200,
+        message: `${uploaded.length} de ${req.files.length} foto(s) enviada(s) com sucesso.`,
+        uploaded,
+        errors
+    });
 });
 
 app.patch('/api/attachments/move', authenticateJWT, async (req, res) => {
