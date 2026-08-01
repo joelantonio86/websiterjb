@@ -16,14 +16,12 @@ const multer = require('multer');
 const storageAdapter = require('./storageAdapter');
 
 // --- 1. Constantes e Ambiente (Preservadas do Original) ---
-// Validar variáveis de ambiente críticas
 const SENDER_EMAIL = process.env.GMAIL_USER;
 const SENDER_PASS = process.env.GMAIL_PASS;
 const TARGET_EMAIL = 'contato.racionaljazzband@gmail.com, racionaljazzbandoficial@gmail.com, andressamqxs@gmail.com';
 const VALID_INVITE_KEYS = ['RJB-MEMBER-2025', 'RJB-TESTE-999'];
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-muito-forte-da-rjb-987654321';
 
-// Validar variáveis críticas (mas não bloquear se faltarem - algumas rotas podem não precisar)
 if (!SENDER_EMAIL || !SENDER_PASS) {
     console.warn('⚠️  AVISO: GMAIL_USER ou GMAIL_PASS não configurados. Funcionalidades de e-mail podem não funcionar.');
 }
@@ -31,7 +29,6 @@ if (!JWT_SECRET || JWT_SECRET === 'chave-secreta-muito-forte-da-rjb-987654321') 
     console.warn('⚠️  AVISO: JWT_SECRET usando valor padrão. Configure uma chave secreta forte em produção.');
 }
 
-// Carregar usuários administradores — não derruba o processo se falhar (para o Cloud Run passar no health check)
 let ADMIN_USERS = [];
 try {
     if (process.env.ADMIN_USERS) {
@@ -77,7 +74,7 @@ const limiter = rateLimit({
 });
 
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
-let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, bucket, BUCKET_NAME;
+let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, partiturasCollection, bucket, BUCKET_NAME;
 
 function initFirebaseAndGCS() {
     try {
@@ -93,6 +90,7 @@ function initFirebaseAndGCS() {
         expensesCollection = db.collection('expenses');
         youtubeVideosCollection = db.collection('youtubeVideos');
         repertoriosCollection = db.collection('repertorios');
+        partiturasCollection = db.collection('partituras');
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
@@ -126,7 +124,6 @@ app.use((req, res, next) => {
 
 const upload = multer({
     storage: multer.memoryStorage(),
-    // Permite vídeos maiores para galeria; ajuste conforme política de custo.
     limits: { fileSize: 100 * 1024 * 1024 }
 });
 
@@ -147,7 +144,6 @@ function authenticateJWT(req, res, next) {
 
 // --- 5. Rotas Administrativas e de Convite ---
 
-// Nova: Registra no banco a chave gerada pelo Front-end para torná-la válida
 app.post('/api/admin/generate-key', authenticateJWT, async (req, res) => {
     const { inviteKey } = req.body;
     if (!inviteKey || !/^RJB-AUTO-[A-Z0-9]{6}$/.test(inviteKey)) {
@@ -174,9 +170,7 @@ app.post('/api/admin/login', limiter, (req, res) => {
     res.status(200).json({ status: 200, message: 'Login OK', token, role: user.role });
 });
 
-// --- 6. Rotas de Membros e Cadastro (Uso Único Implementado) ---
-
-// --- No arquivo index.js, localize a rota app.post('/api/register-member' ---
+// --- 6. Rotas de Membros e Cadastro ---
 
 app.post('/api/register-member', limiter, async (req, res) => {
     const { inviteKey, name, instrument, email, phone, city, state, tefa, termsVersion, termsAccepted } = req.body;
@@ -199,7 +193,6 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
         if (termsAccepted !== true) return res.status(400).json({ message: 'Aceite os termos LGPD.' });
 
-        // Salva o membro no Firestore
         await membersCollection.add({
             name, instrument, email, city, state, phone, tefa: tefa || "", termsVersion, termsAccepted,
             registrationIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
@@ -210,13 +203,11 @@ app.post('/api/register-member', limiter, async (req, res) => {
             await keyDocRef.update({ used: true, usedBy: email, usedAt: admin.firestore.FieldValue.serverTimestamp() });
         }
 
-        // --- ENVIO DE E-MAILS ---
-        const transporter = nodemailer.createTransport({ 
-            service: 'gmail', 
-            auth: { user: SENDER_EMAIL, pass: SENDER_PASS } 
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: SENDER_EMAIL, pass: SENDER_PASS }
         });
 
-        // 1. E-mail de Boas-Vindas para o Membro
         const memberMailOptions = {
             from: `"Racional Jazz Band" <${SENDER_EMAIL}>`,
             to: email,
@@ -224,7 +215,6 @@ app.post('/api/register-member', limiter, async (req, res) => {
             text: `Olá ${name}!\n\nSua inscrição na Racional Jazz Band foi concluída com sucesso.\n\nInstrumento: ${instrument}\nCidade: ${city}/${state}\n\nEm breve entraremos em contato para mais informações. Seja bem-vindo(a)!`
         };
 
-        // 2. Notificação para a Administração da Banda
         const adminMailOptions = {
             from: `"Sistema RJB" <${SENDER_EMAIL}>`,
             to: TARGET_EMAIL,
@@ -232,7 +222,6 @@ app.post('/api/register-member', limiter, async (req, res) => {
             text: `Um novo membro se cadastrou!\n\nNome: ${name}\nInstrumento: ${instrument}\nE-mail: ${email}\nTelefone: ${phone}\nLocal: ${city}/${state}\nChave utilizada: ${inviteKey}`
         };
 
-        // Dispara os e-mails
         await Promise.all([
             transporter.sendMail(memberMailOptions),
             transporter.sendMail(adminMailOptions)
@@ -250,7 +239,6 @@ app.get('/api/public/health', (req, res) => {
     res.json({ ok: true, version: 'with-members-by-state', service: 'rjb-email-sender' });
 });
 
-// Proxy para PDFs de partituras (evita CORS ao fazer fetch do R2 no browser)
 const R2_BASE = 'https://pub-934c96bc6fb449a7ad7b3491065976d3.r2.dev';
 app.get('/api/public/partituras/proxy', async (req, res) => {
     const { folder, file } = req.query;
@@ -280,7 +268,6 @@ app.get('/api/public/partituras/proxy', async (req, res) => {
     }
 });
 
-// --- Estatísticas públicas (mapa da Home: componentes por estado) ---
 const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 app.get('/api/public/stats/members-by-state', async (req, res) => {
     try {
@@ -309,7 +296,6 @@ app.get('/api/public/stats/members-by-state', async (req, res) => {
     }
 });
 
-// --- Mapa de palco (lista pública: primeiro nome, UF, instrumento) ---
 app.get('/api/public/stats/stage-roster', async (req, res) => {
     try {
         const snapshot = await membersCollection.get();
@@ -350,7 +336,7 @@ app.get('/api/public/stats/stage-roster', async (req, res) => {
     }
 });
 
-// --- 7. Rotas de Relatórios (Preservadas) ---
+// --- 7. Rotas de Relatórios ---
 
 app.get('/api/reports/members', authenticateJWT, async (req, res) => {
     try {
@@ -366,13 +352,11 @@ app.get('/api/reports/members', authenticateJWT, async (req, res) => {
 app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => {
     try {
         const snapshot = await membersCollection.get();
-        // Adicionada a coluna TEFA no cabeçalho
         let csv = 'ID,Nome,TEFA,Instrumento,Email,Contato,Cidade,Estado,Data\n';
 
         snapshot.forEach(doc => {
             const d = doc.data();
             const date = d.submittedAt ? d.submittedAt.toDate().toISOString() : "";
-            // Incluindo o valor do campo tefa ou vazio se não existir
             csv += `${doc.id},"${d.name}","${d.tefa || ""}","${d.instrument}","${d.email}","${d.phone || ""}","${d.city}","${d.state}",${date}\n`;
         });
 
@@ -385,7 +369,7 @@ app.get('/api/reports/members/csv', authenticateJWT, async (req, res) => {
     }
 });
 
-// --- 8. Rotas de Anexos GCS (Preservadas e Completas) ---
+// --- 8. Rotas de Anexos GCS ---
 
 function normalizeAttachmentNameParam(name) {
     if (!name || typeof name !== 'string') return '';
@@ -402,7 +386,6 @@ function safeAttachmentName(name) {
     return n;
 }
 
-/** @returns {{ media: string, period: string|null, rest: string }|null} */
 function parseAttachmentName(name) {
     const n = normalizeAttachmentNameParam(name);
     const withPeriod = n.match(/^(foto|video)__(\d{4}-\d{2})__(.+)$/i);
@@ -750,7 +733,6 @@ function serializeRepertorio(doc) {
     };
 }
 
-// Lista completa para o painel admin (CRUD)
 app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
@@ -762,7 +744,6 @@ app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
     }
 });
 
-// Criação de um novo repertório
 app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
     try {
         const { error, value } = validateRepertorioPayload(req.body);
@@ -782,7 +763,6 @@ app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
     }
 });
 
-// Atualização de um repertório existente
 app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     try {
         const { error, value } = validateRepertorioPayload(req.body);
@@ -804,7 +784,6 @@ app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     }
 });
 
-// Exclusão de um repertório
 app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     try {
         const ref = repertoriosCollection.doc(req.params.id);
@@ -819,7 +798,6 @@ app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     }
 });
 
-// Leitura pública (usada em /repertorio-apresentacoes e no filtro de /partituras)
 app.get('/api/public/repertorios', async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
@@ -828,6 +806,223 @@ app.get('/api/public/repertorios', async (req, res) => {
     } catch (error) {
         console.error('public/repertorios/list:', error);
         res.status(500).json({ message: 'Erro ao listar repertórios.' });
+    }
+});
+
+// --- 8.3 Rotas de Partituras (CRUD admin com upload de PDFs) ---
+
+function safePdfName(originalName) {
+    return String(originalName || 'arquivo.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+function slugifyInstrumentName(name) {
+    const slug = String(name || 'instrumento')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    return slug || 'instrumento';
+}
+
+function serializePartitura(doc) {
+    const d = doc.data();
+    return {
+        id: doc.id,
+        name: d.name || '',
+        fullScoreFileName: d.fullScoreFileName || '',
+        fullScoreUrl: d.fullScoreUrl || '',
+        parts: Array.isArray(d.parts) ? d.parts : [],
+        createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
+        updatedAt: d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toISOString() : null
+    };
+}
+
+// Lista completa para o painel admin (CRUD)
+app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
+    try {
+        const snapshot = await partiturasCollection.orderBy('name', 'asc').get();
+        const data = snapshot.docs.map(serializePartitura);
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('admin/partituras/list:', error);
+        res.status(500).json({ message: 'Erro ao listar partituras.' });
+    }
+});
+
+// Criação de uma nova partitura. Usa upload.any() porque o número de instrumentos é
+// dinâmico: cada parte chega como um campo de arquivo próprio, nomeado 'partFile_<id>',
+// e a lista de metadados (nome de cada instrumento) chega em 'partsMeta' como JSON.
+app.post('/api/admin/partituras', authenticateJWT, upload.any(), async (req, res) => {
+    try {
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+
+        const name = String(req.body?.name || '').trim();
+        if (!name) return res.status(400).json({ message: 'Informe o nome da partitura.' });
+
+        let partsMeta = [];
+        try {
+            partsMeta = JSON.parse(req.body?.partsMeta || '[]');
+            if (!Array.isArray(partsMeta)) partsMeta = [];
+        } catch {
+            return res.status(400).json({ message: 'Formato inválido para as partes por instrumento.' });
+        }
+
+        const filesByField = {};
+        (req.files || []).forEach(f => { filesByField[f.fieldname] = f; });
+
+        const fullScoreFile = filesByField['fullScoreFile'];
+        if (!fullScoreFile) return res.status(400).json({ message: 'Selecione o arquivo PDF da partitura completa.' });
+        if (fullScoreFile.mimetype !== 'application/pdf') {
+            return res.status(400).json({ message: 'A partitura completa deve ser um arquivo PDF.' });
+        }
+
+        const fullScoreFileName = `partitura__completa__${Date.now()}-${safePdfName(fullScoreFile.originalname)}`;
+        const fullScoreUrl = await storageAdapter.uploadBuffer(fullScoreFileName, fullScoreFile.buffer, fullScoreFile.mimetype);
+
+        const parts = [];
+        for (let i = 0; i < partsMeta.length; i++) {
+            const meta = partsMeta[i] || {};
+            const instrumentName = String(meta.instrumentName || '').trim();
+            if (!instrumentName) continue;
+
+            const partFile = filesByField[`partFile_${meta.id}`];
+            if (!partFile) {
+                return res.status(400).json({ message: `Selecione o arquivo PDF para o instrumento "${instrumentName}".` });
+            }
+            if (partFile.mimetype !== 'application/pdf') {
+                return res.status(400).json({ message: `O arquivo do instrumento "${instrumentName}" deve ser um PDF.` });
+            }
+
+            const partFileName = `partitura__instrumento__${slugifyInstrumentName(instrumentName)}__${Date.now()}-${i}-${safePdfName(partFile.originalname)}`;
+            const partUrl = await storageAdapter.uploadBuffer(partFileName, partFile.buffer, partFile.mimetype);
+            parts.push({ id: meta.id || `${Date.now()}-${i}`, instrumentName, fileName: partFileName, url: partUrl });
+        }
+
+        const docRef = await partiturasCollection.add({
+            name,
+            fullScoreFileName,
+            fullScoreUrl,
+            parts,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user?.userId || req.user?.email || 'admin'
+        });
+
+        res.status(200).json({ status: 200, id: docRef.id, message: 'Partitura criada com sucesso.' });
+    } catch (error) {
+        console.error('admin/partituras/create:', error);
+        res.status(500).json({ message: 'Erro ao criar partitura.' });
+    }
+});
+
+// Atualização de uma partitura existente. A partitura completa e cada instrumento só são
+// re-enviados para o storage se um novo arquivo tiver sido selecionado; caso contrário,
+// o front-end manda 'existingUrl'/'existingFileName' em partsMeta e mantemos o que já existe.
+app.put('/api/admin/partituras/:id', authenticateJWT, upload.any(), async (req, res) => {
+    try {
+        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+
+        const ref = partiturasCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Partitura não encontrada.' });
+        const existing = snap.data();
+
+        const name = String(req.body?.name || '').trim();
+        if (!name) return res.status(400).json({ message: 'Informe o nome da partitura.' });
+
+        let partsMeta = [];
+        try {
+            partsMeta = JSON.parse(req.body?.partsMeta || '[]');
+            if (!Array.isArray(partsMeta)) partsMeta = [];
+        } catch {
+            return res.status(400).json({ message: 'Formato inválido para as partes por instrumento.' });
+        }
+
+        const filesByField = {};
+        (req.files || []).forEach(f => { filesByField[f.fieldname] = f; });
+
+        let fullScoreFileName = existing.fullScoreFileName || '';
+        let fullScoreUrl = existing.fullScoreUrl || '';
+        const newFullScoreFile = filesByField['fullScoreFile'];
+        if (newFullScoreFile) {
+            if (newFullScoreFile.mimetype !== 'application/pdf') {
+                return res.status(400).json({ message: 'A partitura completa deve ser um arquivo PDF.' });
+            }
+            fullScoreFileName = `partitura__completa__${Date.now()}-${safePdfName(newFullScoreFile.originalname)}`;
+            fullScoreUrl = await storageAdapter.uploadBuffer(fullScoreFileName, newFullScoreFile.buffer, newFullScoreFile.mimetype);
+        }
+        if (!fullScoreUrl) {
+            return res.status(400).json({ message: 'Selecione o arquivo PDF da partitura completa.' });
+        }
+
+        const parts = [];
+        for (let i = 0; i < partsMeta.length; i++) {
+            const meta = partsMeta[i] || {};
+            const instrumentName = String(meta.instrumentName || '').trim();
+            if (!instrumentName) continue;
+
+            const newPartFile = filesByField[`partFile_${meta.id}`];
+            if (newPartFile) {
+                if (newPartFile.mimetype !== 'application/pdf') {
+                    return res.status(400).json({ message: `O arquivo do instrumento "${instrumentName}" deve ser um PDF.` });
+                }
+                const partFileName = `partitura__instrumento__${slugifyInstrumentName(instrumentName)}__${Date.now()}-${i}-${safePdfName(newPartFile.originalname)}`;
+                const partUrl = await storageAdapter.uploadBuffer(partFileName, newPartFile.buffer, newPartFile.mimetype);
+                parts.push({ id: meta.id || `${Date.now()}-${i}`, instrumentName, fileName: partFileName, url: partUrl });
+            } else if (meta.existingUrl) {
+                parts.push({
+                    id: meta.id || `${Date.now()}-${i}`,
+                    instrumentName,
+                    fileName: meta.existingFileName || '',
+                    url: meta.existingUrl
+                });
+            } else {
+                return res.status(400).json({ message: `Selecione o arquivo PDF para o instrumento "${instrumentName}".` });
+            }
+        }
+
+        await ref.update({
+            name,
+            fullScoreFileName,
+            fullScoreUrl,
+            parts,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        res.status(200).json({ status: 200, message: 'Partitura atualizada com sucesso.' });
+    } catch (error) {
+        console.error('admin/partituras/update:', error);
+        res.status(500).json({ message: 'Erro ao atualizar partitura.' });
+    }
+});
+
+// Exclusão de uma partitura (best-effort: também tenta apagar os PDFs do armazenamento,
+// mas não bloqueia a exclusão do registro caso a limpeza de algum arquivo falhe)
+app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
+    try {
+        const ref = partiturasCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Partitura não encontrada.' });
+        const data = snap.data();
+
+        const filesToDelete = [
+            data.fullScoreFileName,
+            ...(Array.isArray(data.parts) ? data.parts.map(p => p.fileName) : [])
+        ].filter(Boolean);
+
+        await Promise.all(filesToDelete.map(async (fileName) => {
+            try {
+                await storageAdapter.deleteObject(fileName);
+            } catch (e) {
+                console.error('admin/partituras/delete storage:', fileName, e.message);
+            }
+        }));
+
+        await ref.delete();
+        res.status(200).json({ status: 200, message: 'Partitura excluída com sucesso.' });
+    } catch (error) {
+        console.error('admin/partituras/delete:', error);
+        res.status(500).json({ message: 'Erro ao excluir partitura.' });
     }
 });
 
@@ -846,25 +1041,22 @@ app.post('/', limiter, async (req, res) => {
     }
 });
 
-// Rota para excluir um membro cadastrado (index.js)
 app.delete('/api/admin/delete-member/:id', authenticateJWT, async (req, res) => {
     try {
-        const memberId = req.params.id; //
-        await membersCollection.doc(memberId).delete(); //
-        res.status(200).json({ status: 200, message: 'Membro excluído com sucesso.' }); //
+        const memberId = req.params.id;
+        await membersCollection.doc(memberId).delete();
+        res.status(200).json({ status: 200, message: 'Membro excluído com sucesso.' });
     } catch (error) {
         console.error('Erro ao excluir membro:', error);
-        res.status(500).json({ message: 'Erro interno ao excluir membro.' }); //
+        res.status(500).json({ message: 'Erro interno ao excluir membro.' });
     }
 });
 
-// Rota para editar dados de um membro (Protegida)
 app.put('/api/admin/update-member/:id', authenticateJWT, async (req, res) => {
     try {
         const memberId = req.params.id;
         const updatedData = req.body;
 
-        // Impedir a alteração de campos sensíveis ou automáticos, se desejar
         delete updatedData.id;
         delete updatedData.submittedAt;
 
@@ -879,7 +1071,6 @@ app.put('/api/admin/update-member/:id', authenticateJWT, async (req, res) => {
 
 // --- 10. Rotas da Área Financeira ---
 
-// Middleware para verificar acesso financeiro (role 'financeiro', 'admin-financeiro' ou 'financeiro-view')
 function requireFinanceAccess(req, res, next) {
     if (req.user.role !== 'financeiro' && req.user.role !== 'admin-financeiro' && req.user.role !== 'financeiro-view') {
         return res.status(403).json({ status: 403, message: 'Acesso negado. Área restrita ao financeiro.' });
@@ -887,7 +1078,6 @@ function requireFinanceAccess(req, res, next) {
     next();
 }
 
-// Middleware para verificar permissão de escrita (apenas 'admin-financeiro' pode criar/editar/excluir)
 function requireFinanceWriteAccess(req, res, next) {
     if (req.user.role !== 'admin-financeiro') {
         return res.status(403).json({ status: 403, message: 'Acesso negado. Apenas administradores financeiros podem realizar esta operação.' });
@@ -895,18 +1085,12 @@ function requireFinanceWriteAccess(req, res, next) {
     next();
 }
 
-// Coleções do Firestore para área financeira (inicializadas em initFirebaseAndGCS)
-
-// --- Contribuições Mensais (CRUD) ---
-
-// Listar todas as contribuições
 app.get('/api/finance/contributions', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
         const snapshot = await contributionsCollection.orderBy('month', 'desc').get();
         const data = [];
         snapshot.forEach(doc => {
             const contribution = { id: doc.id, ...doc.data() };
-            // Garantir que month e year sejam números
             if (contribution.month) contribution.month = parseInt(contribution.month);
             if (contribution.year) contribution.year = parseInt(contribution.year);
             data.push(contribution);
@@ -918,11 +1102,10 @@ app.get('/api/finance/contributions', authenticateJWT, requireFinanceAccess, asy
     }
 });
 
-// Criar nova contribuição
 app.post('/api/finance/contributions', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { memberId, memberName, month, year, amount, status } = req.body;
-        
+
         if (!memberId || !month || !year || !amount) {
             return res.status(400).json({ message: 'Campos obrigatórios: memberId, month, year, amount.' });
         }
@@ -946,16 +1129,15 @@ app.post('/api/finance/contributions', authenticateJWT, requireFinanceWriteAcces
     }
 });
 
-// Atualizar contribuição
 app.put('/api/finance/contributions/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        
+
         delete updateData.id;
         delete updateData.createdAt;
         delete updateData.createdBy;
-        
+
         updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
         updateData.updatedBy = req.user.userId;
 
@@ -967,7 +1149,6 @@ app.put('/api/finance/contributions/:id', authenticateJWT, requireFinanceWriteAc
     }
 });
 
-// Excluir contribuição
 app.delete('/api/finance/contributions/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         await contributionsCollection.doc(req.params.id).delete();
@@ -978,16 +1159,12 @@ app.delete('/api/finance/contributions/:id', authenticateJWT, requireFinanceWrit
     }
 });
 
-// --- Depósitos com Comprovantes (CRUD) ---
-
-// Listar todos os depósitos
 app.get('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
         const snapshot = await depositsCollection.orderBy('depositDate', 'desc').get();
         const data = [];
         snapshot.forEach(doc => {
             const deposit = { id: doc.id, ...doc.data() };
-            // Converter Timestamp para ISO string se necessário
             if (deposit.depositDate && deposit.depositDate.toDate) {
                 deposit.depositDate = deposit.depositDate.toDate().toISOString();
             }
@@ -1003,11 +1180,10 @@ app.get('/api/finance/deposits', authenticateJWT, requireFinanceAccess, async (r
     }
 });
 
-// Criar novo depósito
 app.post('/api/finance/deposits', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { memberId, memberName, amount, depositDate, description, receiptUrl } = req.body;
-        
+
         if (!memberId || !amount || !depositDate) {
             return res.status(400).json({ message: 'Campos obrigatórios: memberId, amount, depositDate.' });
         }
@@ -1031,7 +1207,6 @@ app.post('/api/finance/deposits', authenticateJWT, requireFinanceWriteAccess, as
     }
 });
 
-// Upload de comprovante de depósito
 app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceWriteAccess, upload.single('receipt'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
 
@@ -1046,20 +1221,19 @@ app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceWriteAc
     }
 });
 
-// Atualizar depósito
 app.put('/api/finance/deposits/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        
+
         delete updateData.id;
         delete updateData.createdAt;
         delete updateData.createdBy;
-        
+
         if (updateData.depositDate) {
             updateData.depositDate = admin.firestore.Timestamp.fromDate(new Date(updateData.depositDate));
         }
-        
+
         updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
         updateData.updatedBy = req.user.userId;
 
@@ -1071,7 +1245,6 @@ app.put('/api/finance/deposits/:id', authenticateJWT, requireFinanceWriteAccess,
     }
 });
 
-// Excluir depósito
 app.delete('/api/finance/deposits/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         await depositsCollection.doc(req.params.id).delete();
@@ -1082,9 +1255,6 @@ app.delete('/api/finance/deposits/:id', authenticateJWT, requireFinanceWriteAcce
     }
 });
 
-// --- Gastos da RJB (CRUD) ---
-
-// Listar todos os gastos
 app.get('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
         const snapshot = await expensesCollection.orderBy('expenseDate', 'desc').get();
@@ -1106,11 +1276,10 @@ app.get('/api/finance/expenses', authenticateJWT, requireFinanceAccess, async (r
     }
 });
 
-// Criar novo gasto
 app.post('/api/finance/expenses', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { description, amount, expenseDate, category } = req.body;
-        
+
         if (!description || !amount || !expenseDate) {
             return res.status(400).json({ message: 'Campos obrigatórios: description, amount, expenseDate.' });
         }
@@ -1132,20 +1301,19 @@ app.post('/api/finance/expenses', authenticateJWT, requireFinanceWriteAccess, as
     }
 });
 
-// Atualizar gasto
 app.put('/api/finance/expenses/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        
+
         delete updateData.id;
         delete updateData.createdAt;
         delete updateData.createdBy;
-        
+
         if (updateData.expenseDate) {
             updateData.expenseDate = admin.firestore.Timestamp.fromDate(new Date(updateData.expenseDate));
         }
-        
+
         updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
         updateData.updatedBy = req.user.userId;
 
@@ -1157,7 +1325,6 @@ app.put('/api/finance/expenses/:id', authenticateJWT, requireFinanceWriteAccess,
     }
 });
 
-// Excluir gasto
 app.delete('/api/finance/expenses/:id', authenticateJWT, requireFinanceWriteAccess, async (req, res) => {
     try {
         await expensesCollection.doc(req.params.id).delete();
@@ -1168,19 +1335,14 @@ app.delete('/api/finance/expenses/:id', authenticateJWT, requireFinanceWriteAcce
     }
 });
 
-// --- Relatórios Financeiros ---
-
-// Relatório de pagamentos e pendências
 app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
         const { year, month } = req.query;
-        
-        // Buscar todos os membros
+
         const membersSnapshot = await membersCollection.get();
         const members = [];
         membersSnapshot.forEach(doc => members.push({ id: doc.id, ...doc.data() }));
 
-        // Buscar contribuições
         let contributionsQuery = contributionsCollection;
         if (year) {
             contributionsQuery = contributionsQuery.where('year', '==', parseInt(year));
@@ -1188,12 +1350,11 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
         if (month) {
             contributionsQuery = contributionsQuery.where('month', '==', parseInt(month));
         }
-        
+
         const contributionsSnapshot = await contributionsQuery.get();
         const contributions = [];
         contributionsSnapshot.forEach(doc => contributions.push({ id: doc.id, ...doc.data() }));
 
-        // Buscar depósitos
         const depositsSnapshot = await depositsCollection.get();
         const deposits = [];
         depositsSnapshot.forEach(doc => {
@@ -1204,19 +1365,14 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
             deposits.push(deposit);
         });
 
-        // Constante: Valor mensal obrigatório de contribuição
         const MONTHLY_CONTRIBUTION_AMOUNT = 20.00;
-        // Valor total anual obrigatório para 2026
-        const ANNUAL_AMOUNT_2026 = 240.00; // 12 meses × R$ 20,00
-        // Ano base para cálculo de pendências (zerar pendências anteriores)
+        const ANNUAL_AMOUNT_2026 = 240.00;
         const BASE_YEAR = 2026;
-        
-        // Processar dados
+
         const report = members.map(member => {
             const memberContributions = contributions.filter(c => c.memberId === member.id);
             const memberDeposits = deposits.filter(d => d.memberId === member.id);
-            
-            // Data de cadastro do membro
+
             let memberStartDate = new Date();
             if (member.submittedAt) {
                 if (member.submittedAt.toDate && typeof member.submittedAt.toDate === 'function') {
@@ -1227,8 +1383,7 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                     memberStartDate = new Date(member.submittedAt);
                 }
             }
-            
-            // Último mês pago
+
             const paidMonths = memberContributions
                 .filter(c => c.status === 'paid')
                 .map(c => ({ month: c.month, year: c.year }))
@@ -1236,14 +1391,11 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                     if (a.year !== b.year) return b.year - a.year;
                     return b.month - a.month;
                 });
-            
+
             const lastPaidMonth = paidMonths.length > 0 ? paidMonths[0] : null;
-            
-            // Total pago (todos os depósitos, para histórico)
+
             const totalPaid = memberDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
-            
-            // Total pago apenas de 2026 em diante (para cálculo de pendência de 2026)
-            // Considera depósitos de 2026 em diante
+
             const totalPaid2026FromDeposits = memberDeposits
                 .filter(d => {
                     if (!d.depositDate) return false;
@@ -1260,8 +1412,7 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                     return depositDate.getFullYear() >= BASE_YEAR;
                 })
                 .reduce((sum, d) => sum + (d.amount || 0), 0);
-            
-            // Considera também contribuições marcadas como "paid" de 2026 em diante
+
             const totalPaid2026FromContributions = memberContributions
                 .filter(c => {
                     if (c.status !== 'paid') return false;
@@ -1269,12 +1420,9 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                     return year >= BASE_YEAR;
                 })
                 .reduce((sum, c) => sum + (c.amount || 0), 0);
-            
-            // Total pago de 2026 em diante (soma de depósitos e contribuições)
+
             const totalPaid2026 = totalPaid2026FromDeposits + totalPaid2026FromContributions;
-            
-            // Criar conjunto de meses pagos (formato "YYYY-MM")
-            // Garantir que month e year sejam números para comparação correta
+
             const paidMonthsSet = new Set();
             memberContributions
                 .filter(c => c.status === 'paid')
@@ -1283,48 +1431,38 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
                     const month = parseInt(c.month);
                     paidMonthsSet.add(`${year}-${month}`);
                 });
-            
-            // Calcular meses pendentes (apenas a partir de 2026)
+
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth() + 1;
-            
+
             let pendingMonths = [];
-            
-            // Zerar pendências anteriores a 2026 - considerar apenas 2026 em diante
-            // Todos os membros começam com a mesma base em 2026
+
             if (currentYear >= BASE_YEAR) {
-                // Calcular meses pendentes apenas de 2026 em diante
                 const startYear = BASE_YEAR;
                 const endYear = currentYear;
-                
+
                 for (let y = startYear; y <= endYear; y++) {
-                    const startM = 1; // Sempre começa em janeiro
+                    const startM = 1;
                     const endM = (y === currentYear) ? currentMonth : 12;
-                    
+
                     for (let m = startM; m <= endM; m++) {
-                        // Garantir comparação correta convertendo para string no mesmo formato
                         if (!paidMonthsSet.has(`${y}-${m}`)) {
                             pendingMonths.push({ month: m, year: y });
                         }
                     }
                 }
             }
-            
-            // Calcular valor pendente baseado no valor anual de 2026 (R$ 240,00)
-            // Valor Pendente = R$ 240,00 - Total Pago (apenas de 2026 em diante)
-            // Se Total Pago 2026 >= R$ 240,00, então Valor Pendente = 0
+
             let totalPending = ANNUAL_AMOUNT_2026 - totalPaid2026;
             if (totalPending < 0) {
-                totalPending = 0; // Não pode ser negativo
+                totalPending = 0;
             }
-            
-            // Se não há pagamentos de 2026, o valor pendente deve ser R$ 240,00
+
             if (totalPaid2026 === 0) {
                 totalPending = ANNUAL_AMOUNT_2026;
             }
-            
-            // Contribuições pendentes registradas manualmente (para referência)
+
             const pendingContributions = memberContributions.filter(c => c.status === 'pending');
 
             return {
@@ -1340,7 +1478,6 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
             };
         });
 
-        // Ordenar por nome alfabeticamente
         report.sort((a, b) => {
             const nameA = (a.memberName || '').toLowerCase().trim();
             const nameB = (b.memberName || '').toLowerCase().trim();
@@ -1354,14 +1491,13 @@ app.get('/api/finance/reports/payments', authenticateJWT, requireFinanceAccess, 
     }
 });
 
-// Histórico individual de pagamentos
 app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinanceAccess, async (req, res) => {
     try {
         const { memberId } = req.params;
-        
+
         const contributionsSnapshot = await contributionsCollection.where('memberId', '==', memberId).orderBy('year', 'desc').orderBy('month', 'desc').get();
         const depositsSnapshot = await depositsCollection.where('memberId', '==', memberId).orderBy('depositDate', 'desc').get();
-        
+
         const contributions = [];
         contributionsSnapshot.forEach(doc => {
             const contrib = { id: doc.id, ...doc.data() };
@@ -1370,7 +1506,7 @@ app.get('/api/finance/reports/member/:memberId', authenticateJWT, requireFinance
             }
             contributions.push(contrib);
         });
-        
+
         const deposits = [];
         depositsSnapshot.forEach(doc => {
             const deposit = { id: doc.id, ...doc.data() };
