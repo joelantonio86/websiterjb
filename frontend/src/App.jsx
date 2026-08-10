@@ -27,6 +27,7 @@ import AdminInvites from './pages/admin/AdminInvites'
 import AdminMembers from './pages/admin/AdminMembers'
 import AdminMedia from './pages/admin/AdminMedia'
 import AdminRepertorios from './pages/admin/AdminRepertorios'
+import AdminPartituras from './pages/admin/AdminPartituras'
 function App() {
   return (
     <ErrorBoundary>
@@ -65,6 +66,7 @@ function App() {
                   <Route path="membros" element={<AdminMembers />} />
                   <Route path="midia" element={<AdminMedia />} />
                   <Route path="repertorios" element={<AdminRepertorios />} />
+                  <Route path="partituras" element={<AdminPartituras />} />
                 </Route>
                 <Route 
                   path="/financeiro" 

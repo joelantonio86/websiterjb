@@ -16,6 +16,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    // FormData precisa do boundary gerado pelo browser — não forçar application/json
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      if (config.headers && typeof config.headers.delete === 'function') {
+        config.headers.delete('Content-Type')
+      } else if (config.headers) {
+        delete config.headers['Content-Type']
+      }
+    }
     return config
   },
   (error) => {

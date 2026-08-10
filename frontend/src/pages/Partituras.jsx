@@ -2,11 +2,11 @@ import { useState, useEffect, Fragment } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
-import { racionais, diversas, R2_BASE_URL } from '../data/songs'
 import { INSTRUMENTOS_NAIPE, buildConsolidadoNaipeUrl } from '../data/instrumentosNaipe'
 import { REPERTORIO_MAIO_SHEET_IDS } from '../data/repertorioApresentacoes2026'
 import { API_BASE } from '../services/api'
 import api from '../services/api'
+import usePartiturasCatalog from '../hooks/usePartiturasCatalog'
 import { showToast } from '../components/Toast'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
@@ -78,13 +78,13 @@ function DownloadFailedModal({ totalOk, failed, onClose }) {
 
 const Partituras = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { racionais, diversas, r2BaseUrl: R2_BASE_URL, isLoading: catalogLoading } = usePartiturasCatalog()
   const [searchTerm, setSearchTerm] = useState('')
   const [racionaisOpen, setRacionaisOpen] = useState(false)
   const [diversasOpen, setDiversasOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [focusedField, setFocusedField] = useState(false)
   const [viewMode, setViewMode] = useState('list') // 'list' or 'grid'
-  const [isLoading, setIsLoading] = useState(true)
   const [downloading, setDownloading] = useState(null)
   const [selectedSheets, setSelectedSheets] = useState(new Set())
   const [showOnlySelectedSheets, setShowOnlySelectedSheets] = useState(false)
@@ -99,13 +99,14 @@ const Partituras = () => {
   const [repertorios, setRepertorios] = useState([])
   const [selectedRepertorioId, setSelectedRepertorioId] = useState('')
 
+  const isLoading = catalogLoading
+
   useEffect(() => {
     setIsVisible(true)
-    // Simular loading inicial
-    setTimeout(() => setIsLoading(false), 500)
   }, [])
 
   useEffect(() => {
+    if (catalogLoading) return
     if (searchParams.get('repertorio') === 'maio') {
       const ids = new Set(REPERTORIO_MAIO_SHEET_IDS.filter(id => {
         const dashIdx = id.indexOf('-')
@@ -119,7 +120,7 @@ const Partituras = () => {
       setDiversasOpen(true)
       setSearchParams({}, { replace: true })
     }
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, racionais, diversas, catalogLoading])
 
   useEffect(() => {
     // Resetar estado de download após 2 segundos
