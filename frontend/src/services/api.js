@@ -1,6 +1,15 @@
 import axios from 'axios'
 
-export const API_BASE = import.meta.env.VITE_API_BASE || 'https://rjb-email-sender-215755766100.europe-west1.run.app'
+// Em desenvolvimento, default = backend local. Em build de produção, usa VITE_API_BASE ou Cloud Run.
+export const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  (import.meta.env.DEV
+    ? 'http://127.0.0.1:8080'
+    : 'https://rjb-email-sender-215755766100.europe-west1.run.app')
+
+if (import.meta.env.DEV) {
+  console.info('[RJB] API_BASE =', API_BASE)
+}
 
 const api = axios.create({
   baseURL: API_BASE,
