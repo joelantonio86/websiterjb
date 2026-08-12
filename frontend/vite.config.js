@@ -20,10 +20,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      // Em localhost, se VITE_API_BASE estiver vazio, o proxy manda /api para o backend local.
+      // Com VITE_API_BASE=http://127.0.0.1:8080 o axios fala direto com o backend (CORS já permite).
       '/api': {
-        target: 'https://rjb-email-sender-215755766100.europe-west1.run.app',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8080',
         changeOrigin: true,
-        secure: true
+        secure: false
       }
     }
   },
