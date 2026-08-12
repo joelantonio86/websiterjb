@@ -177,7 +177,7 @@ app.post('/api/admin/generate-key', authenticateJWT, async (req, res) => {
     }
 });
 
-app.post('/api/admin/login', limiter, (req, res) => {
+app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { email, password } = req.body;
     const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
     if (!user) return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
@@ -914,8 +914,10 @@ app.get('/api/public/partituras', async (req, res) => {
         if (!partiturasCollection) {
             return res.status(503).json({ message: 'Serviço temporariamente indisponível.' });
         }
-        const snapshot = await partiturasCollection.orderBy('title', 'asc').get();
-        const items = snapshot.docs.map(serializePartitura);
+        const snapshot = await partiturasCollection.get();
+        const items = snapshot.docs.map(serializePartitura).sort((a, b) =>
+            String(a.title || '').localeCompare(String(b.title || ''), 'pt')
+        );
         const racionais = items.filter((p) => p.folder === 'racionais');
         const diversas = items.filter((p) => p.folder === 'diversas');
         res.status(200).json({
@@ -932,8 +934,11 @@ app.get('/api/public/partituras', async (req, res) => {
 
 app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
     try {
-        const snapshot = await partiturasCollection.orderBy('title', 'asc').get();
-        res.status(200).json(snapshot.docs.map(serializePartitura));
+        const snapshot = await partiturasCollection.get();
+        const data = snapshot.docs.map(serializePartitura).sort((a, b) =>
+            String(a.title || '').localeCompare(String(b.title || ''), 'pt')
+        );
+        res.status(200).json(data);
     } catch (error) {
         console.error('admin/partituras/list:', error);
         res.status(500).json({ message: 'Erro ao listar partituras.' });
