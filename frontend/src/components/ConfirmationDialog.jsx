@@ -8,7 +8,8 @@ const ConfirmationDialog = ({
   message, 
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
-  variant = 'danger' 
+  variant = 'danger',
+  confirmDisabled = false,
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -97,10 +98,12 @@ const ConfirmationDialog = ({
           </button>
           <button
             onClick={() => {
+              if (confirmDisabled) return
               onConfirm()
               onClose()
             }}
-            className={`flex-1 px-4 py-3 ${style.confirmBg} text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl touch-manipulation`}
+            disabled={confirmDisabled}
+            className={`flex-1 px-4 py-3 ${style.confirmBg} text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`}
           >
             {confirmLabel}
           </button>

@@ -10,11 +10,11 @@ const slugify = (value) =>
     .replace(/_+/g, '_')
     .replace(/^_|_$/g, '')
 
-const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
+const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, onSuccess }) => {
   const isEdit = Boolean(partitura)
 
   const [title, setTitle] = useState('')
-  const [folder, setFolder] = useState('diversas')
+  const [folder, setFolder] = useState(defaultFolder)
   const [mp3, setMp3] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
   const [time, setTime] = useState('3:00')
@@ -26,12 +26,14 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
   useEffect(() => {
     if (partitura) {
       setTitle(partitura.title || partitura.name || '')
-      setFolder(partitura.folder || 'diversas')
+      setFolder(partitura.folder || defaultFolder)
       setMp3(partitura.mp3 || '')
       setSlugTouched(true)
       setTime(partitura.time || '3:00')
+    } else {
+      setFolder(defaultFolder)
     }
-  }, [partitura])
+  }, [partitura, defaultFolder])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -43,6 +45,10 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [onClose])
+
+  const safeSlug = slugify(mp3)
+  const pathPreviewPdf = safeSlug ? `${folder}/pdf/${safeSlug}.pdf` : `${folder}/pdf/….pdf`
+  const pathPreviewSib = safeSlug ? `${folder}/sib/${safeSlug}.sib` : `${folder}/sib/….sib`
 
   const handleTitleChange = (value) => {
     setTitle(value)
@@ -57,7 +63,7 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
     if (!folder || !['racionais', 'diversas'].includes(folder)) {
       newErrors.folder = 'Selecione a pasta.'
     }
-    if (!slugify(mp3)) newErrors.mp3 = 'Informe um slug válido (letras, números, _ ou -).'
+    if (!safeSlug) newErrors.mp3 = 'Informe um nome de ficheiro válido (letras, números, _ ou -).'
     if (!isEdit && !pdfFile) newErrors.pdfFile = 'Selecione o arquivo PDF.'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -70,21 +76,24 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
     const formData = new FormData()
     formData.append('title', title.trim())
     formData.append('folder', folder)
-    formData.append('mp3', slugify(mp3))
+    formData.append('mp3', safeSlug)
     formData.append('time', time.trim() || '3:00')
     if (pdfFile) formData.append('pdfFile', pdfFile)
     if (sibFile) formData.append('sibFile', sibFile)
 
     setSubmitting(true)
     try {
+      let savedId = partitura?.id || `${folder}__${safeSlug}`
       if (isEdit) {
-        await api.put(`/api/admin/partituras/${partitura.id}`, formData)
+        const { data } = await api.put(`/api/admin/partituras/${partitura.id}`, formData)
+        savedId = data?.id || savedId
         showMessage('Partitura atualizada com sucesso!')
       } else {
-        await api.post('/api/admin/partituras', formData)
+        const { data } = await api.post('/api/admin/partituras', formData)
+        savedId = data?.id || savedId
         showMessage('Partitura criada com sucesso!')
       }
-      onSuccess()
+      onSuccess(savedId)
     } catch (error) {
       showMessage(error.response?.data?.message || 'Erro ao salvar partitura.', true)
     } finally {
@@ -112,11 +121,10 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
 
         <div className="p-6 sm:p-8">
           <h3 className="text-xl sm:text-2xl font-bold text-rjb-yellow mb-1">
-            {isEdit ? 'Editar partitura' : 'Nova partitura'}
+            {isEdit ? 'Editar partitura' : folder === 'racionais' ? 'Nova partitura racional' : 'Nova partitura (diversas)'}
           </h3>
           <p className="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 mb-6">
-            Os ficheiros vão para o Cloudflare R2 em{' '}
-            <code className="text-xs">{`{folder}/pdf|sib/{'{slug}'}`}</code>, como a página pública já consome.
+            Os ficheiros vão para o Cloudflare R2, no mesmo formato da página pública.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,7 +148,7 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label htmlFor="partitura-folder" className="block text-sm font-medium mb-1 opacity-70">
-                  Pasta <span className="text-red-500">*</span>
+                  Pasta no Cloudflare <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="partitura-folder"
@@ -172,7 +180,7 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
 
             <div>
               <label htmlFor="partitura-mp3" className="block text-sm font-medium mb-1 opacity-70">
-                Slug do ficheiro <span className="text-red-500">*</span>
+                Nome do ficheiro <span className="text-red-500">*</span>
               </label>
               <input
                 id="partitura-mp3"
@@ -187,9 +195,10 @@ const PartituraFormModal = ({ partitura, onClose, onSuccess }) => {
                   errors.mp3 ? 'border-red-500' : 'border-rjb-yellow/20'
                 }`}
               />
-              <p className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mt-1">
-                Usado nos paths <code>pdf/{'{slug}'}.pdf</code> e <code>sib/{'{slug}'}.sib</code>.
-              </p>
+              <div className="mt-2 rounded-lg bg-rjb-bg-light/80 dark:bg-rjb-bg-dark/50 border border-rjb-yellow/15 p-2.5 text-[11px] font-mono text-rjb-text/70 dark:text-rjb-text-dark/70 space-y-0.5">
+                <div>{pathPreviewPdf}</div>
+                <div>{pathPreviewSib}</div>
+              </div>
               {errors.mp3 && <p className="text-xs text-red-500 mt-1">{errors.mp3}</p>}
             </div>
 
