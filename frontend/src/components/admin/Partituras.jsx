@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import api from '../../services/api'
 import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
@@ -8,7 +8,10 @@ import SkeletonLoader from '../SkeletonLoader'
 import PartituraFormModal from './PartituraFormModal'
 import { racionais as staticRacionais, diversas as staticDiversas } from '../../data/songs'
 
-const folderLabel = (folder) => (folder === 'racionais' ? 'Racionais' : 'Outros clássicos')
+const SECTIONS = [
+  { folder: 'racionais', title: 'Músicas Racionais', accent: 'border-rjb-yellow' },
+  { folder: 'diversas', title: 'Outros clássicos', accent: 'border-blue-500' },
+]
 
 const Partituras = () => {
   const [partituras, setPartituras] = useState([])
@@ -17,6 +20,7 @@ const Partituras = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingPartitura, setEditingPartitura] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleteFilesToo, setDeleteFilesToo] = useState(false)
   const [importing, setImporting] = useState(false)
 
   const fetchPartituras = useCallback(async () => {
@@ -36,6 +40,17 @@ const Partituras = () => {
   useEffect(() => {
     fetchPartituras()
   }, [fetchPartituras])
+
+  const grouped = useMemo(() => {
+    const byFolder = { racionais: [], diversas: [] }
+    for (const p of partituras) {
+      const folder = p.folder === 'racionais' ? 'racionais' : 'diversas'
+      byFolder[folder].push(p)
+    }
+    byFolder.racionais.sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt'))
+    byFolder.diversas.sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt'))
+    return byFolder
+  }, [partituras])
 
   const openCreateModal = () => {
     setEditingPartitura(null)
@@ -57,18 +72,25 @@ const Partituras = () => {
     fetchPartituras()
   }
 
+  const openDelete = (partitura) => {
+    setDeleteFilesToo(false)
+    setDeleteTarget(partitura)
+  }
+
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
-    showLoader(true, 'Excluindo partitura...')
+    showLoader(true, deleteFilesToo ? 'Excluindo partitura e ficheiros no R2...' : 'Removendo do catálogo...')
     try {
-      await api.delete(`/api/admin/partituras/${deleteTarget.id}`)
-      showMessage('Partitura excluída com sucesso!')
+      const qs = deleteFilesToo ? '?deleteFiles=true' : ''
+      const { data } = await api.delete(`/api/admin/partituras/${deleteTarget.id}${qs}`)
+      showMessage(data.message || 'Partitura excluída com sucesso!')
       fetchPartituras()
     } catch (error) {
       showMessage(error.response?.data?.message || 'Erro ao excluir partitura.', true)
     } finally {
       showLoader(false)
       setDeleteTarget(null)
+      setDeleteFilesToo(false)
     }
   }
 
@@ -91,11 +113,63 @@ const Partituras = () => {
     }
   }
 
+  const renderCard = (partitura) => (
+    <div
+      key={partitura.id}
+      className="rounded-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-l-4 border-rjb-yellow shadow-lg hover:shadow-xl transition-all duration-300 p-5 flex flex-col gap-3"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark break-words">
+            {partitura.title || partitura.name}
+          </h3>
+          <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1 truncate">
+            {partitura.mp3}
+            {partitura.time ? ` · ${partitura.time}` : ''}
+          </p>
+        </div>
+        <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow whitespace-nowrap">
+          {[partitura.hasPdf !== false && 'PDF', partitura.hasSib && 'SIB'].filter(Boolean).join(' + ') || '—'}
+        </span>
+      </div>
+
+      <div className="flex flex-wrap gap-2 text-xs">
+        {partitura.pdfUrl && (
+          <a href={partitura.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline">
+            Abrir PDF
+          </a>
+        )}
+        {partitura.sibUrl && (
+          <a href={partitura.sibUrl} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline">
+            Abrir SIB
+          </a>
+        )}
+      </div>
+
+      <div className="flex gap-2 pt-2 mt-auto border-t border-rjb-yellow/20">
+        <button
+          type="button"
+          onClick={() => openEditModal(partitura)}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-rjb-yellow/50 text-sm font-semibold text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 transition-colors"
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          onClick={() => openDelete(partitura)}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-red-500/40 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+        >
+          Excluir
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
-          {partituras.length} partitura{partituras.length !== 1 ? 's' : ''} cadastrada{partituras.length !== 1 ? 's' : ''}
+          {partituras.length} partitura{partituras.length !== 1 ? 's' : ''} · {grouped.racionais.length} racionais · {grouped.diversas.length} diversas
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           {partituras.length === 0 && (
@@ -140,68 +214,31 @@ const Partituras = () => {
           onAction={handleImportCatalog}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-          {partituras.map((partitura) => (
-            <div
-              key={partitura.id}
-              className="rounded-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-l-4 border-rjb-yellow shadow-lg hover:shadow-xl transition-all duration-300 p-5 flex flex-col gap-3"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark break-words">
-                    {partitura.title || partitura.name}
+        <div className="space-y-8">
+          {SECTIONS.map(({ folder, title, accent }) => {
+            const items = grouped[folder] || []
+            return (
+              <section key={folder} className="space-y-3">
+                <div className={`flex items-center justify-between gap-3 border-l-4 ${accent} pl-3`}>
+                  <h3 className="text-base sm:text-lg font-extrabold text-rjb-text dark:text-rjb-text-dark">
+                    {title}
                   </h3>
-                  <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1 truncate">
-                    {folderLabel(partitura.folder)} · {partitura.mp3}
-                    {partitura.time ? ` · ${partitura.time}` : ''}
-                  </p>
+                  <span className="text-xs font-semibold text-rjb-text/60 dark:text-rjb-text-dark/60">
+                    {items.length} item{items.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
-                <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow whitespace-nowrap">
-                  {[partitura.hasPdf !== false && 'PDF', partitura.hasSib && 'SIB'].filter(Boolean).join(' + ') || '—'}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2 text-xs">
-                {partitura.pdfUrl && (
-                  <a
-                    href={partitura.pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-rjb-yellow hover:underline"
-                  >
-                    Abrir PDF
-                  </a>
+                {items.length === 0 ? (
+                  <p className="text-sm text-rjb-text/50 dark:text-rjb-text-dark/50 pl-4">
+                    Nenhuma partitura nesta pasta.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                    {items.map(renderCard)}
+                  </div>
                 )}
-                {partitura.sibUrl && (
-                  <a
-                    href={partitura.sibUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-rjb-yellow hover:underline"
-                  >
-                    Abrir SIB
-                  </a>
-                )}
-              </div>
-
-              <div className="flex gap-2 pt-2 mt-auto border-t border-rjb-yellow/20">
-                <button
-                  type="button"
-                  onClick={() => openEditModal(partitura)}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-rjb-yellow/50 text-sm font-semibold text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 transition-colors"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(partitura)}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-red-500/40 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
-          ))}
+              </section>
+            )
+          })}
         </div>
       )}
 
@@ -215,11 +252,34 @@ const Partituras = () => {
 
       <ConfirmationDialog
         isOpen={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => {
+          setDeleteTarget(null)
+          setDeleteFilesToo(false)
+        }}
         onConfirm={handleDeleteConfirm}
         title="Excluir partitura"
-        message={`Tem certeza que deseja excluir "${deleteTarget?.title || deleteTarget?.name}"? Os ficheiros PDF/SIB no armazenamento também serão removidos.`}
-        confirmLabel="Excluir"
+        message={
+          <div className="space-y-3 text-left">
+            <p>
+              Remover <strong>&quot;{deleteTarget?.title || deleteTarget?.name}&quot;</strong> do catálogo?
+            </p>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={deleteFilesToo}
+                onChange={(e) => setDeleteFilesToo(e.target.checked)}
+              />
+              <span>
+                Apagar também os ficheiros <strong>PDF/SIB no Cloudflare</strong>.
+                <span className="block text-red-600 dark:text-red-400 mt-1">
+                  Atenção: isto remove do bucket de produção. No catálogo importado, normalmente NÃO marques.
+                </span>
+              </span>
+            </label>
+          </div>
+        }
+        confirmLabel={deleteFilesToo ? 'Excluir tudo' : 'Remover do catálogo'}
         cancelLabel="Cancelar"
         variant="danger"
       />

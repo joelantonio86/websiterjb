@@ -84,9 +84,9 @@ const ConfirmationDialog = ({
           {title || 'Confirmar ação'}
         </h3>
         
-        <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 mb-6 leading-relaxed">
+        <div className="text-rjb-text/70 dark:text-rjb-text-dark/70 mb-6 leading-relaxed">
           {message || 'Tem certeza que deseja realizar esta ação?'}
-        </p>
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <button

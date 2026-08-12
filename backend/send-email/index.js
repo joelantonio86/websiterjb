@@ -1176,13 +1176,16 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
         if (!snap.exists) return res.status(404).json({ message: 'Partitura não encontrada.' });
         const data = snap.data() || {};
 
-        const keys = [
-            data.pdfFileName,
-            data.sibFileName,
-            ...(Array.isArray(data.parts) ? data.parts.map((p) => p.fileName) : [])
-        ].filter(Boolean);
+        // Por omissão só remove metadados no Firestore.
+        // Para apagar PDF/SIB no R2: ?deleteFiles=true (cuidado com o acervo de produção).
+        const deleteFiles = String(req.query.deleteFiles || req.body?.deleteFiles || '').toLowerCase() === 'true';
 
-        if (storageAdapter.storageReady()) {
+        if (deleteFiles && storageAdapter.storageReady()) {
+            const keys = [
+                data.pdfFileName,
+                data.sibFileName,
+                ...(Array.isArray(data.parts) ? data.parts.map((p) => p.fileName) : [])
+            ].filter(Boolean);
             for (const key of keys) {
                 try {
                     await storageAdapter.deleteObject(key);
@@ -1193,7 +1196,13 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
         }
 
         await ref.delete();
-        res.status(200).json({ status: 200, message: 'Partitura excluída com sucesso.' });
+        res.status(200).json({
+            status: 200,
+            message: deleteFiles
+                ? 'Partitura e ficheiros no Cloudflare excluídos.'
+                : 'Partitura removida do catálogo (ficheiros no Cloudflare mantidos).',
+            deletedFiles: deleteFiles
+        });
     } catch (error) {
         console.error('admin/partituras/delete:', error);
         res.status(500).json({ message: 'Erro ao excluir partitura.' });
