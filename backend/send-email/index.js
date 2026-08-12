@@ -97,14 +97,18 @@ function initFirebaseAndGCS() {
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
-        console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
 
-        const wantR2 = String(process.env.STORAGE_PROVIDER || '').toLowerCase() === 'r2';
+        const storageProviderRaw = String(process.env.STORAGE_PROVIDER || '').trim();
+        const wantR2 = storageProviderRaw.toLowerCase() === 'r2';
+        console.log(`📦 STORAGE_PROVIDER=${storageProviderRaw ? JSON.stringify(storageProviderRaw) : '(não definido)'}`);
         const r2Ok = wantR2 && storageAdapter.initR2FromEnv();
         if (!r2Ok) {
             storageAdapter.initGCS({ bucket, bucketName: BUCKET_NAME });
+            console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
             if (wantR2) {
                 console.warn('⚠️ STORAGE_PROVIDER=r2 mas credenciais R2 incompletas; usando Google Cloud Storage para ficheiros.');
+            } else {
+                console.warn('⚠️ Para usar Cloudflare R2, defina STORAGE_PROVIDER=r2 e as variáveis R2_* no .env');
             }
             console.log('📦 Armazenamento de ficheiros: Google Cloud Storage');
         } else {

@@ -35,12 +35,19 @@ function initGCS (gcs) {
 }
 
 function initR2FromEnv () {
-    const accountId = process.env.R2_ACCOUNT_ID;
-    const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-    const bucket = process.env.R2_BUCKET_NAME;
+    const accountId = String(process.env.R2_ACCOUNT_ID || '').trim();
+    const accessKeyId = String(process.env.R2_ACCESS_KEY_ID || '').trim();
+    const secretAccessKey = String(process.env.R2_SECRET_ACCESS_KEY || '').trim();
+    const bucket = String(process.env.R2_BUCKET_NAME || '').trim();
     const publicBase = trimBase(process.env.R2_PUBLIC_BASE_URL);
-    if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicBase) {
+    const missing = [];
+    if (!accountId) missing.push('R2_ACCOUNT_ID');
+    if (!accessKeyId) missing.push('R2_ACCESS_KEY_ID');
+    if (!secretAccessKey) missing.push('R2_SECRET_ACCESS_KEY');
+    if (!bucket) missing.push('R2_BUCKET_NAME');
+    if (!publicBase) missing.push('R2_PUBLIC_BASE_URL');
+    if (missing.length) {
+        console.warn(`⚠️ R2 incompleto — faltam: ${missing.join(', ')}`);
         return false;
     }
     storageType = 'r2';
