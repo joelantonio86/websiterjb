@@ -76,6 +76,13 @@ const limiter = rateLimit({
     message: { status: 429, message: "Muitas requisições. Tente novamente após 15 minutos." }
 });
 
+// Login local: limite mais folgado (o limiter global de 20/15min bloqueava testes)
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { status: 429, message: "Muitas tentativas de login. Aguarde alguns minutos." }
+});
+
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
 let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, partiturasCollection, bucket, BUCKET_NAME;
 
