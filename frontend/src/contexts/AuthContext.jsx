@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../services/api'
+import api, { API_BASE } from '../services/api'
 
 const AuthContext = createContext()
 
@@ -50,10 +49,17 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: response.data.message }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Erro ao fazer login' 
+      const status = error.response?.status
+      const serverMsg = error.response?.data?.message
+      let message = serverMsg || 'Erro ao fazer login'
+      if (!error.response) {
+        message = `Não foi possível contactar a API (${API_BASE}). Confirma se o backend está em npm start.`
+      } else if (status === 429) {
+        message = serverMsg || 'Muitas tentativas. Aguarde e tente de novo.'
+      } else if (status === 401) {
+        message = serverMsg || 'E-mail ou senha incorretos.'
       }
+      return { success: false, message }
     }
   }
 

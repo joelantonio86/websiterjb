@@ -179,10 +179,15 @@ app.post('/api/admin/generate-key', authenticateJWT, async (req, res) => {
 
 app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { email, password } = req.body;
+    console.log(`🔐 Tentativa de login: ${email || '(sem email)'}`);
     const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
-    if (!user) return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
+    if (!user) {
+        console.warn(`🔐 Login falhou para: ${email || '(sem email)'}`);
+        return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
+    }
 
     const token = jwt.sign({ userId: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+    console.log(`🔐 Login OK: ${user.email} (${user.role})`);
     res.status(200).json({ status: 200, message: 'Login OK', token, role: user.role });
 });
 

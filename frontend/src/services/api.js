@@ -40,11 +40,14 @@ api.interceptors.request.use(
   }
 )
 
-// Interceptor para tratar erros de autenticaÃ§Ã£o
+// Interceptor para tratar erros de autenticação (não aplica ao próprio login)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    const status = error.response?.status
+    const url = String(error.config?.url || '')
+    const isLoginRequest = url.includes('/api/admin/login')
+    if (!isLoginRequest && (status === 401 || status === 403)) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/admin/login'
