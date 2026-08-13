@@ -105,21 +105,18 @@ function initFirebaseAndGCS() {
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
 
+        // Dual storage: GCS = mídia/anexos; R2 = partituras (não se substituem).
+        storageAdapter.initGCS({ bucket, bucketName: BUCKET_NAME });
+        console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
+
         const storageProviderRaw = String(process.env.STORAGE_PROVIDER || '').trim();
-        const wantR2 = storageProviderRaw.toLowerCase() === 'r2';
-        console.log(`📦 STORAGE_PROVIDER=${storageProviderRaw ? JSON.stringify(storageProviderRaw) : '(não definido)'}`);
-        const r2Ok = wantR2 && storageAdapter.initR2FromEnv();
-        if (!r2Ok) {
-            storageAdapter.initGCS({ bucket, bucketName: BUCKET_NAME });
-            console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
-            if (wantR2) {
-                console.warn('⚠️ STORAGE_PROVIDER=r2 mas credenciais R2 incompletas; usando Google Cloud Storage para ficheiros.');
-            } else {
-                console.warn('⚠️ Para usar Cloudflare R2, defina STORAGE_PROVIDER=r2 e as variáveis R2_* no .env');
-            }
-            console.log('📦 Armazenamento de ficheiros: Google Cloud Storage');
+        console.log(`📦 STORAGE_PROVIDER=${storageProviderRaw ? JSON.stringify(storageProviderRaw) : '(não definido — R2 activa-se se R2_* estiverem completas)'}`);
+        const r2Ok = storageAdapter.initR2FromEnv();
+        if (r2Ok) {
+            console.log('📦 Partituras: Cloudflare R2 | Mídia/anexos: Google Cloud Storage');
         } else {
-            console.log('📦 Armazenamento de ficheiros: Cloudflare R2');
+            console.warn('⚠️ R2 não activo — upload de partituras no admin ficará indisponível até configurar R2_*.');
+            console.log('📦 Mídia/anexos: Google Cloud Storage');
         }
     } catch (error) {
         console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
@@ -460,7 +457,7 @@ function extractYoutubeId(input) {
 
 app.get('/api/attachments/list', authenticateJWT, async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileList = await storageAdapter.listFiles();
         res.status(200).json(fileList);
     } catch (error) {
@@ -470,7 +467,7 @@ app.get('/api/attachments/list', authenticateJWT, async (req, res) => {
 
 app.get('/api/public/photos', async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const files = await storageAdapter.listFiles();
         const photos = files
             .filter((f) => String(f.name || '').toLowerCase().startsWith('foto__'))
@@ -497,7 +494,7 @@ app.post('/api/attachments/upload', authenticateJWT, upload.array('files', 20), 
     if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
         return res.status(400).json({ message: 'Selecione um período válido (dezembro de 2025 em diante).' });
     }
-    if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+    if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
 
     const uploaded = [];
     const errors = [];
@@ -533,7 +530,7 @@ app.post('/api/attachments/upload', authenticateJWT, upload.array('files', 20), 
 
 app.patch('/api/attachments/move', authenticateJWT, async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileName = safeAttachmentName(req.body?.fileName);
         const periodKey = String(req.body?.periodKey || '').trim();
         if (!fileName) return res.status(400).json({ message: 'Nome de arquivo inválido.' });
@@ -564,7 +561,7 @@ app.patch('/api/attachments/move', authenticateJWT, async (req, res) => {
 app.post('/api/attachments/replace', authenticateJWT, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const existingFileName = safeAttachmentName(req.body?.existingFileName);
         if (!existingFileName) return res.status(400).json({ message: 'Nome do arquivo inválido.' });
         const parsed = parseAttachmentName(existingFileName);
@@ -608,7 +605,7 @@ app.post('/api/attachments/replace', authenticateJWT, upload.single('file'), asy
 
 app.delete('/api/attachments/delete/:fileName', authenticateJWT, async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileName = safeAttachmentName(req.params.fileName);
         if (!fileName) return res.status(400).json({ message: 'Nome inválido.' });
         await storageAdapter.deleteObject(fileName);
@@ -1026,8 +1023,8 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
     { name: 'sibFile', maxCount: 1 }
 ]), async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) {
-            return res.status(503).json({ message: 'Armazenamento indisponível. Configure STORAGE_PROVIDER=r2 (ou GCS).' });
+        if (!storageAdapter.sheetsReady()) {
+            return res.status(503).json({ message: 'Cloudflare R2 indisponível. Configure as variáveis R2_* no Cloud Run.' });
         }
         const title = String(req.body?.title || req.body?.name || '').trim();
         const folder = String(req.body?.folder || '').trim();
@@ -1052,13 +1049,13 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
         }
 
         const pdfFileName = partituraPdfKey(folder, mp3);
-        const pdfUrl = await storageAdapter.uploadBuffer(pdfFileName, pdfFile.buffer, 'application/pdf');
+        const pdfUrl = await storageAdapter.uploadSheet(pdfFileName, pdfFile.buffer, 'application/pdf');
 
         let sibFileName = '';
         let sibUrl = '';
         if (sibFile) {
             sibFileName = partituraSibKey(folder, mp3);
-            sibUrl = await storageAdapter.uploadBuffer(
+            sibUrl = await storageAdapter.uploadSheet(
                 sibFileName,
                 sibFile.buffer,
                 sibFile.mimetype || 'application/octet-stream'
@@ -1093,8 +1090,8 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
     { name: 'sibFile', maxCount: 1 }
 ]), async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) {
-            return res.status(503).json({ message: 'Armazenamento indisponível. Configure STORAGE_PROVIDER=r2 (ou GCS).' });
+        if (!storageAdapter.sheetsReady()) {
+            return res.status(503).json({ message: 'Cloudflare R2 indisponível. Configure as variáveis R2_* no Cloud Run.' });
         }
         const ref = partiturasCollection.doc(req.params.id);
         const snap = await ref.get();
@@ -1131,16 +1128,16 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
                 return res.status(400).json({ message: 'O arquivo completo deve ser PDF.' });
             }
             const newKey = partituraPdfKey(folder, mp3);
-            pdfUrl = await storageAdapter.uploadBuffer(newKey, pdfFile.buffer, 'application/pdf');
+            pdfUrl = await storageAdapter.uploadSheet(newKey, pdfFile.buffer, 'application/pdf');
             if (pdfFileName && pdfFileName !== newKey) {
-                try { await storageAdapter.deleteObject(pdfFileName); } catch (_) { /* ignore */ }
+                try { await storageAdapter.deleteSheet(pdfFileName); } catch (_) { /* ignore */ }
             }
             pdfFileName = newKey;
         } else if (folderOrSlugChanged && pdfFileName) {
             const newKey = partituraPdfKey(folder, mp3);
-            if (await storageAdapter.objectExists(pdfFileName)) {
-                await storageAdapter.copyObject(pdfFileName, newKey);
-                try { await storageAdapter.deleteObject(pdfFileName); } catch (_) { /* ignore */ }
+            if (await storageAdapter.sheetExists(pdfFileName)) {
+                await storageAdapter.copySheet(pdfFileName, newKey);
+                try { await storageAdapter.deleteSheet(pdfFileName); } catch (_) { /* ignore */ }
             }
             pdfFileName = newKey;
             pdfUrl = partituraPublicUrl(folder, 'pdf', mp3);
@@ -1148,20 +1145,20 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
 
         if (sibFile) {
             const newKey = partituraSibKey(folder, mp3);
-            sibUrl = await storageAdapter.uploadBuffer(
+            sibUrl = await storageAdapter.uploadSheet(
                 newKey,
                 sibFile.buffer,
                 sibFile.mimetype || 'application/octet-stream'
             );
             if (sibFileName && sibFileName !== newKey) {
-                try { await storageAdapter.deleteObject(sibFileName); } catch (_) { /* ignore */ }
+                try { await storageAdapter.deleteSheet(sibFileName); } catch (_) { /* ignore */ }
             }
             sibFileName = newKey;
         } else if (folderOrSlugChanged && sibFileName) {
             const newKey = partituraSibKey(folder, mp3);
-            if (await storageAdapter.objectExists(sibFileName)) {
-                await storageAdapter.copyObject(sibFileName, newKey);
-                try { await storageAdapter.deleteObject(sibFileName); } catch (_) { /* ignore */ }
+            if (await storageAdapter.sheetExists(sibFileName)) {
+                await storageAdapter.copySheet(sibFileName, newKey);
+                try { await storageAdapter.deleteSheet(sibFileName); } catch (_) { /* ignore */ }
             }
             sibFileName = newKey;
             sibUrl = partituraPublicUrl(folder, 'sib', mp3);
@@ -1208,7 +1205,7 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
         // Para apagar PDF/SIB no R2: ?deleteFiles=true (cuidado com o acervo de produção).
         const deleteFiles = String(req.query.deleteFiles || req.body?.deleteFiles || '').toLowerCase() === 'true';
 
-        if (deleteFiles && storageAdapter.storageReady()) {
+        if (deleteFiles && storageAdapter.sheetsReady()) {
             const keys = [
                 data.pdfFileName,
                 data.sibFileName,
@@ -1216,7 +1213,7 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
             ].filter(Boolean);
             for (const key of keys) {
                 try {
-                    await storageAdapter.deleteObject(key);
+                    await storageAdapter.deleteSheet(key);
                 } catch (e) {
                     console.error('admin/partituras/delete storage:', key, e.message);
                 }
@@ -1442,7 +1439,7 @@ app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceWriteAc
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
 
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileName = `deposits/${Date.now()}-${req.file.originalname.replace(/ /g, '_')}`;
         const publicUrl = await storageAdapter.uploadBuffer(fileName, req.file.buffer, req.file.mimetype);
         res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });
