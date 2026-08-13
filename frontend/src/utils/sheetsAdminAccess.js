@@ -7,6 +7,8 @@
 export const SHEETS_ADMIN_EMAILS = [
   'joelantoniomg.86@gmail.com',
   'andressamqxs@gmail.com',
+  'clarinetabest@hotmail.com',
+  'naleribeiro@hotmail.com',
 ]
 
 /** Local-part (antes do @) que identifica os 4 responsáveis. */
