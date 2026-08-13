@@ -154,6 +154,61 @@ function authenticateJWT(req, res, next) {
     }
 }
 
+/** Partituras + repertórios: só Joel, Andressa, Rodrigo, Josenale (ou SHEETS_ADMIN_EMAILS). */
+const SHEETS_ADMIN_EMAILS_DEFAULT = [
+    'joelantoniomg.86@gmail.com',
+    'andressamqxs@gmail.com',
+    'clarinetabest@hotmail.com',
+    'naleribeiro@hotmail.com',
+    'edilashirley@gmail.com'
+];
+const SHEETS_ADMIN_LOCAL_MARKERS = [
+    'joelantoniomg.86',
+    'joelantonio',
+    'andressamqxs',
+    'andressa',
+    'rodrigo',
+    'josenale',
+    'clarinetabest',
+    'naleribeiro',
+    'edilashirley',
+    'edila'
+];
+
+function sheetsAdminAllowList() {
+    const fromEnv = String(process.env.SHEETS_ADMIN_EMAILS || '')
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+    return [...new Set([...SHEETS_ADMIN_EMAILS_DEFAULT, ...fromEnv])];
+}
+
+function canManageSheets(email) {
+    const e = String(email || '').trim().toLowerCase();
+    if (!e || !e.includes('@')) return false;
+    if (sheetsAdminAllowList().includes(e)) return true;
+    const local = e.split('@')[0];
+    return SHEETS_ADMIN_LOCAL_MARKERS.some(
+        (marker) =>
+            local === marker ||
+            local.startsWith(`${marker}.`) ||
+            local.startsWith(`${marker}_`) ||
+            local.startsWith(`${marker}-`) ||
+            local.includes(marker)
+    );
+}
+
+function requireSheetsAdmin(req, res, next) {
+    const actor = req.user?.email || req.user?.userId;
+    if (!canManageSheets(actor)) {
+        return res.status(403).json({
+            status: 403,
+            message: 'Sem permissão para gerir partituras/repertório.'
+        });
+    }
+    next();
+}
+
 // --- 5. Rotas Administrativas e de Convite ---
 
 // Nova: Registra no banco a chave gerada pelo Front-end para torná-la válida
@@ -778,7 +833,7 @@ function serializeRepertorio(doc) {
 }
 
 // Lista completa para o painel admin (CRUD)
-app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
+app.get('/api/admin/repertorios', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
         const data = snapshot.docs.map(serializeRepertorio);
@@ -790,7 +845,7 @@ app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
 });
 
 // Criação de um novo repertório
-app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
+app.post('/api/admin/repertorios', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const { error, value } = validateRepertorioPayload(req.body);
         if (error) return res.status(400).json({ message: error });
@@ -811,7 +866,7 @@ app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
 });
 
 // Atualização de um repertório existente
-app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
+app.put('/api/admin/repertorios/:id', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const { error, value } = validateRepertorioPayload(req.body);
         if (error) return res.status(400).json({ message: error });
@@ -833,7 +888,7 @@ app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
 });
 
 // Arquivar / restaurar (esconde do site sem apagar)
-app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, async (req, res) => {
+app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const archived = Boolean(req.body?.archived);
         const ref = repertoriosCollection.doc(req.params.id);
@@ -857,7 +912,7 @@ app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, async (req, res
 });
 
 // Exclusão de um repertório
-app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
+app.delete('/api/admin/repertorios/:id', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const ref = repertoriosCollection.doc(req.params.id);
         const snap = await ref.get();
@@ -908,8 +963,19 @@ function partituraSibKey(folder, slug) {
     return `${folder}/sib/${slug}.sib`;
 }
 
+function partituraMp3Key(folder, slug) {
+    return `${folder}/mp3/${slug}.mp3`;
+}
+
+function partituraMp3OriginalKey(folder, slug) {
+    return `${folder}/mp3original/${slug}.mp3`;
+}
+
 function partituraPublicUrl(folder, kind, slug) {
-    return `${R2_BASE()}/${folder}/${kind}/${slug}.${kind === 'sib' ? 'sib' : 'pdf'}`;
+    let ext = 'pdf';
+    if (kind === 'sib') ext = 'sib';
+    else if (kind === 'mp3' || kind === 'mp3original') ext = 'mp3';
+    return `${R2_BASE()}/${folder}/${kind}/${slug}.${ext}`;
 }
 
 function serializePartitura(doc) {
@@ -925,10 +991,16 @@ function serializePartitura(doc) {
         time: d.time || '3:00',
         pdfFileName: d.pdfFileName || (mp3 ? partituraPdfKey(folder, mp3) : ''),
         sibFileName: d.sibFileName || (mp3 ? partituraSibKey(folder, mp3) : ''),
+        mp3FileName: d.mp3FileName || (mp3 ? partituraMp3Key(folder, mp3) : ''),
+        mp3OriginalFileName: d.mp3OriginalFileName || (mp3 ? partituraMp3OriginalKey(folder, mp3) : ''),
         pdfUrl: d.pdfUrl || (mp3 ? partituraPublicUrl(folder, 'pdf', mp3) : ''),
         sibUrl: d.sibUrl || (mp3 ? partituraPublicUrl(folder, 'sib', mp3) : ''),
+        mp3Url: d.mp3Url || (mp3 ? partituraPublicUrl(folder, 'mp3', mp3) : ''),
+        mp3OriginalUrl: d.mp3OriginalUrl || (mp3 ? partituraPublicUrl(folder, 'mp3original', mp3) : ''),
         hasPdf: Boolean(d.pdfFileName || d.pdfUrl || mp3),
         hasSib: Boolean(d.sibFileName || d.sibUrl),
+        hasMp3: Boolean(d.mp3FileName || d.mp3Url || mp3),
+        hasMp3Original: Boolean(d.mp3OriginalFileName || d.mp3OriginalUrl),
         parts: Array.isArray(d.parts) ? d.parts : [],
         createdAt: d.createdAt?.toDate?.()?.toISOString?.() || d.createdAt || null,
         updatedAt: d.updatedAt?.toDate?.()?.toISOString?.() || d.updatedAt || null
@@ -972,7 +1044,7 @@ app.get('/api/public/partituras', async (req, res) => {
     }
 });
 
-app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
+app.get('/api/admin/partituras', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const snapshot = await partiturasCollection.get();
         const data = snapshot.docs.map(serializePartitura).sort((a, b) =>
@@ -985,7 +1057,7 @@ app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
     }
 });
 
-app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, res) => {
+app.post('/api/admin/partituras/import-catalog', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const actor = String(req.user?.email || req.user?.userId || '').trim().toLowerCase();
         const allowed = actor === 'joelantoniomg.86@gmail.com';
@@ -1017,8 +1089,12 @@ app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, re
                 time: String(raw.time || '3:00').trim() || '3:00',
                 pdfFileName: partituraPdfKey(folder, mp3),
                 sibFileName: partituraSibKey(folder, mp3),
+                mp3FileName: partituraMp3Key(folder, mp3),
+                mp3OriginalFileName: partituraMp3OriginalKey(folder, mp3),
                 pdfUrl: partituraPublicUrl(folder, 'pdf', mp3),
                 sibUrl: partituraPublicUrl(folder, 'sib', mp3),
+                mp3Url: partituraPublicUrl(folder, 'mp3', mp3),
+                mp3OriginalUrl: partituraPublicUrl(folder, 'mp3original', mp3),
                 parts: [],
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -1033,9 +1109,11 @@ app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, re
     }
 });
 
-app.post('/api/admin/partituras', authenticateJWT, upload.fields([
+app.post('/api/admin/partituras', authenticateJWT, requireSheetsAdmin, upload.fields([
     { name: 'pdfFile', maxCount: 1 },
-    { name: 'sibFile', maxCount: 1 }
+    { name: 'sibFile', maxCount: 1 },
+    { name: 'mp3File', maxCount: 1 },
+    { name: 'mp3OriginalFile', maxCount: 1 }
 ]), async (req, res) => {
     try {
         if (!storageAdapter.sheetsReady()) {
@@ -1058,6 +1136,8 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
         const filesByField = req.files || {};
         const pdfFile = pickUploadedFile(filesByField, 'pdfFile');
         const sibFile = pickUploadedFile(filesByField, 'sibFile');
+        const mp3File = pickUploadedFile(filesByField, 'mp3File');
+        const mp3OriginalFile = pickUploadedFile(filesByField, 'mp3OriginalFile');
         if (!pdfFile) return res.status(400).json({ message: 'Selecione o arquivo PDF.' });
         if (pdfFile.mimetype && pdfFile.mimetype !== 'application/pdf') {
             return res.status(400).json({ message: 'O arquivo completo deve ser PDF.' });
@@ -1077,6 +1157,28 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
             );
         }
 
+        let mp3FileName = '';
+        let mp3Url = '';
+        if (mp3File) {
+            mp3FileName = partituraMp3Key(folder, mp3);
+            mp3Url = await storageAdapter.uploadSheet(
+                mp3FileName,
+                mp3File.buffer,
+                mp3File.mimetype || 'audio/mpeg'
+            );
+        }
+
+        let mp3OriginalFileName = '';
+        let mp3OriginalUrl = '';
+        if (mp3OriginalFile) {
+            mp3OriginalFileName = partituraMp3OriginalKey(folder, mp3);
+            mp3OriginalUrl = await storageAdapter.uploadSheet(
+                mp3OriginalFileName,
+                mp3OriginalFile.buffer,
+                mp3OriginalFile.mimetype || 'audio/mpeg'
+            );
+        }
+
         const docId = `${folder}__${mp3}`;
         await partiturasCollection.doc(docId).set({
             title,
@@ -1085,8 +1187,12 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
             time,
             pdfFileName,
             sibFileName,
+            mp3FileName,
+            mp3OriginalFileName,
             pdfUrl,
             sibUrl,
+            mp3Url,
+            mp3OriginalUrl,
             parts: [],
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -1103,9 +1209,11 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
     }
 });
 
-app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
+app.put('/api/admin/partituras/:id', authenticateJWT, requireSheetsAdmin, upload.fields([
     { name: 'pdfFile', maxCount: 1 },
-    { name: 'sibFile', maxCount: 1 }
+    { name: 'sibFile', maxCount: 1 },
+    { name: 'mp3File', maxCount: 1 },
+    { name: 'mp3OriginalFile', maxCount: 1 }
 ]), async (req, res) => {
     try {
         if (!storageAdapter.sheetsReady()) {
@@ -1133,54 +1241,62 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
         const filesByField = req.files || {};
         const pdfFile = pickUploadedFile(filesByField, 'pdfFile');
         const sibFile = pickUploadedFile(filesByField, 'sibFile');
+        const mp3File = pickUploadedFile(filesByField, 'mp3File');
+        const mp3OriginalFile = pickUploadedFile(filesByField, 'mp3OriginalFile');
 
         let pdfFileName = existing.pdfFileName || partituraPdfKey(existing.folder || folder, existing.mp3 || mp3);
         let pdfUrl = existing.pdfUrl || partituraPublicUrl(existing.folder || folder, 'pdf', existing.mp3 || mp3);
         let sibFileName = existing.sibFileName || '';
         let sibUrl = existing.sibUrl || '';
+        let mp3FileName = existing.mp3FileName || '';
+        let mp3Url = existing.mp3Url || '';
+        let mp3OriginalFileName = existing.mp3OriginalFileName || '';
+        let mp3OriginalUrl = existing.mp3OriginalUrl || '';
 
         const folderOrSlugChanged = folder !== existing.folder || mp3 !== existing.mp3;
 
-        if (pdfFile) {
-            if (pdfFile.mimetype && pdfFile.mimetype !== 'application/pdf') {
-                return res.status(400).json({ message: 'O arquivo completo deve ser PDF.' });
+        async function relocateOrReplace(uploaded, currentKey, makeKey, kind, contentType) {
+            let key = currentKey || '';
+            let url = '';
+            if (uploaded) {
+                const newKey = makeKey(folder, mp3);
+                url = await storageAdapter.uploadSheet(
+                    newKey,
+                    uploaded.buffer,
+                    uploaded.mimetype || contentType
+                );
+                if (key && key !== newKey) {
+                    try { await storageAdapter.deleteSheet(key); } catch (_) { /* ignore */ }
+                }
+                return { key: newKey, url };
             }
-            const newKey = partituraPdfKey(folder, mp3);
-            pdfUrl = await storageAdapter.uploadSheet(newKey, pdfFile.buffer, 'application/pdf');
-            if (pdfFileName && pdfFileName !== newKey) {
-                try { await storageAdapter.deleteSheet(pdfFileName); } catch (_) { /* ignore */ }
+            if (folderOrSlugChanged && key) {
+                const newKey = makeKey(folder, mp3);
+                if (await storageAdapter.sheetExists(key)) {
+                    await storageAdapter.copySheet(key, newKey);
+                    try { await storageAdapter.deleteSheet(key); } catch (_) { /* ignore */ }
+                }
+                return { key: newKey, url: partituraPublicUrl(folder, kind, mp3) };
             }
-            pdfFileName = newKey;
-        } else if (folderOrSlugChanged && pdfFileName) {
-            const newKey = partituraPdfKey(folder, mp3);
-            if (await storageAdapter.sheetExists(pdfFileName)) {
-                await storageAdapter.copySheet(pdfFileName, newKey);
-                try { await storageAdapter.deleteSheet(pdfFileName); } catch (_) { /* ignore */ }
-            }
-            pdfFileName = newKey;
-            pdfUrl = partituraPublicUrl(folder, 'pdf', mp3);
+            return { key, url: kind === 'pdf' ? pdfUrl : kind === 'sib' ? sibUrl : kind === 'mp3' ? mp3Url : mp3OriginalUrl };
         }
 
-        if (sibFile) {
-            const newKey = partituraSibKey(folder, mp3);
-            sibUrl = await storageAdapter.uploadSheet(
-                newKey,
-                sibFile.buffer,
-                sibFile.mimetype || 'application/octet-stream'
-            );
-            if (sibFileName && sibFileName !== newKey) {
-                try { await storageAdapter.deleteSheet(sibFileName); } catch (_) { /* ignore */ }
-            }
-            sibFileName = newKey;
-        } else if (folderOrSlugChanged && sibFileName) {
-            const newKey = partituraSibKey(folder, mp3);
-            if (await storageAdapter.sheetExists(sibFileName)) {
-                await storageAdapter.copySheet(sibFileName, newKey);
-                try { await storageAdapter.deleteSheet(sibFileName); } catch (_) { /* ignore */ }
-            }
-            sibFileName = newKey;
-            sibUrl = partituraPublicUrl(folder, 'sib', mp3);
+        if (pdfFile && pdfFile.mimetype && pdfFile.mimetype !== 'application/pdf') {
+            return res.status(400).json({ message: 'O arquivo completo deve ser PDF.' });
         }
+
+        ({ key: pdfFileName, url: pdfUrl } = await relocateOrReplace(
+            pdfFile, pdfFileName, partituraPdfKey, 'pdf', 'application/pdf'
+        ));
+        ({ key: sibFileName, url: sibUrl } = await relocateOrReplace(
+            sibFile, sibFileName, partituraSibKey, 'sib', 'application/octet-stream'
+        ));
+        ({ key: mp3FileName, url: mp3Url } = await relocateOrReplace(
+            mp3File, mp3FileName, partituraMp3Key, 'mp3', 'audio/mpeg'
+        ));
+        ({ key: mp3OriginalFileName, url: mp3OriginalUrl } = await relocateOrReplace(
+            mp3OriginalFile, mp3OriginalFileName, partituraMp3OriginalKey, 'mp3original', 'audio/mpeg'
+        ));
 
         const desiredId = `${folder}__${mp3}`;
         const payload = {
@@ -1190,8 +1306,12 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
             time,
             pdfFileName,
             sibFileName,
+            mp3FileName,
+            mp3OriginalFileName,
             pdfUrl,
             sibUrl,
+            mp3Url,
+            mp3OriginalUrl,
             parts: Array.isArray(existing.parts) ? existing.parts : [],
             createdAt: existing.createdAt || admin.firestore.FieldValue.serverTimestamp(),
             createdBy: existing.createdBy || req.user?.email || null,
@@ -1212,7 +1332,7 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
     }
 });
 
-app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
+app.delete('/api/admin/partituras/:id', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const ref = partiturasCollection.doc(req.params.id);
         const snap = await ref.get();
@@ -1225,6 +1345,8 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
             const keys = [
                 data.pdfFileName,
                 data.sibFileName,
+                data.mp3FileName,
+                data.mp3OriginalFileName,
                 ...(Array.isArray(data.parts) ? data.parts.map((p) => p.fileName) : [])
             ].filter(Boolean);
             for (const key of keys) {

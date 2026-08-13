@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { canManageSheets } from '../../utils/sheetsAdminAccess'
 
 const linkBase =
   'px-3 py-2 rounded-xl text-sm font-semibold transition-colors border'
@@ -8,14 +9,19 @@ const AdminLayout = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const sheetsOk = canManageSheets(user)
 
   const navItems = [
     { to: '/admin', label: 'Dashboard' },
     { to: '/admin/convites', label: 'Convites' },
     { to: '/admin/membros', label: 'Membros' },
     { to: '/admin/midia', label: 'Mídia' },
-    { to: '/admin/repertorios', label: 'Repertório' },
-    { to: '/admin/partituras', label: 'Partituras' },
+    ...(sheetsOk
+      ? [
+          { to: '/admin/repertorios', label: 'Repertório' },
+          { to: '/admin/partituras', label: 'Partituras' },
+        ]
+      : []),
   ]
 
   const canFinance =

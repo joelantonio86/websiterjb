@@ -10,6 +10,11 @@ const slugify = (value) =>
     .replace(/_+/g, '_')
     .replace(/^_|_$/g, '')
 
+const fileInputClass = (hasError) =>
+  `w-full p-3 text-sm rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-rjb-yellow file:text-rjb-text ${
+    hasError ? 'border-red-500' : 'border-rjb-yellow/20'
+  }`
+
 const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, onSuccess }) => {
   const isEdit = Boolean(partitura)
 
@@ -20,6 +25,8 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
   const [time, setTime] = useState('3:00')
   const [pdfFile, setPdfFile] = useState(null)
   const [sibFile, setSibFile] = useState(null)
+  const [mp3File, setMp3File] = useState(null)
+  const [mp3OriginalFile, setMp3OriginalFile] = useState(null)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -49,6 +56,10 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
   const safeSlug = slugify(mp3)
   const pathPreviewPdf = safeSlug ? `${folder}/pdf/${safeSlug}.pdf` : `${folder}/pdf/….pdf`
   const pathPreviewSib = safeSlug ? `${folder}/sib/${safeSlug}.sib` : `${folder}/sib/….sib`
+  const pathPreviewMp3 = safeSlug ? `${folder}/mp3/${safeSlug}.mp3` : `${folder}/mp3/….mp3`
+  const pathPreviewMp3Original = safeSlug
+    ? `${folder}/mp3original/${safeSlug}.mp3`
+    : `${folder}/mp3original/….mp3`
 
   const handleTitleChange = (value) => {
     setTitle(value)
@@ -80,6 +91,8 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
     formData.append('time', time.trim() || '3:00')
     if (pdfFile) formData.append('pdfFile', pdfFile)
     if (sibFile) formData.append('sibFile', sibFile)
+    if (mp3File) formData.append('mp3File', mp3File)
+    if (mp3OriginalFile) formData.append('mp3OriginalFile', mp3OriginalFile)
 
     setSubmitting(true)
     try {
@@ -124,7 +137,7 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
             {isEdit ? 'Editar partitura' : folder === 'racionais' ? 'Nova partitura racional' : 'Nova partitura (diversas)'}
           </h3>
           <p className="text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 mb-6">
-            Os ficheiros vão para o Cloudflare R2, no mesmo formato da página pública.
+            PDF, SIB e MP3s vão para o Cloudflare R2 com o mesmo nome de ficheiro.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -198,6 +211,8 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
               <div className="mt-2 rounded-lg bg-rjb-bg-light/80 dark:bg-rjb-bg-dark/50 border border-rjb-yellow/15 p-2.5 text-[11px] font-mono text-rjb-text/70 dark:text-rjb-text-dark/70 space-y-0.5">
                 <div>{pathPreviewPdf}</div>
                 <div>{pathPreviewSib}</div>
+                <div>{pathPreviewMp3}</div>
+                <div>{pathPreviewMp3Original}</div>
               </div>
               {errors.mp3 && <p className="text-xs text-red-500 mt-1">{errors.mp3}</p>}
             </div>
@@ -211,9 +226,7 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
                 type="file"
                 accept="application/pdf,.pdf"
                 onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
-                className={`w-full p-3 text-sm rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-rjb-yellow file:text-rjb-text ${
-                  errors.pdfFile ? 'border-red-500' : 'border-rjb-yellow/20'
-                }`}
+                className={fileInputClass(Boolean(errors.pdfFile))}
               />
               {(pdfFile || partitura?.pdfFileName) && (
                 <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 truncate">
@@ -232,11 +245,47 @@ const PartituraFormModal = ({ partitura, defaultFolder = 'diversas', onClose, on
                 type="file"
                 accept=".sib,application/octet-stream"
                 onChange={(e) => setSibFile(e.target.files?.[0] || null)}
-                className="w-full p-3 text-sm rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-rjb-yellow file:text-rjb-text"
+                className={fileInputClass(false)}
               />
               {(sibFile || partitura?.sibFileName) && (
                 <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 truncate">
                   {sibFile ? sibFile.name : `Atual: ${partitura.sibFileName}`}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="partitura-mp3-audio" className="block text-sm font-medium mb-1 opacity-70">
+                MP3 Sibelius {isEdit ? '(opcional — substituir)' : '(opcional)'}
+              </label>
+              <input
+                id="partitura-mp3-audio"
+                type="file"
+                accept="audio/mpeg,audio/mp3,.mp3"
+                onChange={(e) => setMp3File(e.target.files?.[0] || null)}
+                className={fileInputClass(false)}
+              />
+              {(mp3File || partitura?.mp3FileName) && (
+                <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 truncate">
+                  {mp3File ? mp3File.name : `Atual: ${partitura.mp3FileName}`}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="partitura-mp3-original" className="block text-sm font-medium mb-1 opacity-70">
+                MP3 original {isEdit ? '(opcional — substituir)' : '(opcional)'}
+              </label>
+              <input
+                id="partitura-mp3-original"
+                type="file"
+                accept="audio/mpeg,audio/mp3,.mp3"
+                onChange={(e) => setMp3OriginalFile(e.target.files?.[0] || null)}
+                className={fileInputClass(false)}
+              />
+              {(mp3OriginalFile || partitura?.mp3OriginalFileName) && (
+                <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mt-1 truncate">
+                  {mp3OriginalFile ? mp3OriginalFile.name : `Atual: ${partitura.mp3OriginalFileName}`}
                 </p>
               )}
             </div>
