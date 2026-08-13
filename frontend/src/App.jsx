@@ -20,6 +20,7 @@ import TermosUso from './pages/TermosUso'
 import MemberRegistration from './pages/MemberRegistration'
 import Financeiro from './pages/Financeiro'
 import ProtectedRoute from './components/ProtectedRoute'
+import SheetsAdminRoute from './components/SheetsAdminRoute'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -65,8 +66,22 @@ function App() {
                   <Route path="convites" element={<AdminInvites />} />
                   <Route path="membros" element={<AdminMembers />} />
                   <Route path="midia" element={<AdminMedia />} />
-                  <Route path="repertorios" element={<AdminRepertorios />} />
-                  <Route path="partituras" element={<AdminPartituras />} />
+                  <Route
+                    path="repertorios"
+                    element={
+                      <SheetsAdminRoute>
+                        <AdminRepertorios />
+                      </SheetsAdminRoute>
+                    }
+                  />
+                  <Route
+                    path="partituras"
+                    element={
+                      <SheetsAdminRoute>
+                        <AdminPartituras />
+                      </SheetsAdminRoute>
+                    }
+                  />
                 </Route>
                 <Route 
                   path="/financeiro" 

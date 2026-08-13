@@ -154,6 +154,54 @@ function authenticateJWT(req, res, next) {
     }
 }
 
+/** Partituras + repertórios: só Joel, Andressa, Rodrigo, Josenale (ou SHEETS_ADMIN_EMAILS). */
+const SHEETS_ADMIN_EMAILS_DEFAULT = [
+    'joelantoniomg.86@gmail.com',
+    'andressamqxs@gmail.com'
+];
+const SHEETS_ADMIN_LOCAL_MARKERS = [
+    'joelantoniomg.86',
+    'joelantonio',
+    'andressamqxs',
+    'andressa',
+    'rodrigo',
+    'josenale'
+];
+
+function sheetsAdminAllowList() {
+    const fromEnv = String(process.env.SHEETS_ADMIN_EMAILS || '')
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+    return [...new Set([...SHEETS_ADMIN_EMAILS_DEFAULT, ...fromEnv])];
+}
+
+function canManageSheets(email) {
+    const e = String(email || '').trim().toLowerCase();
+    if (!e || !e.includes('@')) return false;
+    if (sheetsAdminAllowList().includes(e)) return true;
+    const local = e.split('@')[0];
+    return SHEETS_ADMIN_LOCAL_MARKERS.some(
+        (marker) =>
+            local === marker ||
+            local.startsWith(`${marker}.`) ||
+            local.startsWith(`${marker}_`) ||
+            local.startsWith(`${marker}-`) ||
+            local.includes(marker)
+    );
+}
+
+function requireSheetsAdmin(req, res, next) {
+    const actor = req.user?.email || req.user?.userId;
+    if (!canManageSheets(actor)) {
+        return res.status(403).json({
+            status: 403,
+            message: 'Sem permissão para gerir partituras/repertório.'
+        });
+    }
+    next();
+}
+
 // --- 5. Rotas Administrativas e de Convite ---
 
 // Nova: Registra no banco a chave gerada pelo Front-end para torná-la válida
@@ -778,7 +826,7 @@ function serializeRepertorio(doc) {
 }
 
 // Lista completa para o painel admin (CRUD)
-app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
+app.get('/api/admin/repertorios', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
         const data = snapshot.docs.map(serializeRepertorio);
@@ -790,7 +838,7 @@ app.get('/api/admin/repertorios', authenticateJWT, async (req, res) => {
 });
 
 // Criação de um novo repertório
-app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
+app.post('/api/admin/repertorios', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const { error, value } = validateRepertorioPayload(req.body);
         if (error) return res.status(400).json({ message: error });
@@ -811,7 +859,7 @@ app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
 });
 
 // Atualização de um repertório existente
-app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
+app.put('/api/admin/repertorios/:id', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const { error, value } = validateRepertorioPayload(req.body);
         if (error) return res.status(400).json({ message: error });
@@ -833,7 +881,7 @@ app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
 });
 
 // Arquivar / restaurar (esconde do site sem apagar)
-app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, async (req, res) => {
+app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const archived = Boolean(req.body?.archived);
         const ref = repertoriosCollection.doc(req.params.id);
@@ -857,7 +905,7 @@ app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, async (req, res
 });
 
 // Exclusão de um repertório
-app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
+app.delete('/api/admin/repertorios/:id', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const ref = repertoriosCollection.doc(req.params.id);
         const snap = await ref.get();
@@ -972,7 +1020,7 @@ app.get('/api/public/partituras', async (req, res) => {
     }
 });
 
-app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
+app.get('/api/admin/partituras', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const snapshot = await partiturasCollection.get();
         const data = snapshot.docs.map(serializePartitura).sort((a, b) =>
@@ -985,7 +1033,7 @@ app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
     }
 });
 
-app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, res) => {
+app.post('/api/admin/partituras/import-catalog', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const actor = String(req.user?.email || req.user?.userId || '').trim().toLowerCase();
         const allowed = actor === 'joelantoniomg.86@gmail.com';
@@ -1033,7 +1081,7 @@ app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, re
     }
 });
 
-app.post('/api/admin/partituras', authenticateJWT, upload.fields([
+app.post('/api/admin/partituras', authenticateJWT, requireSheetsAdmin, upload.fields([
     { name: 'pdfFile', maxCount: 1 },
     { name: 'sibFile', maxCount: 1 }
 ]), async (req, res) => {
@@ -1103,7 +1151,7 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
     }
 });
 
-app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
+app.put('/api/admin/partituras/:id', authenticateJWT, requireSheetsAdmin, upload.fields([
     { name: 'pdfFile', maxCount: 1 },
     { name: 'sibFile', maxCount: 1 }
 ]), async (req, res) => {
@@ -1212,7 +1260,7 @@ app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
     }
 });
 
-app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
+app.delete('/api/admin/partituras/:id', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const ref = partiturasCollection.doc(req.params.id);
         const snap = await ref.get();
