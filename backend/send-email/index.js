@@ -764,6 +764,7 @@ function serializeRepertorio(doc) {
         date: d.date || '',
         location: d.location || '',
         songs: Array.isArray(d.songs) ? d.songs : [],
+        archived: Boolean(d.archived),
         createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
         updatedAt: d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toISOString() : null
     };
@@ -789,6 +790,7 @@ app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
 
         const docRef = await repertoriosCollection.add({
             ...value,
+            archived: false,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             createdBy: req.user?.userId || req.user?.email || 'admin'
@@ -823,6 +825,30 @@ app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     }
 });
 
+// Arquivar / restaurar (esconde do site sem apagar)
+app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, async (req, res) => {
+    try {
+        const archived = Boolean(req.body?.archived);
+        const ref = repertoriosCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Repertório não encontrado.' });
+
+        await ref.update({
+            archived,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        res.status(200).json({
+            status: 200,
+            archived,
+            message: archived ? 'Repertório arquivado.' : 'Repertório restaurado.'
+        });
+    } catch (error) {
+        console.error('admin/repertorios/archive:', error);
+        res.status(500).json({ message: 'Erro ao atualizar arquivo do repertório.' });
+    }
+});
+
 // Exclusão de um repertório
 app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     try {
@@ -838,11 +864,13 @@ app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     }
 });
 
-// Leitura pública (usada em /repertorio-apresentacoes e no filtro de /partituras)
+// Leitura pública — só repertórios ativos (não arquivados)
 app.get('/api/public/repertorios', async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
-        const data = snapshot.docs.map(serializeRepertorio);
+        const data = snapshot.docs
+            .map(serializeRepertorio)
+            .filter((r) => !r.archived);
         res.status(200).json(data);
     } catch (error) {
         console.error('public/repertorios/list:', error);
