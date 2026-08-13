@@ -8,10 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Light: cinza-pedra suave (menos brilho que branco puro; sem cream genérico)
         'rjb-yellow': '#FFD700',
-        'rjb-text': '#2A2A2A',
-        'rjb-bg-light': '#F8F9FA',
-        'rjb-card-light': '#FFFFFF',
+        'rjb-text': '#2C2A26',
+        'rjb-bg-light': '#E9E7E2',
+        'rjb-card-light': '#F4F3F0',
         'rjb-bg-dark': '#121212',
         'rjb-card-dark': '#1E1E1E',
         'rjb-text-dark': '#E0E0E0',
