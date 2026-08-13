@@ -20,6 +20,10 @@ const SHEETS_ADMIN_LOCAL_MARKERS = [
   'andressa',
   'rodrigo',
   'josenale',
+  'clarinetabest',
+  'naleribeiro',
+  'edilashirley',
+  'edila',
 ]
 
 function normalizeEmail (email) {
