@@ -157,7 +157,9 @@ function authenticateJWT(req, res, next) {
 /** Partituras + repertórios: só Joel, Andressa, Rodrigo, Josenale (ou SHEETS_ADMIN_EMAILS). */
 const SHEETS_ADMIN_EMAILS_DEFAULT = [
     'joelantoniomg.86@gmail.com',
-    'andressamqxs@gmail.com'
+    'andressamqxs@gmail.com',
+    'clarinetabest@hotmail.com',
+    'naleribeiro@hotmail.com'
 ];
 const SHEETS_ADMIN_LOCAL_MARKERS = [
     'joelantoniomg.86',
