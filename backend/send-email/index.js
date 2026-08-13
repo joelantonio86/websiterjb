@@ -159,7 +159,8 @@ const SHEETS_ADMIN_EMAILS_DEFAULT = [
     'joelantoniomg.86@gmail.com',
     'andressamqxs@gmail.com',
     'clarinetabest@hotmail.com',
-    'naleribeiro@hotmail.com'
+    'naleribeiro@hotmail.com',
+    'edilashirley@gmail.com'
 ];
 const SHEETS_ADMIN_LOCAL_MARKERS = [
     'joelantoniomg.86',
@@ -167,7 +168,11 @@ const SHEETS_ADMIN_LOCAL_MARKERS = [
     'andressamqxs',
     'andressa',
     'rodrigo',
-    'josenale'
+    'josenale',
+    'clarinetabest',
+    'naleribeiro',
+    'edilashirley',
+    'edila'
 ];
 
 function sheetsAdminAllowList() {
