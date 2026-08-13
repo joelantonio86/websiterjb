@@ -55,10 +55,13 @@ function initR2FromEnv () {
     }
     r2BucketName = bucket;
     r2PublicBase = publicBase;
+    // AWS SDK >= 3.729 envia checksums CRC32 por omissão; o R2 ainda rejeita isso (PutObject → 500).
     r2Client = new S3Client({
         region: 'auto',
         endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-        credentials: { accessKeyId, secretAccessKey }
+        credentials: { accessKeyId, secretAccessKey },
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+        responseChecksumValidation: 'WHEN_REQUIRED'
     });
     console.log(`✅ Cloudflare R2 inicializado. Bucket: ${r2BucketName}`);
     return true;

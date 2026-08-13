@@ -261,7 +261,17 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
 // --- Rotas públicas (sem autenticação) ---
 app.get('/api/public/health', (req, res) => {
-    res.json({ ok: true, version: 'with-members-by-state', service: 'rjb-email-sender' });
+    res.json({
+        ok: true,
+        version: 'partituras-r2-dual-storage',
+        service: 'rjb-email-sender',
+        storage: {
+            gcs: storageAdapter.isGCS(),
+            r2: storageAdapter.isR2(),
+            mode: storageAdapter.storageType()
+        },
+        firestore: Boolean(membersCollection)
+    });
 });
 
 // Proxy para PDFs de partituras (evita CORS ao fazer fetch do R2 no browser)
@@ -1081,7 +1091,10 @@ app.post('/api/admin/partituras', authenticateJWT, upload.fields([
         res.status(200).json({ status: 200, id: docId, message: 'Partitura criada com sucesso.' });
     } catch (error) {
         console.error('admin/partituras/create:', error);
-        res.status(500).json({ message: 'Erro ao criar partitura.' });
+        res.status(500).json({
+            message: 'Erro ao criar partitura.',
+            detail: String(error?.message || error).slice(0, 400)
+        });
     }
 });
 
