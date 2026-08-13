@@ -17,8 +17,8 @@
   }
   
   .header-rjb {
-    background-color: #FFFFFF;
-    border-bottom: 1px solid #EEEEEE;
+    background-color: #F4F3F0;
+    border-bottom: 1px solid rgba(44, 42, 38, 0.08);
     transition: background-color 0.5s ease, border-color 0.5s ease;
     z-index: 9999 !important;
   }
