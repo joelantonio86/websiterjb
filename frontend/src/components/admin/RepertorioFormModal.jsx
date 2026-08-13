@@ -1,14 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
-import { racionais, diversas } from '../../data/songs'
 import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
 import api from '../../services/api'
-
-// Lista consolidada de todas as músicas disponíveis no sistema (mesma fonte usada em /partituras)
-const ALL_SONGS = [
-  ...racionais.map((s) => ({ ...s, folder: 'racionais', category: 'Músicas Racionais' })),
-  ...diversas.map((s) => ({ ...s, folder: 'diversas', category: 'Outros Clássicos' })),
-].sort((a, b) => a.title.localeCompare(b.title))
+import usePartiturasCatalog from '../../hooks/usePartiturasCatalog'
 
 const getSongId = (song) => `${song.folder}-${song.mp3}`
 
@@ -20,6 +14,16 @@ const normalize = (text) =>
 
 const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
   const isEdit = Boolean(repertorio)
+  const { racionais, diversas } = usePartiturasCatalog()
+
+  const ALL_SONGS = useMemo(
+    () =>
+      [
+        ...racionais.map((s) => ({ ...s, folder: 'racionais', category: 'Músicas Racionais' })),
+        ...diversas.map((s) => ({ ...s, folder: 'diversas', category: 'Outros Clássicos' })),
+      ].sort((a, b) => a.title.localeCompare(b.title)),
+    [racionais, diversas]
+  )
 
   const [name, setName] = useState('')
   const [date, setDate] = useState('')
@@ -53,11 +57,11 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
     const term = normalize(songSearch)
     if (!term) return ALL_SONGS
     return ALL_SONGS.filter((s) => normalize(s.title).includes(term))
-  }, [songSearch])
+  }, [songSearch, ALL_SONGS])
 
   const selectedSongs = useMemo(
     () => ALL_SONGS.filter((s) => selectedIds.has(getSongId(s))),
-    [selectedIds]
+    [selectedIds, ALL_SONGS]
   )
 
   const toggleSong = (song) => {
@@ -147,7 +151,7 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex.: Apresentação de Maio 2026"
+                placeholder="Ex.: Apresentação de Setembro 2026"
                 className={`w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all ${
                   errors.name ? 'border-red-500' : 'border-rjb-yellow/20'
                 }`}

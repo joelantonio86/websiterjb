@@ -1,6 +1,9 @@
 /**
- * Armazenamento de ficheiros: Google Cloud Storage ou Cloudflare R2 (API S3).
- * Defina STORAGE_PROVIDER=r2 e as variáveis R2_* para usar R2; caso contrário usa GCS (bucket).
+ * Armazenamento dual:
+ * - GCS → anexos/mídia/financeiro (bucket admin)
+ * - Cloudflare R2 → partituras PDF/SIB (bucket rjb-sheets)
+ *
+ * Em produção os dois devem estar activos. R2 incompleto não derruba o GCS.
  */
 
 const {
@@ -12,7 +15,6 @@ const {
     HeadObjectCommand
 } = require('@aws-sdk/client-s3');
 
-let storageType = 'gcs';
 let gcsBucket = null;
 let gcsBucketName = '';
 
@@ -28,24 +30,29 @@ function trimBase (u) {
  * @param {{ bucket: import('@google-cloud/storage').Bucket, bucketName: string }} gcs
  */
 function initGCS (gcs) {
-    storageType = 'gcs';
     gcsBucket = gcs.bucket;
     gcsBucketName = gcs.bucketName;
-    r2Client = null;
 }
 
 function initR2FromEnv () {
-    const accountId = process.env.R2_ACCOUNT_ID;
-    const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-    const bucket = process.env.R2_BUCKET_NAME;
+    const accountId = String(process.env.R2_ACCOUNT_ID || '').trim();
+    const accessKeyId = String(process.env.R2_ACCESS_KEY_ID || '').trim();
+    const secretAccessKey = String(process.env.R2_SECRET_ACCESS_KEY || '').trim();
+    const bucket = String(process.env.R2_BUCKET_NAME || '').trim();
     const publicBase = trimBase(process.env.R2_PUBLIC_BASE_URL);
-    if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicBase) {
+    const missing = [];
+    if (!accountId) missing.push('R2_ACCOUNT_ID');
+    if (!accessKeyId) missing.push('R2_ACCESS_KEY_ID');
+    if (!secretAccessKey) missing.push('R2_SECRET_ACCESS_KEY');
+    if (!bucket) missing.push('R2_BUCKET_NAME');
+    if (!publicBase) missing.push('R2_PUBLIC_BASE_URL');
+    if (missing.length) {
+        console.warn(`⚠️ R2 incompleto — faltam: ${missing.join(', ')}`);
+        r2Client = null;
+        r2BucketName = '';
+        r2PublicBase = '';
         return false;
     }
-    storageType = 'r2';
-    gcsBucket = null;
-    gcsBucketName = '';
     r2BucketName = bucket;
     r2PublicBase = publicBase;
     r2Client = new S3Client({
@@ -68,130 +75,158 @@ function publicUrlForKey (key) {
 }
 
 function isR2 () {
-    return storageType === 'r2' && r2Client;
+    return Boolean(r2Client && r2BucketName);
 }
 
 function isGCS () {
-    return storageType === 'gcs' && gcsBucket;
+    return Boolean(gcsBucket && gcsBucketName);
 }
 
+/** Mídia/anexos (GCS). */
+function mediaReady () {
+    return isGCS();
+}
+
+/** Partituras (R2). */
+function sheetsReady () {
+    return isR2();
+}
+
+/** Compat: true se GCS ou R2 estiver pronto. */
 function storageReady () {
-    return isR2() || isGCS();
+    return mediaReady() || sheetsReady();
+}
+
+function storageType () {
+    if (isR2() && isGCS()) return 'dual';
+    if (isR2()) return 'r2';
+    if (isGCS()) return 'gcs';
+    return 'none';
+}
+
+function requireGCS () {
+    if (!isGCS()) throw new Error('Google Cloud Storage não configurado.');
+}
+
+function requireR2 () {
+    if (!isR2()) throw new Error('Cloudflare R2 não configurado.');
 }
 
 async function listFiles () {
-    if (isR2()) {
-        const out = [];
-        let ContinuationToken;
-        do {
-            const resp = await r2Client.send(
-                new ListObjectsV2Command({
-                    Bucket: r2BucketName,
-                    ContinuationToken
-                })
-            );
-            for (const obj of resp.Contents || []) {
-                out.push({
-                    name: obj.Key,
-                    size: String(obj.Size ?? ''),
-                    uploaded: obj.LastModified ? obj.LastModified.toISOString() : '',
-                    contentType: '',
-                    downloadUrl: publicUrlForKey(obj.Key)
-                });
-            }
-            ContinuationToken = resp.IsTruncated ? resp.NextContinuationToken : undefined;
-        } while (ContinuationToken);
-        return out;
-    }
-    if (isGCS()) {
-        const [files] = await gcsBucket.getFiles();
-        return files.map((file) => ({
-            name: file.name,
-            size: file.metadata.size,
-            uploaded: file.metadata.timeCreated,
-            contentType: file.metadata.contentType || '',
-            downloadUrl: `https://storage.googleapis.com/${gcsBucketName}/${encodeURIComponent(file.name)}`
-        }));
-    }
-    throw new Error('Storage não configurado.');
+    requireGCS();
+    const [files] = await gcsBucket.getFiles();
+    return files.map((file) => ({
+        name: file.name,
+        size: file.metadata.size,
+        uploaded: file.metadata.timeCreated,
+        contentType: file.metadata.contentType || '',
+        downloadUrl: `https://storage.googleapis.com/${gcsBucketName}/${encodeURIComponent(file.name)}`
+    }));
 }
 
 /**
+ * Upload de mídia/anexos → GCS.
  * @returns {Promise<string>} URL pública
  */
 async function uploadBuffer (key, buffer, contentType) {
-    if (isR2()) {
-        await r2Client.send(
-            new PutObjectCommand({
-                Bucket: r2BucketName,
-                Key: key,
-                Body: buffer,
-                ContentType: contentType || 'application/octet-stream'
-            })
-        );
-        return publicUrlForKey(key);
-    }
-    if (isGCS()) {
-        const blob = gcsBucket.file(key);
-        await new Promise((resolve, reject) => {
-            const ws = blob.createWriteStream({
-                resumable: false,
-                metadata: { contentType: contentType || 'application/octet-stream' }
-            });
-            ws.on('error', reject);
-            ws.on('finish', resolve);
-            ws.end(buffer);
+    requireGCS();
+    const blob = gcsBucket.file(key);
+    await new Promise((resolve, reject) => {
+        const ws = blob.createWriteStream({
+            resumable: false,
+            metadata: { contentType: contentType || 'application/octet-stream' }
         });
-        return `https://storage.googleapis.com/${gcsBucketName}/${encodeURIComponent(key)}`;
-    }
-    throw new Error('Storage não configurado.');
+        ws.on('error', reject);
+        ws.on('finish', resolve);
+        ws.end(buffer);
+    });
+    return `https://storage.googleapis.com/${gcsBucketName}/${encodeURIComponent(key)}`;
 }
 
 async function copyObject (srcKey, destKey) {
-    if (isR2()) {
-        await r2Client.send(
-            new CopyObjectCommand({
-                Bucket: r2BucketName,
-                Key: destKey,
-                CopySource: copySourcePath(r2BucketName, srcKey)
-            })
-        );
-        return;
-    }
-    if (isGCS()) {
-        await gcsBucket.file(srcKey).copy(gcsBucket.file(destKey));
-        return;
-    }
-    throw new Error('Storage não configurado.');
+    requireGCS();
+    await gcsBucket.file(srcKey).copy(gcsBucket.file(destKey));
 }
 
 async function deleteObject (key) {
-    if (isR2()) {
-        await r2Client.send(new DeleteObjectCommand({ Bucket: r2BucketName, Key: key }));
-        return;
-    }
-    if (isGCS()) {
-        await gcsBucket.file(key).delete();
-        return;
-    }
-    throw new Error('Storage não configurado.');
+    requireGCS();
+    await gcsBucket.file(key).delete();
 }
 
 async function objectExists (key) {
-    if (isR2()) {
-        try {
-            await r2Client.send(new HeadObjectCommand({ Bucket: r2BucketName, Key: key }));
-            return true;
-        } catch (e) {
-            if (e?.$metadata?.httpStatusCode === 404 || e?.name === 'NotFound') return false;
-            throw e;
+    requireGCS();
+    const [exists] = await gcsBucket.file(key).exists();
+    return exists;
+}
+
+/**
+ * Upload de partitura (PDF/SIB) → R2.
+ * @returns {Promise<string>} URL pública R2
+ */
+async function uploadSheet (key, buffer, contentType) {
+    requireR2();
+    await r2Client.send(
+        new PutObjectCommand({
+            Bucket: r2BucketName,
+            Key: key,
+            Body: buffer,
+            ContentType: contentType || 'application/octet-stream'
+        })
+    );
+    return publicUrlForKey(key);
+}
+
+async function copySheet (srcKey, destKey) {
+    requireR2();
+    await r2Client.send(
+        new CopyObjectCommand({
+            Bucket: r2BucketName,
+            Key: destKey,
+            CopySource: copySourcePath(r2BucketName, srcKey)
+        })
+    );
+}
+
+async function deleteSheet (key) {
+    requireR2();
+    await r2Client.send(new DeleteObjectCommand({ Bucket: r2BucketName, Key: key }));
+}
+
+async function sheetExists (key) {
+    requireR2();
+    try {
+        await r2Client.send(new HeadObjectCommand({ Bucket: r2BucketName, Key: key }));
+        return true;
+    } catch (e) {
+        if (e?.$metadata?.httpStatusCode === 404 || e?.name === 'NotFound') return false;
+        throw e;
+    }
+}
+
+/** Lista objectos no bucket R2 (diagnóstico / admin). */
+async function listSheets () {
+    requireR2();
+    const out = [];
+    let ContinuationToken;
+    do {
+        const resp = await r2Client.send(
+            new ListObjectsV2Command({
+                Bucket: r2BucketName,
+                ContinuationToken
+            })
+        );
+        for (const obj of resp.Contents || []) {
+            out.push({
+                name: obj.Key,
+                size: String(obj.Size ?? ''),
+                uploaded: obj.LastModified ? obj.LastModified.toISOString() : '',
+                contentType: '',
+                downloadUrl: publicUrlForKey(obj.Key)
+            });
         }
-    }
-    if (isGCS()) {
-        const [exists] = await gcsBucket.file(key).exists();
-        return exists;
-    }
-    throw new Error('Storage não configurado.');
+        ContinuationToken = resp.IsTruncated ? resp.NextContinuationToken : undefined;
+    } while (ContinuationToken);
+    return out;
 }
 
 module.exports = {
@@ -199,14 +234,21 @@ module.exports = {
     initR2FromEnv,
     isR2,
     isGCS,
+    mediaReady,
+    sheetsReady,
     storageReady,
-    storageType: () => storageType,
+    storageType,
     listFiles,
     uploadBuffer,
     copyObject,
     deleteObject,
     objectExists,
+    uploadSheet,
+    copySheet,
+    deleteSheet,
+    sheetExists,
+    listSheets,
     publicUrlForKey,
     gcsPublicUrl: (key) =>
-        isGCS() ? `https://storage.googleapis.com/${gcsBucketName}/${encodeURIComponent(key)}` : publicUrlForKey(key)
+        `https://storage.googleapis.com/${gcsBucketName}/${encodeURIComponent(key)}`
 };

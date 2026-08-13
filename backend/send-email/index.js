@@ -76,8 +76,15 @@ const limiter = rateLimit({
     message: { status: 429, message: "Muitas requisições. Tente novamente após 15 minutos." }
 });
 
+// Login local: limite mais folgado (o limiter global de 20/15min bloqueava testes)
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { status: 429, message: "Muitas tentativas de login. Aguarde alguns minutos." }
+});
+
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
-let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, bucket, BUCKET_NAME;
+let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, partiturasCollection, bucket, BUCKET_NAME;
 
 function initFirebaseAndGCS() {
     try {
@@ -93,21 +100,23 @@ function initFirebaseAndGCS() {
         expensesCollection = db.collection('expenses');
         youtubeVideosCollection = db.collection('youtubeVideos');
         repertoriosCollection = db.collection('repertorios');
+        partiturasCollection = db.collection('partituras');
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
+
+        // Dual storage: GCS = mídia/anexos; R2 = partituras (não se substituem).
+        storageAdapter.initGCS({ bucket, bucketName: BUCKET_NAME });
         console.log(`✅ Google Cloud Storage inicializado. Bucket: ${BUCKET_NAME}`);
 
-        const wantR2 = String(process.env.STORAGE_PROVIDER || '').toLowerCase() === 'r2';
-        const r2Ok = wantR2 && storageAdapter.initR2FromEnv();
-        if (!r2Ok) {
-            storageAdapter.initGCS({ bucket, bucketName: BUCKET_NAME });
-            if (wantR2) {
-                console.warn('⚠️ STORAGE_PROVIDER=r2 mas credenciais R2 incompletas; usando Google Cloud Storage para ficheiros.');
-            }
-            console.log('📦 Armazenamento de ficheiros: Google Cloud Storage');
+        const storageProviderRaw = String(process.env.STORAGE_PROVIDER || '').trim();
+        console.log(`📦 STORAGE_PROVIDER=${storageProviderRaw ? JSON.stringify(storageProviderRaw) : '(não definido — R2 activa-se se R2_* estiverem completas)'}`);
+        const r2Ok = storageAdapter.initR2FromEnv();
+        if (r2Ok) {
+            console.log('📦 Partituras: Cloudflare R2 | Mídia/anexos: Google Cloud Storage');
         } else {
-            console.log('📦 Armazenamento de ficheiros: Cloudflare R2');
+            console.warn('⚠️ R2 não activo — upload de partituras no admin ficará indisponível até configurar R2_*.');
+            console.log('📦 Mídia/anexos: Google Cloud Storage');
         }
     } catch (error) {
         console.error('❌ Erro ao inicializar serviços (Firebase/GCS):', error);
@@ -165,12 +174,17 @@ app.post('/api/admin/generate-key', authenticateJWT, async (req, res) => {
     }
 });
 
-app.post('/api/admin/login', limiter, (req, res) => {
+app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { email, password } = req.body;
+    console.log(`🔐 Tentativa de login: ${email || '(sem email)'}`);
     const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
-    if (!user) return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
+    if (!user) {
+        console.warn(`🔐 Login falhou para: ${email || '(sem email)'}`);
+        return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
+    }
 
     const token = jwt.sign({ userId: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+    console.log(`🔐 Login OK: ${user.email} (${user.role})`);
     res.status(200).json({ status: 200, message: 'Login OK', token, role: user.role });
 });
 
@@ -251,7 +265,9 @@ app.get('/api/public/health', (req, res) => {
 });
 
 // Proxy para PDFs de partituras (evita CORS ao fazer fetch do R2 no browser)
-const R2_BASE = 'https://pub-934c96bc6fb449a7ad7b3491065976d3.r2.dev';
+const R2_BASE = () =>
+    String(process.env.R2_PUBLIC_BASE_URL || 'https://pub-934c96bc6fb449a7ad7b3491065976d3.r2.dev').replace(/\/+$/, '');
+
 app.get('/api/public/partituras/proxy', async (req, res) => {
     const { folder, file } = req.query;
     if (!folder || !file) {
@@ -264,7 +280,7 @@ app.get('/api/public/partituras/proxy', async (req, res) => {
     if (!safeFile || safeFile !== file) {
         return res.status(400).json({ message: 'Nome de arquivo inválido.' });
     }
-    const url = `${R2_BASE}/${folder}/pdf/${safeFile}.pdf`;
+    const url = `${R2_BASE()}/${folder}/pdf/${safeFile}.pdf`;
     try {
         const r = await fetch(url);
         if (!r.ok) {
@@ -441,7 +457,7 @@ function extractYoutubeId(input) {
 
 app.get('/api/attachments/list', authenticateJWT, async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileList = await storageAdapter.listFiles();
         res.status(200).json(fileList);
     } catch (error) {
@@ -451,7 +467,7 @@ app.get('/api/attachments/list', authenticateJWT, async (req, res) => {
 
 app.get('/api/public/photos', async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const files = await storageAdapter.listFiles();
         const photos = files
             .filter((f) => String(f.name || '').toLowerCase().startsWith('foto__'))
@@ -478,7 +494,7 @@ app.post('/api/attachments/upload', authenticateJWT, upload.array('files', 20), 
     if (!/^\d{4}-\d{2}$/.test(periodKey) || periodKey < '2025-12') {
         return res.status(400).json({ message: 'Selecione um período válido (dezembro de 2025 em diante).' });
     }
-    if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+    if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
 
     const uploaded = [];
     const errors = [];
@@ -514,7 +530,7 @@ app.post('/api/attachments/upload', authenticateJWT, upload.array('files', 20), 
 
 app.patch('/api/attachments/move', authenticateJWT, async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileName = safeAttachmentName(req.body?.fileName);
         const periodKey = String(req.body?.periodKey || '').trim();
         if (!fileName) return res.status(400).json({ message: 'Nome de arquivo inválido.' });
@@ -545,7 +561,7 @@ app.patch('/api/attachments/move', authenticateJWT, async (req, res) => {
 app.post('/api/attachments/replace', authenticateJWT, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const existingFileName = safeAttachmentName(req.body?.existingFileName);
         if (!existingFileName) return res.status(400).json({ message: 'Nome do arquivo inválido.' });
         const parsed = parseAttachmentName(existingFileName);
@@ -589,7 +605,7 @@ app.post('/api/attachments/replace', authenticateJWT, upload.single('file'), asy
 
 app.delete('/api/attachments/delete/:fileName', authenticateJWT, async (req, res) => {
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileName = safeAttachmentName(req.params.fileName);
         if (!fileName) return res.status(400).json({ message: 'Nome inválido.' });
         await storageAdapter.deleteObject(fileName);
@@ -745,6 +761,7 @@ function serializeRepertorio(doc) {
         date: d.date || '',
         location: d.location || '',
         songs: Array.isArray(d.songs) ? d.songs : [],
+        archived: Boolean(d.archived),
         createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
         updatedAt: d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toISOString() : null
     };
@@ -770,6 +787,7 @@ app.post('/api/admin/repertorios', authenticateJWT, async (req, res) => {
 
         const docRef = await repertoriosCollection.add({
             ...value,
+            archived: false,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             createdBy: req.user?.userId || req.user?.email || 'admin'
@@ -804,6 +822,30 @@ app.put('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     }
 });
 
+// Arquivar / restaurar (esconde do site sem apagar)
+app.patch('/api/admin/repertorios/:id/archive', authenticateJWT, async (req, res) => {
+    try {
+        const archived = Boolean(req.body?.archived);
+        const ref = repertoriosCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Repertório não encontrado.' });
+
+        await ref.update({
+            archived,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        res.status(200).json({
+            status: 200,
+            archived,
+            message: archived ? 'Repertório arquivado.' : 'Repertório restaurado.'
+        });
+    } catch (error) {
+        console.error('admin/repertorios/archive:', error);
+        res.status(500).json({ message: 'Erro ao atualizar arquivo do repertório.' });
+    }
+});
+
 // Exclusão de um repertório
 app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     try {
@@ -819,15 +861,376 @@ app.delete('/api/admin/repertorios/:id', authenticateJWT, async (req, res) => {
     }
 });
 
-// Leitura pública (usada em /repertorio-apresentacoes e no filtro de /partituras)
+// Leitura pública — só repertórios ativos (não arquivados)
 app.get('/api/public/repertorios', async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
-        const data = snapshot.docs.map(serializeRepertorio);
+        const data = snapshot.docs
+            .map(serializeRepertorio)
+            .filter((r) => !r.archived);
         res.status(200).json(data);
     } catch (error) {
         console.error('public/repertorios/list:', error);
         res.status(500).json({ message: 'Erro ao listar repertórios.' });
+    }
+});
+
+// --- Partituras (ficheiros no Cloudflare R2; metadados no Firestore) ---
+
+function safePartituraSlug(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
+}
+
+function isValidPartituraFolder(folder) {
+    return folder === 'racionais' || folder === 'diversas';
+}
+
+function partituraPdfKey(folder, slug) {
+    return `${folder}/pdf/${slug}.pdf`;
+}
+
+function partituraSibKey(folder, slug) {
+    return `${folder}/sib/${slug}.sib`;
+}
+
+function partituraPublicUrl(folder, kind, slug) {
+    return `${R2_BASE()}/${folder}/${kind}/${slug}.${kind === 'sib' ? 'sib' : 'pdf'}`;
+}
+
+function serializePartitura(doc) {
+    const d = doc.data() || {};
+    const folder = d.folder || 'diversas';
+    const mp3 = d.mp3 || '';
+    return {
+        id: doc.id,
+        title: d.title || '',
+        name: d.title || d.name || '',
+        folder,
+        mp3,
+        time: d.time || '3:00',
+        pdfFileName: d.pdfFileName || (mp3 ? partituraPdfKey(folder, mp3) : ''),
+        sibFileName: d.sibFileName || (mp3 ? partituraSibKey(folder, mp3) : ''),
+        pdfUrl: d.pdfUrl || (mp3 ? partituraPublicUrl(folder, 'pdf', mp3) : ''),
+        sibUrl: d.sibUrl || (mp3 ? partituraPublicUrl(folder, 'sib', mp3) : ''),
+        hasPdf: Boolean(d.pdfFileName || d.pdfUrl || mp3),
+        hasSib: Boolean(d.sibFileName || d.sibUrl),
+        parts: Array.isArray(d.parts) ? d.parts : [],
+        createdAt: d.createdAt?.toDate?.()?.toISOString?.() || d.createdAt || null,
+        updatedAt: d.updatedAt?.toDate?.()?.toISOString?.() || d.updatedAt || null
+    };
+}
+
+async function findPartituraByFolderSlug(folder, mp3, excludeId) {
+    const docId = `${folder}__${mp3}`;
+    if (excludeId && excludeId === docId) return null;
+    const snap = await partiturasCollection.doc(docId).get();
+    if (!snap.exists) return null;
+    if (excludeId && snap.id === excludeId) return null;
+    return snap;
+}
+
+function pickUploadedFile(filesByField, field) {
+    const entry = filesByField[field];
+    return Array.isArray(entry) ? entry[0] : entry;
+}
+
+app.get('/api/public/partituras', async (req, res) => {
+    try {
+        if (!partiturasCollection) {
+            return res.status(503).json({ message: 'Serviço temporariamente indisponível.' });
+        }
+        const snapshot = await partiturasCollection.get();
+        const items = snapshot.docs.map(serializePartitura).sort((a, b) =>
+            String(a.title || '').localeCompare(String(b.title || ''), 'pt')
+        );
+        const racionais = items.filter((p) => p.folder === 'racionais');
+        const diversas = items.filter((p) => p.folder === 'diversas');
+        res.status(200).json({
+            r2BaseUrl: R2_BASE(),
+            source: items.length ? 'firestore' : 'empty',
+            racionais,
+            diversas
+        });
+    } catch (error) {
+        console.error('public/partituras/list:', error);
+        res.status(500).json({ message: 'Erro ao listar partituras.' });
+    }
+});
+
+app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
+    try {
+        const snapshot = await partiturasCollection.get();
+        const data = snapshot.docs.map(serializePartitura).sort((a, b) =>
+            String(a.title || '').localeCompare(String(b.title || ''), 'pt')
+        );
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('admin/partituras/list:', error);
+        res.status(500).json({ message: 'Erro ao listar partituras.' });
+    }
+});
+
+app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, res) => {
+    try {
+        const items = Array.isArray(req.body?.items) ? req.body.items : [];
+        if (!items.length) return res.status(400).json({ message: 'Envie items[] com title, folder e mp3.' });
+
+        let created = 0;
+        let skipped = 0;
+        for (const raw of items) {
+            const folder = String(raw.folder || '').trim();
+            const mp3 = safePartituraSlug(raw.mp3 || raw.slug);
+            const title = String(raw.title || '').trim();
+            if (!isValidPartituraFolder(folder) || !mp3 || !title) {
+                skipped++;
+                continue;
+            }
+            const existing = await findPartituraByFolderSlug(folder, mp3);
+            if (existing) {
+                skipped++;
+                continue;
+            }
+            await partiturasCollection.doc(`${folder}__${mp3}`).set({
+                title,
+                folder,
+                mp3,
+                time: String(raw.time || '3:00').trim() || '3:00',
+                pdfFileName: partituraPdfKey(folder, mp3),
+                sibFileName: partituraSibKey(folder, mp3),
+                pdfUrl: partituraPublicUrl(folder, 'pdf', mp3),
+                sibUrl: partituraPublicUrl(folder, 'sib', mp3),
+                parts: [],
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                createdBy: req.user?.email || null
+            });
+            created++;
+        }
+        res.status(200).json({ status: 200, created, skipped, message: `Importação concluída: ${created} criadas, ${skipped} ignoradas.` });
+    } catch (error) {
+        console.error('admin/partituras/import-catalog:', error);
+        res.status(500).json({ message: 'Erro ao importar catálogo.' });
+    }
+});
+
+app.post('/api/admin/partituras', authenticateJWT, upload.fields([
+    { name: 'pdfFile', maxCount: 1 },
+    { name: 'sibFile', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        if (!storageAdapter.sheetsReady()) {
+            return res.status(503).json({ message: 'Cloudflare R2 indisponível. Configure as variáveis R2_* no Cloud Run.' });
+        }
+        const title = String(req.body?.title || req.body?.name || '').trim();
+        const folder = String(req.body?.folder || '').trim();
+        const mp3 = safePartituraSlug(req.body?.mp3 || req.body?.slug || title);
+        const time = String(req.body?.time || '3:00').trim() || '3:00';
+
+        if (!title) return res.status(400).json({ message: 'Informe o nome da partitura.' });
+        if (!isValidPartituraFolder(folder)) return res.status(400).json({ message: 'Pasta inválida (use racionais ou diversas).' });
+        if (!mp3) return res.status(400).json({ message: 'Slug (mp3) inválido.' });
+
+        const duplicate = await findPartituraByFolderSlug(folder, mp3);
+        if (duplicate) {
+            return res.status(409).json({ message: `Já existe partitura com slug "${mp3}" em ${folder}.` });
+        }
+
+        const filesByField = req.files || {};
+        const pdfFile = pickUploadedFile(filesByField, 'pdfFile');
+        const sibFile = pickUploadedFile(filesByField, 'sibFile');
+        if (!pdfFile) return res.status(400).json({ message: 'Selecione o arquivo PDF.' });
+        if (pdfFile.mimetype && pdfFile.mimetype !== 'application/pdf') {
+            return res.status(400).json({ message: 'O arquivo completo deve ser PDF.' });
+        }
+
+        const pdfFileName = partituraPdfKey(folder, mp3);
+        const pdfUrl = await storageAdapter.uploadSheet(pdfFileName, pdfFile.buffer, 'application/pdf');
+
+        let sibFileName = '';
+        let sibUrl = '';
+        if (sibFile) {
+            sibFileName = partituraSibKey(folder, mp3);
+            sibUrl = await storageAdapter.uploadSheet(
+                sibFileName,
+                sibFile.buffer,
+                sibFile.mimetype || 'application/octet-stream'
+            );
+        }
+
+        const docId = `${folder}__${mp3}`;
+        await partiturasCollection.doc(docId).set({
+            title,
+            folder,
+            mp3,
+            time,
+            pdfFileName,
+            sibFileName,
+            pdfUrl,
+            sibUrl,
+            parts: [],
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.user?.email || null
+        });
+
+        res.status(200).json({ status: 200, id: docId, message: 'Partitura criada com sucesso.' });
+    } catch (error) {
+        console.error('admin/partituras/create:', error);
+        res.status(500).json({ message: 'Erro ao criar partitura.' });
+    }
+});
+
+app.put('/api/admin/partituras/:id', authenticateJWT, upload.fields([
+    { name: 'pdfFile', maxCount: 1 },
+    { name: 'sibFile', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        if (!storageAdapter.sheetsReady()) {
+            return res.status(503).json({ message: 'Cloudflare R2 indisponível. Configure as variáveis R2_* no Cloud Run.' });
+        }
+        const ref = partiturasCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Partitura não encontrada.' });
+        const existing = snap.data() || {};
+
+        const title = String(req.body?.title || req.body?.name || existing.title || '').trim();
+        const folder = String(req.body?.folder || existing.folder || '').trim();
+        const mp3 = safePartituraSlug(req.body?.mp3 || req.body?.slug || existing.mp3 || title);
+        const time = String(req.body?.time || existing.time || '3:00').trim() || '3:00';
+
+        if (!title) return res.status(400).json({ message: 'Informe o nome da partitura.' });
+        if (!isValidPartituraFolder(folder)) return res.status(400).json({ message: 'Pasta inválida (use racionais ou diversas).' });
+        if (!mp3) return res.status(400).json({ message: 'Slug (mp3) inválido.' });
+
+        const duplicate = await findPartituraByFolderSlug(folder, mp3, req.params.id);
+        if (duplicate) {
+            return res.status(409).json({ message: `Já existe partitura com slug "${mp3}" em ${folder}.` });
+        }
+
+        const filesByField = req.files || {};
+        const pdfFile = pickUploadedFile(filesByField, 'pdfFile');
+        const sibFile = pickUploadedFile(filesByField, 'sibFile');
+
+        let pdfFileName = existing.pdfFileName || partituraPdfKey(existing.folder || folder, existing.mp3 || mp3);
+        let pdfUrl = existing.pdfUrl || partituraPublicUrl(existing.folder || folder, 'pdf', existing.mp3 || mp3);
+        let sibFileName = existing.sibFileName || '';
+        let sibUrl = existing.sibUrl || '';
+
+        const folderOrSlugChanged = folder !== existing.folder || mp3 !== existing.mp3;
+
+        if (pdfFile) {
+            if (pdfFile.mimetype && pdfFile.mimetype !== 'application/pdf') {
+                return res.status(400).json({ message: 'O arquivo completo deve ser PDF.' });
+            }
+            const newKey = partituraPdfKey(folder, mp3);
+            pdfUrl = await storageAdapter.uploadSheet(newKey, pdfFile.buffer, 'application/pdf');
+            if (pdfFileName && pdfFileName !== newKey) {
+                try { await storageAdapter.deleteSheet(pdfFileName); } catch (_) { /* ignore */ }
+            }
+            pdfFileName = newKey;
+        } else if (folderOrSlugChanged && pdfFileName) {
+            const newKey = partituraPdfKey(folder, mp3);
+            if (await storageAdapter.sheetExists(pdfFileName)) {
+                await storageAdapter.copySheet(pdfFileName, newKey);
+                try { await storageAdapter.deleteSheet(pdfFileName); } catch (_) { /* ignore */ }
+            }
+            pdfFileName = newKey;
+            pdfUrl = partituraPublicUrl(folder, 'pdf', mp3);
+        }
+
+        if (sibFile) {
+            const newKey = partituraSibKey(folder, mp3);
+            sibUrl = await storageAdapter.uploadSheet(
+                newKey,
+                sibFile.buffer,
+                sibFile.mimetype || 'application/octet-stream'
+            );
+            if (sibFileName && sibFileName !== newKey) {
+                try { await storageAdapter.deleteSheet(sibFileName); } catch (_) { /* ignore */ }
+            }
+            sibFileName = newKey;
+        } else if (folderOrSlugChanged && sibFileName) {
+            const newKey = partituraSibKey(folder, mp3);
+            if (await storageAdapter.sheetExists(sibFileName)) {
+                await storageAdapter.copySheet(sibFileName, newKey);
+                try { await storageAdapter.deleteSheet(sibFileName); } catch (_) { /* ignore */ }
+            }
+            sibFileName = newKey;
+            sibUrl = partituraPublicUrl(folder, 'sib', mp3);
+        }
+
+        const desiredId = `${folder}__${mp3}`;
+        const payload = {
+            title,
+            folder,
+            mp3,
+            time,
+            pdfFileName,
+            sibFileName,
+            pdfUrl,
+            sibUrl,
+            parts: Array.isArray(existing.parts) ? existing.parts : [],
+            createdAt: existing.createdAt || admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: existing.createdBy || req.user?.email || null,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (desiredId !== req.params.id) {
+            await partiturasCollection.doc(desiredId).set(payload);
+            await ref.delete();
+        } else {
+            await ref.update(payload);
+        }
+
+        res.status(200).json({ status: 200, message: 'Partitura atualizada com sucesso.', id: desiredId });
+    } catch (error) {
+        console.error('admin/partituras/update:', error);
+        res.status(500).json({ message: 'Erro ao atualizar partitura.' });
+    }
+});
+
+app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
+    try {
+        const ref = partiturasCollection.doc(req.params.id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ message: 'Partitura não encontrada.' });
+        const data = snap.data() || {};
+
+        // Por omissão só remove metadados no Firestore.
+        // Para apagar PDF/SIB no R2: ?deleteFiles=true (cuidado com o acervo de produção).
+        const deleteFiles = String(req.query.deleteFiles || req.body?.deleteFiles || '').toLowerCase() === 'true';
+
+        if (deleteFiles && storageAdapter.sheetsReady()) {
+            const keys = [
+                data.pdfFileName,
+                data.sibFileName,
+                ...(Array.isArray(data.parts) ? data.parts.map((p) => p.fileName) : [])
+            ].filter(Boolean);
+            for (const key of keys) {
+                try {
+                    await storageAdapter.deleteSheet(key);
+                } catch (e) {
+                    console.error('admin/partituras/delete storage:', key, e.message);
+                }
+            }
+        }
+
+        await ref.delete();
+        res.status(200).json({
+            status: 200,
+            message: deleteFiles
+                ? 'Partitura e ficheiros no Cloudflare excluídos.'
+                : 'Partitura removida do catálogo (ficheiros no Cloudflare mantidos).',
+            deletedFiles: deleteFiles
+        });
+    } catch (error) {
+        console.error('admin/partituras/delete:', error);
+        res.status(500).json({ message: 'Erro ao excluir partitura.' });
     }
 });
 
@@ -1036,7 +1439,7 @@ app.post('/api/finance/deposits/receipt', authenticateJWT, requireFinanceWriteAc
     if (!req.file) return res.status(400).json({ message: 'Arquivo ausente.' });
 
     try {
-        if (!storageAdapter.storageReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
+        if (!storageAdapter.mediaReady()) return res.status(503).json({ message: 'Armazenamento indisponível.' });
         const fileName = `deposits/${Date.now()}-${req.file.originalname.replace(/ /g, '_')}`;
         const publicUrl = await storageAdapter.uploadBuffer(fileName, req.file.buffer, req.file.mimetype);
         res.status(200).json({ status: 200, message: 'Comprovante enviado.', receiptUrl: publicUrl });

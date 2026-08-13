@@ -2,11 +2,10 @@ import { useState, useEffect, Fragment } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import JSZip from 'jszip'
 import PageWrapper from '../components/PageWrapper'
-import { racionais, diversas, R2_BASE_URL } from '../data/songs'
 import { INSTRUMENTOS_NAIPE, buildConsolidadoNaipeUrl } from '../data/instrumentosNaipe'
-import { REPERTORIO_MAIO_SHEET_IDS } from '../data/repertorioApresentacoes2026'
 import { API_BASE } from '../services/api'
 import api from '../services/api'
+import usePartiturasCatalog from '../hooks/usePartiturasCatalog'
 import { showToast } from '../components/Toast'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
@@ -78,13 +77,13 @@ function DownloadFailedModal({ totalOk, failed, onClose }) {
 
 const Partituras = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { racionais, diversas, r2BaseUrl: R2_BASE_URL, isLoading: catalogLoading } = usePartiturasCatalog()
   const [searchTerm, setSearchTerm] = useState('')
   const [racionaisOpen, setRacionaisOpen] = useState(false)
   const [diversasOpen, setDiversasOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [focusedField, setFocusedField] = useState(false)
   const [viewMode, setViewMode] = useState('list') // 'list' or 'grid'
-  const [isLoading, setIsLoading] = useState(true)
   const [downloading, setDownloading] = useState(null)
   const [selectedSheets, setSelectedSheets] = useState(new Set())
   const [showOnlySelectedSheets, setShowOnlySelectedSheets] = useState(false)
@@ -99,27 +98,24 @@ const Partituras = () => {
   const [repertorios, setRepertorios] = useState([])
   const [selectedRepertorioId, setSelectedRepertorioId] = useState('')
 
+  const isLoading = catalogLoading
+
   useEffect(() => {
     setIsVisible(true)
-    // Simular loading inicial
-    setTimeout(() => setIsLoading(false), 500)
   }, [])
 
   useEffect(() => {
-    if (searchParams.get('repertorio') === 'maio') {
-      const ids = new Set(REPERTORIO_MAIO_SHEET_IDS.filter(id => {
-        const dashIdx = id.indexOf('-')
-        const folder = id.slice(0, dashIdx)
-        const mp3 = id.slice(dashIdx + 1)
-        return (folder === 'racionais' ? racionais : diversas).some(s => s.mp3 === mp3)
-      }))
-      setSelectedSheets(ids)
-      setShowOnlySelectedSheets(true)
+    if (catalogLoading || repertorios.length === 0) return
+    const repParam = searchParams.get('repertorio')
+    if (!repParam) return
+    const found = repertorios.find((r) => r.id === repParam)
+    if (found) {
+      setSelectedRepertorioId(found.id)
       setRacionaisOpen(true)
       setDiversasOpen(true)
       setSearchParams({}, { replace: true })
     }
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, repertorios, catalogLoading])
 
   useEffect(() => {
     // Resetar estado de download após 2 segundos
@@ -198,20 +194,6 @@ const Partituras = () => {
 
   const selectAllFiltered = () => {
     setSelectedSheets(new Set(filteredSheets.map(getSheetId)))
-  }
-
-  const selectMayRepertoire = () => {
-    const ids = new Set(REPERTORIO_MAIO_SHEET_IDS.filter(id => {
-      const dashIdx = id.indexOf('-')
-      const folder = id.slice(0, dashIdx)
-      const mp3 = id.slice(dashIdx + 1)
-      return (folder === 'racionais' ? racionais : diversas).some(s => s.mp3 === mp3)
-    }))
-    setSelectedSheets(ids)
-    setShowOnlySelectedSheets(true)
-    setRacionaisOpen(true)
-    setDiversasOpen(true)
-    showToast(`${ids.size} partituras do repertório de maio selecionadas`, 'success', 3000)
   }
 
   const clearSelection = () => {
@@ -775,14 +757,6 @@ const Partituras = () => {
                 className="px-3 py-2 text-sm font-medium rounded-lg border border-rjb-text/20 text-rjb-text/70 dark:text-rjb-text-dark/70 hover:bg-rjb-text/5 transition-colors"
               >
                 Desmarcar
-              </button>
-              <button
-                type="button"
-                onClick={selectMayRepertoire}
-                className="px-3 py-2 text-sm font-medium rounded-lg border border-rjb-yellow/50 bg-rjb-yellow/10 text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/20 transition-colors"
-                title="Seleciona as partituras do repertório de maio (13/05/2026)"
-              >
-                📋 Repertório de Maio
               </button>
               <button
                 type="button"

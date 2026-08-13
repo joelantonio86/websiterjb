@@ -4,6 +4,9 @@
 .env.production
 *.env
 password.env
+**/serviceAccount*.json
+**/*-firebase-adminsdk*.json
+**/rjb-firebase.json
 
 # Arquivos de documentação sensível
 README-SECURITY.md
