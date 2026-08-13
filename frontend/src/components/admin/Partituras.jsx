@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
 import ConfirmationDialog from '../ConfirmationDialog'
@@ -13,6 +14,8 @@ const SECTIONS = [
   { folder: 'diversas', title: 'Outros clássicos', accent: 'border-blue-500', btn: 'Nova diversa' },
 ]
 
+const DEV_IMPORT_EMAIL = 'joelantoniomg.86@gmail.com'
+
 const normalize = (text) =>
   String(text || '')
     .toLowerCase()
@@ -20,6 +23,9 @@ const normalize = (text) =>
     .replace(/[\u0300-\u036f]/g, '')
 
 const Partituras = () => {
+  const { user } = useAuth()
+  const canImportCatalog = String(user?.email || '').trim().toLowerCase() === DEV_IMPORT_EMAIL
+
   const [partituras, setPartituras] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -27,7 +33,6 @@ const Partituras = () => {
   const [editingPartitura, setEditingPartitura] = useState(null)
   const [defaultFolder, setDefaultFolder] = useState('diversas')
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [deleteFilesToo, setDeleteFilesToo] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [importing, setImporting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -112,25 +117,22 @@ const Partituras = () => {
     closeModal()
     await fetchPartituras()
     if (savedId) {
-      // pequeno delay para o DOM renderizar a lista
       setTimeout(() => flashHighlight(savedId), 80)
     }
   }
 
   const openDelete = (partitura) => {
-    setDeleteFilesToo(false)
     setDeleteConfirmText('')
     setDeleteTarget(partitura)
   }
 
-  const canConfirmDelete = !deleteFilesToo || deleteConfirmText.trim().toUpperCase() === 'EXCLUIR'
+  const canConfirmDelete = deleteConfirmText.trim().toUpperCase() === 'EXCLUIR'
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget || !canConfirmDelete) return
-    showLoader(true, deleteFilesToo ? 'Excluindo partitura e ficheiros no R2...' : 'Removendo do catálogo...')
+    showLoader(true, 'Excluindo partitura e ficheiros no Cloudflare...')
     try {
-      const qs = deleteFilesToo ? '?deleteFiles=true' : ''
-      const { data } = await api.delete(`/api/admin/partituras/${deleteTarget.id}${qs}`)
+      const { data } = await api.delete(`/api/admin/partituras/${deleteTarget.id}`)
       showMessage(data.message || 'Partitura excluída com sucesso!')
       fetchPartituras()
     } catch (error) {
@@ -138,12 +140,12 @@ const Partituras = () => {
     } finally {
       showLoader(false)
       setDeleteTarget(null)
-      setDeleteFilesToo(false)
       setDeleteConfirmText('')
     }
   }
 
   const handleImportCatalog = async () => {
+    if (!canImportCatalog) return
     setImporting(true)
     showLoader(true, 'Importando catálogo atual...')
     try {
@@ -238,7 +240,7 @@ const Partituras = () => {
             {filtered.length} visível{filtered.length !== 1 ? 'eis' : ''} · {partituras.length} no total · {grouped.racionais.length} racionais · {grouped.diversas.length} diversas
           </p>
           <div className="flex flex-col sm:flex-row gap-2">
-            {partituras.length === 0 && (
+            {canImportCatalog && partituras.length === 0 && (
               <button
                 type="button"
                 onClick={handleImportCatalog}
@@ -303,9 +305,13 @@ const Partituras = () => {
         <EmptyState
           icon="🎼"
           title="Nenhuma partitura no banco"
-          description="Importe o catálogo atual do site (PDF/SIB já no Cloudflare) ou cadastre a primeira partitura."
-          actionLabel="Importar catálogo do site"
-          onAction={handleImportCatalog}
+          description={
+            canImportCatalog
+              ? 'Importe o catálogo atual do site (PDF/SIB já no Cloudflare) ou cadastre a primeira partitura.'
+              : 'Cadastre a primeira partitura com PDF e SIB.'
+          }
+          actionLabel={canImportCatalog ? 'Importar catálogo do site' : 'Nova partitura'}
+          onAction={canImportCatalog ? handleImportCatalog : () => openCreateModal('racionais')}
         />
       ) : filtered.length === 0 ? (
         <EmptyState
@@ -383,7 +389,6 @@ const Partituras = () => {
         isOpen={Boolean(deleteTarget)}
         onClose={() => {
           setDeleteTarget(null)
-          setDeleteFilesToo(false)
           setDeleteConfirmText('')
         }}
         onConfirm={handleDeleteConfirm}
@@ -392,43 +397,28 @@ const Partituras = () => {
         message={
           <div className="space-y-3 text-left">
             <p>
-              Remover <strong>&quot;{deleteTarget?.title || deleteTarget?.name}&quot;</strong> do catálogo?
+              Excluir <strong>&quot;{deleteTarget?.title || deleteTarget?.name}&quot;</strong>?
             </p>
-            <label className="flex items-start gap-2 text-sm cursor-pointer">
+            <p className="text-sm text-red-600 dark:text-red-400">
+              Remove do catálogo <strong>e</strong> os ficheiros PDF/SIB no Cloudflare (produção).
+              Confirma que tens backup se fores precisar destes ficheiros.
+            </p>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Para confirmar, escreve <code className="text-red-600">EXCLUIR</code>
+              </label>
               <input
-                type="checkbox"
-                className="mt-1"
-                checked={deleteFilesToo}
-                onChange={(e) => {
-                  setDeleteFilesToo(e.target.checked)
-                  setDeleteConfirmText('')
-                }}
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="EXCLUIR"
+                className="w-full p-2.5 text-sm rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-red-500/40 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-red-500/40"
+                autoComplete="off"
               />
-              <span>
-                Apagar também os ficheiros <strong>PDF/SIB no Cloudflare</strong>.
-                <span className="block text-red-600 dark:text-red-400 mt-1">
-                  Atenção: remove do bucket de produção. No catálogo importado, normalmente NÃO marques.
-                </span>
-              </span>
-            </label>
-            {deleteFilesToo && (
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Para confirmar, escreve <code className="text-red-600">EXCLUIR</code>
-                </label>
-                <input
-                  type="text"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="EXCLUIR"
-                  className="w-full p-2.5 text-sm rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border border-red-500/40 text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-red-500/40"
-                  autoComplete="off"
-                />
-              </div>
-            )}
+            </div>
           </div>
         }
-        confirmLabel={deleteFilesToo ? 'Excluir tudo no Cloudflare' : 'Remover do catálogo'}
+        confirmLabel="Excluir no catálogo e Cloudflare"
         cancelLabel="Cancelar"
         variant="danger"
       />

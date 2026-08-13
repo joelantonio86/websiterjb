@@ -987,6 +987,11 @@ app.get('/api/admin/partituras', authenticateJWT, async (req, res) => {
 
 app.post('/api/admin/partituras/import-catalog', authenticateJWT, async (req, res) => {
     try {
+        const actor = String(req.user?.email || req.user?.userId || '').trim().toLowerCase();
+        const allowed = actor === 'joelantoniomg.86@gmail.com';
+        if (!allowed) {
+            return res.status(403).json({ message: 'Importação de catálogo restrita.' });
+        }
         const items = Array.isArray(req.body?.items) ? req.body.items : [];
         if (!items.length) return res.status(400).json({ message: 'Envie items[] com title, folder e mp3.' });
 
@@ -1214,11 +1219,9 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
         if (!snap.exists) return res.status(404).json({ message: 'Partitura não encontrada.' });
         const data = snap.data() || {};
 
-        // Por omissão só remove metadados no Firestore.
-        // Para apagar PDF/SIB no R2: ?deleteFiles=true (cuidado com o acervo de produção).
-        const deleteFiles = String(req.query.deleteFiles || req.body?.deleteFiles || '').toLowerCase() === 'true';
-
-        if (deleteFiles && storageAdapter.sheetsReady()) {
+        // Exclusão remove metadados no Firestore e os ficheiros PDF/SIB no Cloudflare R2.
+        let deletedFiles = false;
+        if (storageAdapter.sheetsReady()) {
             const keys = [
                 data.pdfFileName,
                 data.sibFileName,
@@ -1227,6 +1230,7 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
             for (const key of keys) {
                 try {
                     await storageAdapter.deleteSheet(key);
+                    deletedFiles = true;
                 } catch (e) {
                     console.error('admin/partituras/delete storage:', key, e.message);
                 }
@@ -1236,10 +1240,10 @@ app.delete('/api/admin/partituras/:id', authenticateJWT, async (req, res) => {
         await ref.delete();
         res.status(200).json({
             status: 200,
-            message: deleteFiles
+            message: deletedFiles
                 ? 'Partitura e ficheiros no Cloudflare excluídos.'
-                : 'Partitura removida do catálogo (ficheiros no Cloudflare mantidos).',
-            deletedFiles: deleteFiles
+                : 'Partitura removida do catálogo.',
+            deletedFiles
         });
     } catch (error) {
         console.error('admin/partituras/delete:', error);
