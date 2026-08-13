@@ -184,12 +184,17 @@ const Partituras = () => {
               {partitura.time ? ` · ${partitura.time}` : ''}
             </p>
             <p className="text-[11px] text-rjb-text/45 dark:text-rjb-text-dark/45 mt-1 font-mono truncate">
-              {partitura.folder}/pdf/{partitura.mp3}.pdf
+              {partitura.folder}/pdf|sib|mp3|mp3original/{partitura.mp3}.*
             </p>
           </div>
           <div className="flex flex-col items-end gap-1">
             <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow whitespace-nowrap">
-              {[partitura.hasPdf !== false && 'PDF', partitura.hasSib && 'SIB'].filter(Boolean).join(' + ') || '—'}
+              {[
+                partitura.hasPdf !== false && 'PDF',
+                partitura.hasSib && 'SIB',
+                partitura.hasMp3 && 'MP3',
+                partitura.hasMp3Original && 'Orig.',
+              ].filter(Boolean).join(' + ') || '—'}
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-rjb-text/50 dark:text-rjb-text-dark/50">
               Catálogo
@@ -206,6 +211,16 @@ const Partituras = () => {
           {partitura.sibUrl && (
             <a href={partitura.sibUrl} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline">
               Abrir SIB
+            </a>
+          )}
+          {partitura.mp3Url && (
+            <a href={partitura.mp3Url} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline">
+              MP3 Sibelius
+            </a>
+          )}
+          {partitura.mp3OriginalUrl && (
+            <a href={partitura.mp3OriginalUrl} target="_blank" rel="noopener noreferrer" className="text-rjb-yellow hover:underline">
+              MP3 original
             </a>
           )}
         </div>
@@ -400,7 +415,7 @@ const Partituras = () => {
               Excluir <strong>&quot;{deleteTarget?.title || deleteTarget?.name}&quot;</strong>?
             </p>
             <p className="text-sm text-red-600 dark:text-red-400">
-              Remove do catálogo <strong>e</strong> os ficheiros PDF/SIB no Cloudflare (produção).
+              Remove do catálogo <strong>e</strong> os ficheiros PDF/SIB/MP3 no Cloudflare (produção).
               Confirma que tens backup se fores precisar destes ficheiros.
             </p>
             <div>
