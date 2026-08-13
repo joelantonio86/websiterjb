@@ -151,7 +151,7 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex.: Apresentação de Maio 2026"
+                placeholder="Ex.: Apresentação de Setembro 2026"
                 className={`w-full p-3 text-base rounded-lg bg-rjb-bg-light dark:bg-rjb-bg-dark border text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow transition-all ${
                   errors.name ? 'border-red-500' : 'border-rjb-yellow/20'
                 }`}

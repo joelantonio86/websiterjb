@@ -18,10 +18,7 @@ const formatDateLabel = (dateStr) => {
   return `${day} de ${MESES[Number(month) - 1] || month} de ${year}`
 }
 
-/**
- * Destaque do próximo repertório activo (não arquivado) vindo da API pública.
- * Substitui o bloco hardcoded de Maio.
- */
+/** Destaque do próximo repertório activo (não arquivado) da API pública. */
 export default function NextRepertorioHighlight({ compact = false }) {
   const [repertorios, setRepertorios] = useState([])
   const [loading, setLoading] = useState(true)

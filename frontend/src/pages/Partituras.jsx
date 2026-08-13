@@ -107,7 +107,7 @@ const Partituras = () => {
   useEffect(() => {
     if (catalogLoading || repertorios.length === 0) return
     const repParam = searchParams.get('repertorio')
-    if (!repParam || repParam === 'maio') return
+    if (!repParam) return
     const found = repertorios.find((r) => r.id === repParam)
     if (found) {
       setSelectedRepertorioId(found.id)
