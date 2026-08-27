@@ -40,7 +40,7 @@ const AdminLayout = () => {
         <header className="rounded-2xl border border-rjb-yellow/20 bg-rjb-card-light/70 dark:bg-rjb-card-dark/70 shadow-lg p-5 sm:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow">Painel Administrativo</h1>
+              <h1 className="font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl font-bold text-rjb-gold">Painel Administrativo</h1>
               <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1 break-all">
                 {user?.email}
               </p>
@@ -56,7 +56,7 @@ const AdminLayout = () => {
               )}
               <button
                 onClick={handleLogout}
-                className="bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/50 text-rjb-yellow font-semibold py-2.5 px-4 rounded-xl hover:bg-rjb-yellow/10 transition-colors"
+                className="bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/50 text-rjb-gold font-semibold py-2.5 px-4 rounded-xl hover:bg-rjb-yellow/10 transition-colors"
               >
                 Sair
               </button>
@@ -75,7 +75,7 @@ const AdminLayout = () => {
                   className={({ isActive }) =>
                     `${linkBase} ${
                       isActive
-                        ? 'border-rjb-yellow/60 bg-rjb-yellow/15 text-rjb-yellow'
+                        ? 'border-rjb-yellow/60 bg-rjb-yellow/15 text-rjb-gold'
                         : 'border-rjb-yellow/20 hover:bg-rjb-yellow/10 text-rjb-text dark:text-rjb-text-dark'
                     }`
                   }
@@ -102,7 +102,7 @@ const AdminLayout = () => {
                     className={({ isActive }) =>
                       `block ${linkBase} ${
                         isActive
-                          ? 'border-rjb-yellow/60 bg-rjb-yellow/15 text-rjb-yellow'
+                          ? 'border-rjb-yellow/60 bg-rjb-yellow/15 text-rjb-gold'
                           : 'border-rjb-yellow/20 hover:bg-rjb-yellow/10 text-rjb-text dark:text-rjb-text-dark'
                       }`
                     }

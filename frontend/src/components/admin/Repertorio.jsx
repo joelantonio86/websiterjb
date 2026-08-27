@@ -132,7 +132,7 @@ const Repertorios = () => {
               </p>
             )}
           </div>
-          <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow whitespace-nowrap">
+          <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold bg-rjb-yellow/20 text-rjb-gold whitespace-nowrap">
             {songs.length} música{songs.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -142,7 +142,7 @@ const Repertorios = () => {
             <button
               type="button"
               onClick={() => toggleExpanded(repertorio.id)}
-              className="text-xs font-semibold text-rjb-yellow hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-rjb-gold hover:underline flex items-center gap-1"
             >
               {isExpanded ? 'Ocultar músicas' : 'Ver músicas'}
               <svg
@@ -213,14 +213,14 @@ const Repertorios = () => {
             <button
               type="button"
               onClick={() => setShowArchived(false)}
-              className={`px-3 py-2 text-xs font-bold ${!showArchived ? 'bg-rjb-yellow text-rjb-text' : 'text-rjb-text/70 dark:text-rjb-text-dark/70 hover:bg-rjb-yellow/10'}`}
+              className={`px-3 py-2 text-xs font-bold ${!showArchived ? 'bg-rjb-yellow text-rjb-text' : 'text-rjb-gold hover:bg-rjb-yellow/10'}`}
             >
               Activos
             </button>
             <button
               type="button"
               onClick={() => setShowArchived(true)}
-              className={`px-3 py-2 text-xs font-bold ${showArchived ? 'bg-rjb-yellow text-rjb-text' : 'text-rjb-text/70 dark:text-rjb-text-dark/70 hover:bg-rjb-yellow/10'}`}
+              className={`px-3 py-2 text-xs font-bold ${showArchived ? 'bg-rjb-yellow text-rjb-text' : 'text-rjb-gold hover:bg-rjb-yellow/10'}`}
             >
               Arquivados ({archived.length})
             </button>
@@ -228,7 +228,7 @@ const Repertorios = () => {
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold text-sm hover:from-yellow-500 hover:to-yellow-600 shadow-lg hover:shadow-xl transition-all"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rjb-yellow to-rjb-yellow-hover text-rjb-text font-bold text-sm hover:from-rjb-yellow-hover hover:to-rjb-yellow-ink shadow-lg hover:shadow-xl transition-all"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
