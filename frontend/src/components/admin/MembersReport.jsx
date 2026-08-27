@@ -280,7 +280,7 @@ const MembersReport = () => {
         </div>
         <div className="p-5 sm:p-6">
           {/* Header com filtros */}
-          <div className="bg-gradient-to-br from-white via-gray-50 to-rjb-yellow/5 dark:from-rjb-bg-dark dark:via-rjb-bg-dark/90 dark:to-rjb-yellow/5 p-6 sm:p-8 lg:p-10 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 border border-gray-200/50 dark:border-rjb-yellow/10 shadow-lg backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-rjb-card-light via-rjb-bg-light to-rjb-yellow/5 dark:from-rjb-bg-dark dark:via-rjb-bg-dark/90 dark:to-rjb-yellow/5 p-6 sm:p-8 lg:p-10 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 border border-rjb-border-light dark:border-rjb-yellow/10 shadow-lg backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6">
               <div className="flex items-center gap-3 sm:gap-4 w-full lg:w-auto">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-rjb-yellow to-rjb-yellow/80 flex items-center justify-center shadow-lg flex-shrink-0">
@@ -305,7 +305,7 @@ const MembersReport = () => {
               <div className="flex flex-col gap-3 sm:gap-4 w-full lg:w-auto">
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                   <div className="relative flex-grow w-full sm:min-w-[200px] lg:min-w-[250px]">
-                    <span className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                    <span className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-rjb-text-muted dark:text-rjb-text-muted-dark">
                       <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                       </svg>
@@ -316,13 +316,13 @@ const MembersReport = () => {
                       placeholder="Buscar por nome..."
                       value={filters.name}
                       onChange={(e) => handleFilterChange('name', e.target.value)}
-                      className="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-base rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md"
+                      className="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-base rounded-lg sm:rounded-xl border-2 border-rjb-border-light dark:border-rjb-border-dark dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md"
                     />
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                   <div className="relative flex-grow w-full sm:min-w-[150px]">
-                    <span className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                    <span className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-rjb-text-muted dark:text-rjb-text-muted-dark">
                       <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                       </svg>
@@ -330,7 +330,7 @@ const MembersReport = () => {
                     <select
                       value={filters.instrument}
                       onChange={(e) => handleFilterChange('instrument', e.target.value)}
-                      className={`pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!filters.instrument ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}
+                      className={`pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-rjb-border-light dark:border-rjb-border-dark dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!filters.instrument ? 'text-rjb-text-muted dark:text-rjb-text-muted-dark' : 'text-rjb-text dark:text-rjb-text-dark'}`}
                     >
                       <option value="">Filtrar por instrumento...</option>
                       {getUniqueInstruments().map(inst => (
@@ -339,7 +339,7 @@ const MembersReport = () => {
                     </select>
                   </div>
                   <div className="relative flex-grow w-full sm:min-w-[150px]">
-                    <span className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+                    <span className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-rjb-text-muted dark:text-rjb-text-muted-dark">
                       <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -348,7 +348,7 @@ const MembersReport = () => {
                     <select
                       value={filters.location}
                       onChange={(e) => handleFilterChange('location', e.target.value)}
-                      className={`pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!filters.location ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}
+                      className={`pl-10 sm:pl-12 pr-8 sm:pr-10 w-full py-2.5 sm:py-3 text-sm rounded-lg sm:rounded-xl border-2 border-rjb-border-light dark:border-rjb-border-dark dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md appearance-none bg-white dark:bg-rjb-bg-dark/50 cursor-pointer ${!filters.location ? 'text-rjb-text-muted dark:text-rjb-text-muted-dark' : 'text-rjb-text dark:text-rjb-text-dark'}`}
                     >
                       <option value="">Filtrar por localidade...</option>
                       {getUniqueLocations().map(loc => (
@@ -361,7 +361,7 @@ const MembersReport = () => {
             </div>
             
             {/* Botões de Ação */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 pt-4 border-t border-rjb-border-light dark:border-rjb-border-dark">
               <button
                 onClick={handleDownloadCSV}
                 className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 text-sm font-medium flex-1 sm:flex-none sm:min-w-[100px]"
@@ -384,7 +384,7 @@ const MembersReport = () => {
               </button>
               <button
                 onClick={clearFilters}
-                className="inline-flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95 text-sm font-medium flex-1 sm:flex-none sm:min-w-[100px]"
+                className="inline-flex items-center justify-center gap-2 bg-rjb-border-light dark:bg-rjb-border-dark hover:bg-rjb-border-light/70 dark:hover:bg-rjb-border-dark/70 text-rjb-text dark:text-rjb-text-dark px-4 py-2.5 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95 text-sm font-medium flex-1 sm:flex-none sm:min-w-[100px]"
                 title="Limpar Filtros"
               >
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,7 +405,7 @@ const MembersReport = () => {
                 return (
                   <div
                     key={m.id}
-                    className="bg-white dark:bg-rjb-card-dark rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+                    className="bg-white dark:bg-rjb-card-dark rounded-xl border border-rjb-border-light dark:border-rjb-border-dark p-4 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
                   >
                     <div className="mb-4">
                       <div className="flex items-start gap-3">
@@ -419,10 +419,10 @@ const MembersReport = () => {
                             {m.name}
                           </h3>
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-rjb-text-muted dark:text-rjb-text-muted-dark flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                             </svg>
-                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium break-words">{m.instrument}</span>
+                            <span className="text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark font-medium break-words">{m.instrument}</span>
                           </div>
                         </div>
                       </div>
@@ -436,11 +436,11 @@ const MembersReport = () => {
                       </div>
                       
                       <div className="flex items-start gap-2">
-                        <svg className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-rjb-text-muted dark:text-rjb-text-muted-dark flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <span className="text-sm text-gray-600 dark:text-gray-400 font-medium break-words flex-1">{m.city || ''}/{m.state || ''}</span>
+                        <span className="text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark font-medium break-words flex-1">{m.city || ''}/{m.state || ''}</span>
                       </div>
                       
                       {m.phone && (
@@ -460,7 +460,7 @@ const MembersReport = () => {
                       )}
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-3 border-t border-rjb-border-light dark:border-rjb-border-dark">
                       <button
                         onClick={() => handleEdit(m)}
                         className="inline-flex items-center justify-center gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all shadow-sm"
@@ -489,7 +489,7 @@ const MembersReport = () => {
           </div>
 
           {/* Versão Desktop: Tabela */}
-          <div className="hidden lg:block rounded-xl border border-gray-200/50 dark:border-rjb-yellow/10 shadow-xl bg-white dark:bg-rjb-card-dark backdrop-blur-sm">
+          <div className="hidden lg:block rounded-xl border border-rjb-border-light dark:border-rjb-yellow/10 shadow-xl bg-white dark:bg-rjb-card-dark backdrop-blur-sm">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gradient-to-br from-amber-300 via-amber-300/95 to-amber-300/90 text-rjb-text dark:text-rjb-text-dark text-xs uppercase font-black tracking-wider shadow-lg relative">
@@ -572,7 +572,7 @@ const MembersReport = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="text-rjb-text dark:text-rjb-text-dark/80 divide-y divide-gray-100 dark:divide-gray-700/50">
+              <tbody className="text-rjb-text dark:text-rjb-text-dark/80 divide-y divide-rjb-border-light dark:divide-rjb-border-dark">
                 {paginatedMembers.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="p-8 text-center text-rjb-text/70 dark:text-rjb-text-dark/70">
@@ -589,7 +589,7 @@ const MembersReport = () => {
                     return (
                       <tr
                         key={m.id}
-                        className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-rjb-yellow/5 hover:to-transparent transition-all duration-300 group"
+                        className="border-b border-rjb-border-light dark:border-rjb-border-dark hover:bg-gradient-to-r hover:from-rjb-yellow/5 hover:to-transparent transition-all duration-300 group"
                       >
                         <td className="p-3 px-4 text-center">
                           <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-rjb-yellow/30 to-rjb-yellow/20 text-rjb-yellow font-bold text-sm border-2 border-rjb-yellow/40 shadow-sm">
@@ -603,10 +603,10 @@ const MembersReport = () => {
                         </td>
                         <td className="p-3 px-4">
                           <div className="flex items-start gap-1.5">
-                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-rjb-text-muted dark:text-rjb-text-muted-dark flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                             </svg>
-                            <span className="text-sm text-gray-700 dark:text-gray-300 font-medium leading-relaxed break-words" style={{ wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxHeight: '3em' }}>
+                            <span className="text-sm text-rjb-text dark:text-rjb-text-dark font-medium leading-relaxed break-words" style={{ wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxHeight: '3em' }}>
                               {m.instrument}
                             </span>
                           </div>
@@ -618,11 +618,11 @@ const MembersReport = () => {
                         </td>
                         <td className="p-3 px-4">
                           <div className="flex items-start gap-1.5">
-                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-rjb-text-muted dark:text-rjb-text-muted-dark flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed break-words" style={{ wordBreak: 'break-word', lineHeight: '1.5' }}>
+                            <span className="text-sm text-rjb-text dark:text-rjb-text-dark leading-relaxed break-words" style={{ wordBreak: 'break-word', lineHeight: '1.5' }}>
                               {m.city || ''}/{m.state || ''}
                             </span>
                           </div>
@@ -646,7 +646,7 @@ const MembersReport = () => {
                               </div>
                             </a>
                           ) : (
-                            <span className="text-gray-400 text-sm">---</span>
+                            <span className="text-rjb-text-muted dark:text-rjb-text-muted-dark text-sm">---</span>
                           )}
                         </td>
                         <td className="p-3 pr-4 text-right">

@@ -308,7 +308,7 @@ const Financeiro = () => {
               className={`flex-shrink-0 min-h-[44px] sm:min-h-0 px-4 sm:px-5 py-3 sm:py-2.5 font-semibold text-sm whitespace-nowrap rounded-xl sm:rounded-lg border-2 transition-all duration-200 snap-start touch-manipulation ${
                 activeTab === t.id
                   ? 'border-green-600 bg-green-600 text-white shadow-lg shadow-green-600/25 dark:shadow-green-500/20'
-                  : 'border-gray-200 dark:border-gray-600 bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/80 dark:text-rjb-text-dark/80 hover:border-green-500/50 hover:text-green-600 dark:hover:text-green-400'
+                  : 'border-rjb-border-light dark:border-rjb-border-dark bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/80 dark:text-rjb-text-dark/80 hover:border-green-500/50 hover:text-green-600 dark:hover:text-green-400'
               }`}
             >
               {t.label}
@@ -319,7 +319,7 @@ const Financeiro = () => {
         {/* Tab: Contribuições */}
         {activeTab === 'contributions' && (
           <section className="animate-fade-in" aria-labelledby="contrib-title">
-            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
+            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
               <div className="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-green-600/10 via-green-600/5 to-transparent dark:from-green-600/15 dark:via-green-600/10 border-b border-green-600/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 id="contrib-title" className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Contribuições Mensais</h2>
@@ -338,7 +338,7 @@ const Financeiro = () => {
               </div>
               <div className="p-4 sm:p-6">
                 <div className="relative mb-4">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rjb-text-muted dark:text-rjb-text-muted-dark pointer-events-none">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </span>
                   <input
@@ -346,7 +346,7 @@ const Financeiro = () => {
                     placeholder="Buscar por nome..."
                     value={contributionSearch}
                     onChange={e => setContributionSearch(e.target.value)}
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
+                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-rjb-text-muted dark:placeholder:text-rjb-text-muted-dark focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
                   />
                 </div>
                 <div className="mb-6 p-4 sm:p-5 rounded-xl bg-green-50/80 dark:bg-green-900/20 border border-green-200/80 dark:border-green-800/80 flex flex-wrap items-center justify-between gap-3">
@@ -367,7 +367,7 @@ const Financeiro = () => {
         {/* Tab: Depósitos */}
         {activeTab === 'deposits' && (
           <section className="animate-fade-in" aria-labelledby="deposits-title">
-            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
+            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
               <div className="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-green-600/10 via-green-600/5 to-transparent dark:from-green-600/15 dark:via-green-600/10 border-b border-green-600/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h2 id="deposits-title" className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Depósitos e Comprovantes</h2>
                 {canWrite && (
@@ -383,7 +383,7 @@ const Financeiro = () => {
               </div>
               <div className="p-4 sm:p-6">
                 <div className="relative mb-4">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rjb-text-muted dark:text-rjb-text-muted-dark pointer-events-none">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </span>
                   <input
@@ -391,7 +391,7 @@ const Financeiro = () => {
                     placeholder="Buscar por nome..."
                     value={depositSearch}
                     onChange={e => setDepositSearch(e.target.value)}
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
+                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-rjb-text-muted dark:placeholder:text-rjb-text-muted-dark focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none transition-all"
                   />
                 </div>
                 <div className="mb-6 p-4 sm:p-5 rounded-xl bg-green-50/80 dark:bg-green-900/20 border border-green-200/80 dark:border-green-800/80 flex flex-wrap items-center justify-between gap-3">
@@ -412,7 +412,7 @@ const Financeiro = () => {
         {/* Tab: Gastos */}
         {activeTab === 'expenses' && (
           <section className="animate-fade-in" aria-labelledby="expenses-title">
-            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
+            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
               <div className="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-red-600/10 via-red-600/5 to-transparent dark:from-red-600/15 dark:via-red-600/10 border-b border-red-600/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h2 id="expenses-title" className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da RJB</h2>
                 {canWrite && (
@@ -428,7 +428,7 @@ const Financeiro = () => {
               </div>
               <div className="p-4 sm:p-6">
                 <div className="relative mb-4">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rjb-text-muted dark:text-rjb-text-muted-dark pointer-events-none">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </span>
                   <input
@@ -436,7 +436,7 @@ const Financeiro = () => {
                     placeholder="Buscar por descrição..."
                     value={expenseSearch}
                     onChange={e => setExpenseSearch(e.target.value)}
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-gray-500 focus:ring-2 focus:ring-red-500/40 focus:border-red-500 outline-none transition-all"
+                    className="w-full min-h-[44px] pl-10 pr-4 py-2.5 text-base rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark placeholder:text-rjb-text-muted dark:placeholder:text-rjb-text-muted-dark focus:ring-2 focus:ring-red-500/40 focus:border-red-500 outline-none transition-all"
                   />
                 </div>
                 <div className="mb-6 p-4 sm:p-5 rounded-xl bg-red-50/80 dark:bg-red-900/20 border border-red-200/80 dark:border-red-800/80 flex flex-wrap items-center justify-between gap-3">
@@ -457,7 +457,7 @@ const Financeiro = () => {
         {/* Tab: Relatórios */}
         {activeTab === 'reports' && (
           <section className="animate-fade-in space-y-6" aria-labelledby="reports-title">
-            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
+            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
               <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-green-600/20 bg-gradient-to-r from-green-600/10 to-transparent dark:from-green-600/15">
                 <h2 id="reports-title" className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Relatório de Pagamentos e Pendências</h2>
               </div>
@@ -467,16 +467,16 @@ const Financeiro = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                   <div className="relative flex-1 min-w-0">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rjb-text-muted dark:text-rjb-text-muted-dark">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
-                    <input type="search" placeholder="Buscar por nome..." value={reportSearch} onChange={e => setReportSearch(e.target.value)} className="w-full min-h-[44px] pl-10 pr-4 py-2 text-base rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none" />
+                    <input type="search" placeholder="Buscar por nome..." value={reportSearch} onChange={e => setReportSearch(e.target.value)} className="w-full min-h-[44px] pl-10 pr-4 py-2 text-base rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 focus:border-green-500 outline-none" />
                   </div>
-                  <select value={reportYear} onChange={e => setReportYear(e.target.value)} className="min-h-[44px] sm:min-h-[42px] px-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 outline-none">
+                  <select value={reportYear} onChange={e => setReportYear(e.target.value)} className="min-h-[44px] sm:min-h-[42px] px-4 rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 outline-none">
                     <option value="">Todos os anos</option>
                     {[2026, 2025, 2024].map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
-                  <select value={reportMonth} onChange={e => setReportMonth(e.target.value)} className="min-h-[44px] sm:min-h-[42px] px-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 outline-none">
+                  <select value={reportMonth} onChange={e => setReportMonth(e.target.value)} className="min-h-[44px] sm:min-h-[42px] px-4 rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark focus:ring-2 focus:ring-green-500/40 outline-none">
                     <option value="">Todos os meses</option>
                     {MONTH_NAMES.map((name, i) => <option key={i} value={i + 1}>{name}</option>)}
                   </select>
@@ -485,7 +485,7 @@ const Financeiro = () => {
                 <div className="mt-6"><PaymentReportTable report={filteredPaymentReport} /></div>
               </div>
             </div>
-            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
+            <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
               <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-green-600/20 bg-gradient-to-r from-green-600/10 to-transparent dark:from-green-600/15">
                 <h2 className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Valor em Caixa</h2>
               </div>
@@ -542,8 +542,8 @@ function ContributionsList ({ contributions, canWrite, onEdit, onDelete }) {
   if (contributions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-          <svg className="w-7 h-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <div className="w-14 h-14 rounded-2xl bg-rjb-border-light/40 dark:bg-rjb-border-dark/40 flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-rjb-text-muted dark:text-rjb-text-muted-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
         </div>
         <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base">Nenhuma contribuição registrada.</p>
       </div>
@@ -553,7 +553,7 @@ function ContributionsList ({ contributions, canWrite, onEdit, onDelete }) {
   return (
     <div className="space-y-6">
       {groups.map(({ key, items, total }) => (
-        <div key={key} className="rounded-xl sm:rounded-2xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-white/50 dark:bg-black/20">
+        <div key={key} className="rounded-xl sm:rounded-2xl border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-white/50 dark:bg-black/20">
           <div className="px-4 py-3 sm:px-5 sm:py-3.5 bg-gradient-to-r from-green-600/15 to-green-600/5 dark:from-green-600/20 dark:to-green-600/10 border-b border-green-600/20 flex flex-wrap justify-between items-center gap-2">
             <h4 className="font-bold text-rjb-text dark:text-rjb-text-dark text-sm sm:text-base">{getMonthLabel(key)}</h4>
             <span className="text-sm font-semibold tabular-nums text-green-600 dark:text-green-400">Total Pago: {formatMoney(total)}</span>
@@ -625,8 +625,8 @@ function DepositsList ({ deposits, canWrite, onEdit, onDelete }) {
   if (deposits.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-          <svg className="w-7 h-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <div className="w-14 h-14 rounded-2xl bg-rjb-border-light/40 dark:bg-rjb-border-dark/40 flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-rjb-text-muted dark:text-rjb-text-muted-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
         </div>
         <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base">Nenhum depósito registrado.</p>
       </div>
@@ -636,7 +636,7 @@ function DepositsList ({ deposits, canWrite, onEdit, onDelete }) {
   return (
     <div className="space-y-6">
       {groups.map(({ key, items, total }) => (
-        <div key={key} className="rounded-xl sm:rounded-2xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-white/50 dark:bg-black/20">
+        <div key={key} className="rounded-xl sm:rounded-2xl border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-white/50 dark:bg-black/20">
           <div className="px-4 py-3 sm:px-5 sm:py-3.5 bg-gradient-to-r from-green-600/15 to-green-600/5 border-b border-green-600/20 flex justify-between items-center">
             <h4 className="font-bold text-rjb-text dark:text-rjb-text-dark text-sm sm:text-base">{getMonthLabel(key)}</h4>
             <span className="text-sm font-semibold tabular-nums text-green-600 dark:text-green-400">{formatMoney(total)}</span>
@@ -687,8 +687,8 @@ function ExpensesList ({ expenses, canWrite, onEdit, onDelete }) {
   if (expenses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-          <svg className="w-7 h-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <div className="w-14 h-14 rounded-2xl bg-rjb-border-light/40 dark:bg-rjb-border-dark/40 flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-rjb-text-muted dark:text-rjb-text-muted-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
         </div>
         <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base">Nenhum gasto registrado.</p>
       </div>
@@ -698,7 +698,7 @@ function ExpensesList ({ expenses, canWrite, onEdit, onDelete }) {
   return (
     <div className="space-y-6">
       {groups.map(({ key, items, total }) => (
-        <div key={key} className="rounded-xl sm:rounded-2xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden bg-white/50 dark:bg-black/20">
+        <div key={key} className="rounded-xl sm:rounded-2xl border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-white/50 dark:bg-black/20">
           <div className="px-4 py-3 sm:px-5 sm:py-3.5 bg-gradient-to-r from-red-600/15 to-red-600/5 border-b border-red-600/20 flex justify-between items-center">
             <h4 className="font-bold text-rjb-text dark:text-rjb-text-dark text-sm sm:text-base">{getMonthLabel(key)}</h4>
             <span className="text-sm font-semibold tabular-nums text-red-600 dark:text-red-400">{formatMoney(total)}</span>
@@ -709,7 +709,7 @@ function ExpensesList ({ expenses, canWrite, onEdit, onDelete }) {
                 <div className="min-w-0">
                   <p className="font-semibold text-rjb-text dark:text-rjb-text-dark line-clamp-2">{e.description}</p>
                   <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 tabular-nums mt-0.5">{e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A'} · {formatMoney(e.amount)}</p>
-                  {e.category && <span className="inline-block mt-2 px-2.5 py-1 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 text-rjb-text/80 dark:text-rjb-text-dark/80">{e.category}</span>}
+                  {e.category && <span className="inline-block mt-2 px-2.5 py-1 text-xs font-medium rounded-lg bg-rjb-border-light/40 dark:bg-rjb-border-dark/40 text-rjb-text/80 dark:text-rjb-text-dark/80">{e.category}</span>}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {e.receiptUrl && (
@@ -734,17 +734,17 @@ function ExpensesList ({ expenses, canWrite, onEdit, onDelete }) {
 function PaymentReportTable ({ report }) {
   if (!report || report.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-center rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-dashed border-gray-200 dark:border-gray-600">
+      <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-center rounded-xl bg-rjb-card-light/60 dark:bg-rjb-card-dark/40 border border-dashed border-rjb-border-light dark:border-rjb-border-dark">
         <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base">Clique em &quot;Gerar Relatório&quot; para visualizar os dados.</p>
       </div>
     )
   }
   return (
     <>
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200/80 dark:border-gray-700/80">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-rjb-border-light dark:border-rjb-border-dark">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+            <tr className="bg-rjb-card-light/60 dark:bg-rjb-card-dark/60 border-b border-rjb-border-light dark:border-rjb-border-dark">
               <th className="text-left py-3 px-4 font-semibold text-rjb-text dark:text-rjb-text-dark">Membro</th>
               <th className="text-left py-3 px-4 font-semibold text-rjb-text dark:text-rjb-text-dark">Último mês pago</th>
               <th className="text-right py-3 px-4 font-semibold text-rjb-text dark:text-rjb-text-dark">Total pago</th>
@@ -754,7 +754,7 @@ function PaymentReportTable ({ report }) {
           </thead>
           <tbody>
             {report.map((r, i) => (
-              <tr key={r.memberId || i} className="border-b border-gray-100 dark:border-gray-700/80 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+              <tr key={r.memberId || i} className="border-b border-rjb-border-light dark:border-rjb-border-dark hover:bg-rjb-yellow/5 transition-colors">
                 <td className="py-3 px-4 text-rjb-text dark:text-rjb-text-dark font-medium">{r.memberName || '—'}</td>
                 <td className="py-3 px-4 text-rjb-text/80 dark:text-rjb-text-dark/80">{r.lastPaidMonth || 'Nunca'}</td>
                 <td className="py-3 px-4 text-right text-green-600 dark:text-green-400 font-medium tabular-nums">{formatMoney(r.totalPaid)}</td>
@@ -767,7 +767,7 @@ function PaymentReportTable ({ report }) {
       </div>
       <div className="md:hidden space-y-3">
         {report.map((r, i) => (
-          <div key={r.memberId || i} className="p-4 rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light dark:bg-rjb-card-dark">
+          <div key={r.memberId || i} className="p-4 rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-card-light dark:bg-rjb-card-dark">
             <p className="font-semibold text-rjb-text dark:text-rjb-text-dark truncate">{r.memberName || '—'}</p>
             <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-0.5">Último pago: {r.lastPaidMonth || 'Nunca'}</p>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
@@ -785,7 +785,7 @@ function PaymentReportTable ({ report }) {
 function CashFlowReport ({ data }) {
   if (!data || !data.summary) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-center rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-dashed border-gray-200 dark:border-gray-600">
+      <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-center rounded-xl bg-rjb-card-light/60 dark:bg-rjb-card-dark/40 border border-dashed border-rjb-border-light dark:border-rjb-border-dark">
         <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base">Clique em &quot;Gerar Relatório de Caixa&quot; para visualizar.</p>
       </div>
     )
@@ -796,20 +796,20 @@ function CashFlowReport ({ data }) {
       <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/80 dark:border-green-800/50">
         <h4 className="text-base sm:text-lg font-bold text-green-800 dark:text-green-200 mb-4">Resumo Financeiro</h4>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-4 rounded-xl bg-white/90 dark:bg-gray-800/90 border border-green-200/80 dark:border-green-800/50 shadow-sm">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Contribuições</p>
+          <div className="p-4 rounded-xl bg-rjb-card-light/90 dark:bg-rjb-card-dark/90 border border-green-200/80 dark:border-green-800/50 shadow-sm">
+            <p className="text-xs sm:text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark mb-1">Contribuições</p>
             <p className="text-lg sm:text-xl font-bold tabular-nums text-green-600 dark:text-green-400">{formatMoney(totalContributions)}</p>
           </div>
-          <div className="p-4 rounded-xl bg-white/90 dark:bg-gray-800/90 border border-green-200/80 dark:border-green-800/50 shadow-sm">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Depósitos</p>
+          <div className="p-4 rounded-xl bg-rjb-card-light/90 dark:bg-rjb-card-dark/90 border border-green-200/80 dark:border-green-800/50 shadow-sm">
+            <p className="text-xs sm:text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark mb-1">Depósitos</p>
             <p className="text-lg sm:text-xl font-bold tabular-nums text-green-600 dark:text-green-400">{formatMoney(totalDeposits)}</p>
           </div>
-          <div className="p-4 rounded-xl bg-white/90 dark:bg-gray-800/90 border border-red-200/80 dark:border-red-800/50 shadow-sm">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Gastos</p>
+          <div className="p-4 rounded-xl bg-rjb-card-light/90 dark:bg-rjb-card-dark/90 border border-red-200/80 dark:border-red-800/50 shadow-sm">
+            <p className="text-xs sm:text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark mb-1">Gastos</p>
             <p className="text-lg sm:text-xl font-bold tabular-nums text-red-600 dark:text-red-400">{formatMoney(totalExpenses)}</p>
           </div>
-          <div className={`col-span-2 lg:col-span-1 p-4 rounded-xl bg-white/90 dark:bg-gray-800/90 border-2 shadow-sm ${cashFlow >= 0 ? 'border-green-500 dark:border-green-600' : 'border-red-500 dark:border-red-600'}`}>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Valor em Caixa</p>
+          <div className={`col-span-2 lg:col-span-1 p-4 rounded-xl bg-rjb-card-light/90 dark:bg-rjb-card-dark/90 border-2 shadow-sm ${cashFlow >= 0 ? 'border-green-500 dark:border-green-600' : 'border-red-500 dark:border-red-600'}`}>
+            <p className="text-xs sm:text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark mb-1">Valor em Caixa</p>
             <p className={`text-lg sm:text-xl font-bold tabular-nums ${cashFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{formatMoney(cashFlow)}</p>
           </div>
         </div>
@@ -823,12 +823,12 @@ function CashFlowReport ({ data }) {
             <h5 className="font-bold text-green-600 mb-3">Contribuições ({data.details.contributions?.length || 0})</h5>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {(data.details.contributions || []).length === 0 ? (
-                <p className="text-sm text-gray-500">Nenhuma</p>
+                <p className="text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark">Nenhuma</p>
               ) : (
                 data.details.contributions.map(c => (
-                  <div key={c.id} className="text-sm p-2 bg-white dark:bg-gray-800 rounded border">
+                  <div key={c.id} className="text-sm p-2 bg-rjb-card-light dark:bg-rjb-card-dark rounded border border-rjb-border-light dark:border-rjb-border-dark">
                     <p className="font-semibold">{c.memberName || 'Membro'}</p>
-                    <p className="text-gray-600 dark:text-gray-400">{c.month}/{c.year} - {formatMoney(c.amount)}</p>
+                    <p className="text-rjb-text-muted dark:text-rjb-text-muted-dark">{c.month}/{c.year} - {formatMoney(c.amount)}</p>
                   </div>
                 ))
               )}
@@ -838,12 +838,12 @@ function CashFlowReport ({ data }) {
             <h5 className="font-bold text-green-600 dark:text-green-500 mb-3 text-sm sm:text-base">Depósitos ({data.details.deposits?.length || 0})</h5>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {(data.details.deposits || []).length === 0 ? (
-                <p className="text-sm text-gray-500">Nenhum</p>
+                <p className="text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark">Nenhum</p>
               ) : (
                 data.details.deposits.map(d => (
-                  <div key={d.id} className="text-sm p-2 bg-white dark:bg-gray-800 rounded border">
+                  <div key={d.id} className="text-sm p-2 bg-rjb-card-light dark:bg-rjb-card-dark rounded border border-rjb-border-light dark:border-rjb-border-dark">
                     <p className="font-semibold">{d.memberName || 'Membro'}</p>
-                    <p className="text-gray-600 dark:text-gray-400">{d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A'} - {formatMoney(d.amount)}</p>
+                    <p className="text-rjb-text-muted dark:text-rjb-text-muted-dark">{d.depositDate ? new Date(d.depositDate).toLocaleDateString('pt-BR') : 'N/A'} - {formatMoney(d.amount)}</p>
                   </div>
                 ))
               )}
@@ -853,12 +853,12 @@ function CashFlowReport ({ data }) {
             <h5 className="font-bold text-red-600 dark:text-red-500 mb-3 text-sm sm:text-base">Gastos ({data.details.expenses?.length || 0})</h5>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {(data.details.expenses || []).length === 0 ? (
-                <p className="text-sm text-gray-500">Nenhum</p>
+                <p className="text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark">Nenhum</p>
               ) : (
                 data.details.expenses.map(e => (
-                  <div key={e.id} className="text-sm p-2 bg-white dark:bg-gray-800 rounded border">
+                  <div key={e.id} className="text-sm p-2 bg-rjb-card-light dark:bg-rjb-card-dark rounded border border-rjb-border-light dark:border-rjb-border-dark">
                     <p className="font-semibold">{e.description}</p>
-                    <p className="text-gray-600 dark:text-gray-400">{e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A'} - {formatMoney(e.amount)}</p>
+                    <p className="text-rjb-text-muted dark:text-rjb-text-muted-dark">{e.expenseDate ? new Date(e.expenseDate).toLocaleDateString('pt-BR') : 'N/A'} - {formatMoney(e.amount)}</p>
                   </div>
                 ))
               )}
@@ -900,9 +900,9 @@ function ContributionModal ({ initial, members, onClose, onSave, canWrite }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-hidden bg-black/50 sm:bg-black/50" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="contribution-modal-title">
       <div className="bg-rjb-card-light dark:bg-rjb-card-dark w-full max-h-[90vh] sm:max-h-[85vh] sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="flex-shrink-0 sticky top-0 bg-rjb-card-light dark:bg-rjb-card-dark border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+        <div className="flex-shrink-0 sticky top-0 bg-rjb-card-light dark:bg-rjb-card-dark border-b border-rjb-border-light dark:border-rjb-border-dark px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
           <h3 id="contribution-modal-title" className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-500">{(isEdit ? 'Editar' : 'Nova')} Contribuição</h3>
-          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 -mr-2 touch-manipulation" aria-label="Fechar">
+          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-rjb-text-muted dark:text-rjb-text-muted-dark hover:bg-rjb-border-light/40 dark:hover:bg-rjb-border-dark/40 -mr-2 touch-manipulation" aria-label="Fechar">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -955,7 +955,7 @@ function ContributionModal ({ initial, members, onClose, onSave, canWrite }) {
             {initial.receiptUrl && !receiptFile && <a href={initial.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 text-sm mt-1 inline-block">Ver comprovante atual</a>}
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 touch-manipulation">Cancelar</button>
+            <button type="button" onClick={onClose} className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-rjb-border-light dark:bg-rjb-border-dark text-rjb-text dark:text-rjb-text-dark font-semibold hover:bg-rjb-border-light/70 dark:hover:bg-rjb-border-dark/70 touch-manipulation">Cancelar</button>
             <button type="submit" className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold touch-manipulation">Salvar</button>
           </div>
         </form>
@@ -992,9 +992,9 @@ function DepositModal ({ initial, members, onClose, onSave, canWrite }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-hidden bg-black/50" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="deposit-modal-title">
       <div className="bg-rjb-card-light dark:bg-rjb-card-dark w-full max-h-[90vh] sm:max-h-[85vh] sm:max-w-md sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="flex-shrink-0 sticky top-0 bg-rjb-card-light dark:bg-rjb-card-dark border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+        <div className="flex-shrink-0 sticky top-0 bg-rjb-card-light dark:bg-rjb-card-dark border-b border-rjb-border-light dark:border-rjb-border-dark px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
           <h3 id="deposit-modal-title" className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-500">{(isEdit ? 'Editar' : 'Novo')} Depósito</h3>
-          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 -mr-2 touch-manipulation" aria-label="Fechar">
+          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-rjb-text-muted dark:text-rjb-text-muted-dark hover:bg-rjb-border-light/40 dark:hover:bg-rjb-border-dark/40 -mr-2 touch-manipulation" aria-label="Fechar">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -1026,7 +1026,7 @@ function DepositModal ({ initial, members, onClose, onSave, canWrite }) {
             {initial.receiptUrl && !receiptFile && <a href={initial.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 text-sm mt-1 inline-block">Ver comprovante atual</a>}
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 touch-manipulation">Cancelar</button>
+            <button type="button" onClick={onClose} className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-rjb-border-light dark:bg-rjb-border-dark text-rjb-text dark:text-rjb-text-dark font-semibold hover:bg-rjb-border-light/70 dark:hover:bg-rjb-border-dark/70 touch-manipulation">Cancelar</button>
             <button type="submit" className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold touch-manipulation">Salvar</button>
           </div>
         </form>
@@ -1058,9 +1058,9 @@ function ExpenseModal ({ initial, onClose, onSave, canWrite }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-hidden bg-black/50" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="expense-modal-title">
       <div className="bg-rjb-card-light dark:bg-rjb-card-dark w-full max-h-[90vh] sm:max-h-[85vh] sm:max-w-md sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="flex-shrink-0 sticky top-0 bg-rjb-card-light dark:bg-rjb-card-dark border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+        <div className="flex-shrink-0 sticky top-0 bg-rjb-card-light dark:bg-rjb-card-dark border-b border-rjb-border-light dark:border-rjb-border-dark px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
           <h3 id="expense-modal-title" className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-500">{(isEdit ? 'Editar' : 'Novo')} Gasto</h3>
-          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 -mr-2 touch-manipulation" aria-label="Fechar">
+          <button type="button" onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-rjb-text-muted dark:text-rjb-text-muted-dark hover:bg-rjb-border-light/40 dark:hover:bg-rjb-border-dark/40 -mr-2 touch-manipulation" aria-label="Fechar">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -1091,7 +1091,7 @@ function ExpenseModal ({ initial, onClose, onSave, canWrite }) {
             {initial.receiptUrl && !receiptFile && <a href={initial.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 text-sm mt-1 inline-block">Ver comprovante atual</a>}
           </div>
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 touch-manipulation">Cancelar</button>
+            <button type="button" onClick={onClose} className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-rjb-border-light dark:bg-rjb-border-dark text-rjb-text dark:text-rjb-text-dark font-semibold hover:bg-rjb-border-light/70 dark:hover:bg-rjb-border-dark/70 touch-manipulation">Cancelar</button>
             <button type="submit" className="flex-1 min-h-[48px] sm:min-h-[44px] py-3 sm:py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold touch-manipulation">Salvar</button>
           </div>
         </form>

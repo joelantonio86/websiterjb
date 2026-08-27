@@ -290,15 +290,15 @@ const Partituras = () => {
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleSheetSelection(sheet)}
-                  className="w-4 h-4 rounded border-rjb-yellow text-rjb-yellow focus:ring-rjb-yellow"
+                  className="w-4 h-4 rounded border-rjb-yellow text-rjb-gold focus:ring-rjb-yellow"
                   aria-label={`Selecionar ${sheet.title} para download em lote`}
                 />
-              <p className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 break-words">
+              <p className="text-lg font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors duration-300 break-words">
                 {sheet.title}
               </p>
               </label>
               {isRacional && (
-                <span className="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow rounded-full">
+                <span className="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-rjb-yellow/20 text-rjb-gold rounded-full">
                   Racional
                 </span>
               )}
@@ -376,15 +376,15 @@ const Partituras = () => {
                 type="checkbox"
                 checked={isSelected}
                 onChange={() => toggleSheetSelection(sheet)}
-                className="w-4 h-4 rounded border-rjb-yellow text-rjb-yellow focus:ring-rjb-yellow"
+                className="w-4 h-4 rounded border-rjb-yellow text-rjb-gold focus:ring-rjb-yellow"
                 aria-label={`Selecionar ${sheet.title} para download em lote`}
               />
-            <p className="text-base sm:text-lg md:text-xl font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 break-words">
+            <p className="text-base sm:text-lg md:text-xl font-bold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors duration-300 break-words">
               {sheet.title}
             </p>
             </label>
             {isRacional && (
-              <span className="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-rjb-yellow/20 text-rjb-yellow rounded-full">
+              <span className="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-rjb-yellow/20 text-rjb-gold rounded-full">
                 Racional
               </span>
             )}
@@ -497,15 +497,15 @@ const Partituras = () => {
 
                 {/* Título e Informações */}
                 <div className="flex-1 min-w-0">
-                  <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold mb-2 transition-colors duration-300 ${
-                    isRacional ? 'text-rjb-yellow' : 'text-blue-600 dark:text-blue-400'
+                  <h2 className={`font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl font-semibold mb-2 transition-colors duration-300 ${
+                    isRacional ? 'text-rjb-gold' : 'text-blue-600 dark:text-blue-400'
                   }`}>
                     {categoryTitle}
                   </h2>
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
                       isRacional 
-                        ? 'bg-rjb-yellow/30 text-rjb-yellow' 
+                        ? 'bg-rjb-yellow/30 text-rjb-gold' 
                         : 'bg-blue-500/30 text-blue-600 dark:text-blue-400'
                     }`}>
                       {sheets.length} {sheets.length === 1 ? 'música' : 'músicas'}
@@ -526,7 +526,7 @@ const Partituras = () => {
                 <svg
                   className={`w-6 h-6 sm:w-7 sm:h-7 transform transition-transform duration-300 ${
                     isOpen ? 'rotate-180' : 'rotate-0'
-                  } ${isRacional ? 'text-rjb-yellow' : 'text-blue-600 dark:text-blue-400'}`}
+                  } ${isRacional ? 'text-rjb-gold' : 'text-blue-600 dark:text-blue-400'}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -577,7 +577,7 @@ const Partituras = () => {
       <div className={`space-y-4 sm:space-y-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
         {/* Header com estatísticas */}
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-rjb-text dark:text-rjb-text-dark mb-3">
+          <h1 className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-3">
             🎼 Partituras
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 max-w-3xl mx-auto leading-relaxed px-2 mb-4">
@@ -587,11 +587,11 @@ const Partituras = () => {
           {/* Estatísticas */}
           <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
             <div className="px-4 py-2 bg-gradient-to-r from-rjb-yellow/20 to-yellow-500/10 dark:from-rjb-yellow/10 dark:to-yellow-500/5 rounded-lg border border-rjb-yellow/30">
-              <div className="text-2xl sm:text-3xl font-bold text-rjb-yellow">{totalSheets}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-rjb-gold">{totalSheets}</div>
               <div className="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">Total</div>
             </div>
             <div className="px-4 py-2 bg-gradient-to-r from-rjb-yellow/20 to-yellow-500/10 dark:from-rjb-yellow/10 dark:to-yellow-500/5 rounded-lg border border-rjb-yellow/30">
-              <div className="text-2xl sm:text-3xl font-bold text-rjb-yellow">{racionaisCount}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-rjb-gold">{racionaisCount}</div>
               <div className="text-xs sm:text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">Racionais</div>
             </div>
             <div className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-blue-600/10 dark:from-blue-500/10 dark:to-blue-600/5 rounded-lg border border-blue-500/30">
@@ -660,7 +660,7 @@ const Partituras = () => {
                         className={`flex-1 min-h-[48px] px-3 sm:px-4 py-3 text-sm font-medium transition-colors touch-manipulation ${
                           naipeCategoria === 'racionais'
                             ? 'bg-rjb-yellow text-rjb-text'
-                            : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/70 hover:text-rjb-yellow'
+                            : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/70 hover:text-rjb-gold'
                         }`}
                       >
                         Racionais
@@ -700,7 +700,7 @@ const Partituras = () => {
           {/* Busca */}
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
@@ -734,7 +734,7 @@ const Partituras = () => {
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg className="w-4 h-4 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </div>
@@ -791,7 +791,7 @@ const Partituras = () => {
               className={`px-3 sm:px-4 py-3 sm:py-4 transition-all duration-300 ${
                 viewMode === 'list'
                   ? 'bg-rjb-yellow text-rjb-text'
-                  : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow'
+                  : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-gold'
               }`}
               aria-label="Visualização em lista"
             >
@@ -804,7 +804,7 @@ const Partituras = () => {
               className={`px-3 sm:px-4 py-3 sm:py-4 transition-all duration-300 border-l-2 border-rjb-yellow/30 ${
                 viewMode === 'grid'
                   ? 'bg-rjb-yellow text-rjb-text'
-                  : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow'
+                  : 'bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-gold'
               }`}
               aria-label="Visualização em grade"
             >
@@ -843,7 +843,7 @@ const Partituras = () => {
           <div className="bg-gradient-to-br from-rjb-card-light to-rjb-card-light/95 dark:from-rjb-card-dark dark:to-rjb-card-dark/95 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-fade-in">
             <div className="flex items-center gap-4 mb-5">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-rjb-yellow/20 flex items-center justify-center">
-                <svg className="w-6 h-6 text-rjb-yellow animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-rjb-gold animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>

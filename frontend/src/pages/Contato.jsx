@@ -90,7 +90,7 @@ const Contato = () => {
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
             <label htmlFor="senderName" className="block text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark flex items-center gap-2">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
               Nome
@@ -119,7 +119,7 @@ const Contato = () => {
 
           <div className="space-y-2">
             <label htmlFor="senderEmail" className="block text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark flex items-center gap-2">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
               </svg>
               E-mail
@@ -146,7 +146,7 @@ const Contato = () => {
 
           <div className="space-y-2">
             <label htmlFor="subject" className="block text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark flex items-center gap-2">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
               </svg>
               Assunto
@@ -173,7 +173,7 @@ const Contato = () => {
 
           <div className="space-y-2">
             <label htmlFor="body" className="block text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark flex items-center gap-2">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-yellow flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-rjb-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
               Mensagem

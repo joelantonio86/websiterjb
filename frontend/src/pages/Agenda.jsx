@@ -39,7 +39,7 @@ const Agenda = () => {
                   
                   <div className="relative z-10 flex-shrink-0 w-full md:w-32 lg:w-36 mb-3 sm:mb-4 md:mb-0 md:mr-6 lg:mr-8 text-center md:text-left">
                     <div className="inline-flex flex-col items-center md:items-start p-3 sm:p-4 bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 rounded-lg sm:rounded-xl border border-rjb-yellow/30 shadow-lg">
-                      <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-yellow leading-none mb-1">{day}</p>
+                      <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-gold leading-none mb-1">{day}</p>
                       <p className="text-xs sm:text-sm md:text-base font-bold text-rjb-text dark:text-rjb-text-dark uppercase tracking-wide">
                         {month}
                       </p>
@@ -50,19 +50,19 @@ const Agenda = () => {
                   </div>
                   
                   <div className="relative z-10 flex-grow w-full">
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-2 sm:mb-3 group-hover:text-rjb-yellow transition-colors duration-300 break-words">
+                    <h3 className="font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2 sm:mb-3 group-hover:text-rjb-gold transition-colors duration-300 break-words">
                       {event.title}
                     </h3>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm md:text-base text-rjb-text/70 dark:text-rjb-text-dark/70">
                       <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-rjb-bg-light/50 dark:bg-rjb-bg-dark/50 rounded-lg">
-                        <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                         <span className="font-medium break-words">{event.location}</span>
                       </div>
                       <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-rjb-bg-light/50 dark:bg-rjb-bg-dark/50 rounded-lg">
-                        <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <span className="font-medium">{/^\d{1,2}:\d{2}$/.test(event.time) ? `${event.time}h` : event.time}</span>
@@ -71,7 +71,7 @@ const Agenda = () => {
                     {event.link && (
                       <Link
                         to={event.link}
-                        className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-rjb-yellow hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
+                        className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-rjb-gold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
@@ -87,7 +87,7 @@ const Agenda = () => {
         ) : (
           <EmptyState
             icon={
-              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
               </svg>
             }

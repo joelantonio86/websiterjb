@@ -20,30 +20,30 @@ const TermosUso = () => {
           </p>
 
           <section className="mb-6">
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Uso do site</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Uso do site</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
               O conteúdo do site — músicas, partituras, vídeos e textos — é de uso restrito e destinado ao conhecimento da Cultura Racional e à divulgação da banda. O material não pode ser utilizado para fins comerciais sem autorização prévia.
             </p>
           </section>
 
           <section className="mb-6">
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Partituras e mídia</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Partituras e mídia</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
               As partituras e arquivos de áudio disponíveis são para estudo e prática pessoal. A reprodução ou distribuição em larga escala requer permissão da Racional Jazz Band.
             </p>
           </section>
 
           <section className="mb-6">
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Conduta do usuário</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Conduta do usuário</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
               Ao utilizar formulários e áreas interativas, o usuário se compromete a fornecer informações verdadeiras e a não fazer uso do site para atividades ilegais ou que prejudiquem terceiros.
             </p>
           </section>
 
           <section>
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Alterações</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Alterações</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
-              Estes termos podem ser atualizados periodicamente. O uso continuado do site após alterações constitui aceitação dos novos termos. Em caso de dúvidas, entre em <Link to="/contato" className="text-rjb-yellow hover:underline">contato</Link> conosco.
+              Estes termos podem ser atualizados periodicamente. O uso continuado do site após alterações constitui aceitação dos novos termos. Em caso de dúvidas, entre em <Link to="/contato" className="text-rjb-gold hover:underline">contato</Link> conosco.
             </p>
           </section>
         </div>

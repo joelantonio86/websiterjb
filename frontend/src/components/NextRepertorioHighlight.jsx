@@ -66,7 +66,7 @@ export default function NextRepertorioHighlight({ compact = false }) {
         <div className="flex items-start gap-3 min-w-0">
           <span className="text-3xl flex-shrink-0" aria-hidden>📋</span>
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wide text-rjb-yellow mb-0.5">Próximo repertório</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-rjb-gold mb-0.5">Próximo repertório</p>
             <h3 className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark break-words">
               {next.name}
             </h3>
@@ -107,7 +107,7 @@ export default function NextRepertorioHighlight({ compact = false }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
             {songs.slice(0, 18).map((item, i) => (
               <div key={`${item.folder}-${item.mp3}-${i}`} className="flex items-center gap-2">
-                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-rjb-yellow/30 text-rjb-yellow font-semibold text-xs flex items-center justify-center">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-rjb-yellow/30 text-rjb-gold font-semibold text-xs flex items-center justify-center">
                   {i + 1}
                 </span>
                 <span className="text-rjb-text dark:text-rjb-text-dark">{item.title}</span>

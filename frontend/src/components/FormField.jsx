@@ -53,7 +53,7 @@ const FormField = ({
           htmlFor={name} 
           className="block text-xs sm:text-sm font-semibold text-rjb-text dark:text-rjb-text-dark flex items-center gap-2"
         >
-          {icon && <span className="text-rjb-yellow">{icon}</span>}
+          {icon && <span className="text-rjb-gold">{icon}</span>}
           {label}
           {required && <span className="text-red-500">*</span>}
         </label>

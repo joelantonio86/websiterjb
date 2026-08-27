@@ -38,7 +38,7 @@ const Repertorio = () => {
       <div className="mb-8 sm:mb-10 animate-fade-in">
         <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
           <div className={`w-1 h-6 sm:h-8 rounded-full ${isRacional ? 'bg-gradient-to-b from-rjb-yellow to-yellow-500' : 'bg-gradient-to-b from-gray-400 to-gray-500'}`}></div>
-          <h3 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold ${isRacional ? 'text-rjb-yellow' : 'text-rjb-text/90 dark:text-rjb-text-dark/90'} transition-colors duration-500 break-words`}>
+          <h3 className={`font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold ${isRacional ? 'text-rjb-gold' : 'text-rjb-text/90 dark:text-rjb-text-dark/90'} transition-colors duration-500 break-words`}>
             {title}
           </h3>
         </div>
@@ -55,7 +55,7 @@ const Repertorio = () => {
                   className={`group/btn flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 active:scale-95 touch-manipulation ${
                     playingButton === song.title
                       ? 'bg-gradient-to-br from-rjb-yellow to-yellow-500 text-white shadow-lg'
-                      : 'bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 text-rjb-yellow hover:from-rjb-yellow/30 hover:to-rjb-yellow/20'
+                      : 'bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 text-rjb-gold hover:from-rjb-yellow/30 hover:to-rjb-yellow/20'
                   }`}
                   aria-label={`Tocar ${song.title}`}
                 >
@@ -69,13 +69,13 @@ const Repertorio = () => {
                     </svg>
                   )}
                 </button>
-                <span className="text-sm sm:text-base md:text-lg font-semibold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300 truncate flex-1 min-w-0">
+                <span className="text-sm sm:text-base md:text-lg font-semibold text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors duration-300 truncate flex-1 min-w-0">
                   {song.title}
                 </span>
               </div>
               <span className={`text-xs sm:text-sm md:text-base font-medium px-2 sm:px-3 py-1 rounded-lg flex-shrink-0 self-end sm:self-auto ${
                 isRacional
-                  ? 'bg-rjb-yellow/20 text-rjb-yellow'
+                  ? 'bg-rjb-yellow/20 text-rjb-gold'
                   : 'bg-rjb-text/10 dark:bg-rjb-text-dark/10 text-rjb-text/70 dark:text-rjb-text-dark/70'
               }`}>
                 {song.time}

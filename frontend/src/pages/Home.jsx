@@ -72,10 +72,10 @@ const Home = () => {
       <section className="relative min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden px-4" id="hero">
         <div className="relative z-10 max-w-7xl mx-auto w-full text-center">
           <div className={`text-center pt-8 sm:pt-12 pb-16 sm:pb-24 transition-all ${motion.duration} ${isVisible ? `opacity-100 translate-y-0 ${motion.enterAlt}` : exit}`}>
-            <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-mono rjb-logo-text text-rjb-yellow mb-3 sm:mb-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-tight ${isVisible ? motion.enter : exitScale}`}>
-              Racional Jazz Band
+            <h1 className={`font-serif rjb-logo-text text-rjb-gold mb-3 sm:mb-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[0.95] tracking-tight text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-[9rem] xl:text-[11rem] font-semibold ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
+              Racional <em className="italic font-medium" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}>Jazz</em> Band
             </h1>
-            <h2 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 px-2 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-300'} leading-tight ${isVisible ? motion.enterAlt : exitY}`}>
+            <h2 className={`font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 px-2 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-300'} leading-tight ${isVisible ? motion.enterAlt : exitY}`}>
               Música, Arte e Cultura Racional
             </h2>
             <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 mb-6 sm:mb-10 max-w-4xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
@@ -127,7 +127,7 @@ const Home = () => {
       {/* Próximas apresentações */}
       <section id="proximas-apresentacoes" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="proximas-title">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 id="proximas-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="proximas-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Próximas apresentações
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
@@ -143,7 +143,7 @@ const Home = () => {
                 className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-l-4 border-rjb-yellow shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <div className="flex-shrink-0 inline-flex flex-col items-center sm:items-start p-2.5 sm:p-3 bg-rjb-yellow/15 dark:bg-rjb-yellow/10 rounded-lg border border-rjb-yellow/30">
-                  <span className="text-2xl font-extrabold text-rjb-yellow leading-none">{day}</span>
+                  <span className="text-2xl font-extrabold text-rjb-gold leading-none">{day}</span>
                   <span className="text-xs font-bold text-rjb-text dark:text-rjb-text-dark uppercase">{month}</span>
                   <span className="text-xs text-rjb-text/70 dark:text-rjb-text-dark/70">{year}</span>
                 </div>
@@ -153,7 +153,7 @@ const Home = () => {
                 </div>
                 <Link
                   to={event.link || '/agenda'}
-                  className="flex-shrink-0 text-sm font-semibold text-rjb-yellow hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
+                  className="flex-shrink-0 text-sm font-semibold text-rjb-gold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
                 >
                   Ver repertório →
                 </Link>
@@ -183,7 +183,7 @@ const Home = () => {
       {/* Para músicos */}
       <section id="para-musicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20 bg-gradient-to-b from-rjb-yellow/5 to-transparent dark:from-rjb-yellow/5 dark:to-transparent rounded-3xl" aria-labelledby="para-musicos-title">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 id="para-musicos-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="para-musicos-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Para músicos
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
@@ -202,9 +202,9 @@ const Home = () => {
               className="group flex flex-col p-5 sm:p-6 rounded-2xl bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl border border-rjb-yellow/20 hover:border-rjb-yellow/50 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
             >
               <span className="text-3xl sm:text-4xl mb-3 block" aria-hidden="true">{item.icon}</span>
-              <h3 className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 group-hover:text-rjb-yellow transition-colors">{item.title}</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 group-hover:text-rjb-gold transition-colors">{item.title}</h3>
               <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 flex-grow">{item.description}</p>
-              <span className="text-sm font-semibold text-rjb-yellow mt-3 inline-flex items-center gap-1">
+              <span className="text-sm font-semibold text-rjb-gold mt-3 inline-flex items-center gap-1">
                 Acessar <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
               </span>
             </Link>
@@ -216,7 +216,7 @@ const Home = () => {
       {featuredVideo && (
         <section id="destaque-video" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="destaque-video-title">
           <div className="text-center mb-6 sm:mb-8">
-            <h2 id="destaque-video-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+            <h2 id="destaque-video-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
               Assista em destaque
             </h2>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
@@ -236,14 +236,14 @@ const Home = () => {
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-rjb-yellow ml-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-rjb-gold ml-1" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                   </svg>
                 </div>
               </div>
             </div>
             <div className="p-4 sm:p-5 bg-rjb-card-light dark:bg-rjb-card-dark">
-              <h3 className="font-bold text-lg text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors">{featuredVideo.title}</h3>
+              <h3 className="font-bold text-lg text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors">{featuredVideo.title}</h3>
               <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 mt-0.5">{featuredVideo.eventTitle} · {featuredVideo.dateFormatted}</p>
             </div>
           </button>
@@ -278,7 +278,7 @@ const Home = () => {
             </div>
           )}
           <p className="text-center mt-4">
-            <Link to="/apresentacoes" className="text-sm font-semibold text-rjb-yellow hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded">
+            <Link to="/apresentacoes" className="text-sm font-semibold text-rjb-gold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded">
               Ver todas as apresentações →
             </Link>
           </p>
@@ -290,19 +290,19 @@ const Home = () => {
         <h2 id="numeros-heading" className="sr-only">Números da RJB</h2>
         <div className="flex flex-wrap justify-center gap-8 sm:gap-12 md:gap-16">
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-yellow tabular-nums">{totalSongs}</p>
+            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-gold tabular-nums">{totalSongs}</p>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">músicas no repertório</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-yellow tabular-nums">{nextShowsCount}</p>
+            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-gold tabular-nums">{nextShowsCount}</p>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">apresentações em 2026</p>
           </div>
           <div className="text-center" aria-live="polite" aria-atomic="true">
-            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-yellow tabular-nums">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-gold tabular-nums">
               {totalComponents === null ? '...' : totalComponents}
             </p>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">
-              <a href="#componentes" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded underline-offset-2 hover:underline">
+              <a href="#componentes" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded underline-offset-2 hover:underline">
                 componentes em todo o Brasil
               </a>
             </p>
@@ -313,7 +313,7 @@ const Home = () => {
       {/* Mapa: componentes por estado */}
       <section id="componentes" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="mapa-brasil-title">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 id="mapa-brasil-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="mapa-brasil-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Componentes por estado
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
@@ -326,7 +326,7 @@ const Home = () => {
       {/* Mapa de palco: nome, UF e instrumento */}
       <section id="mapa-palco" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="mapa-palco-title">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 id="mapa-palco-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="mapa-palco-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Mapa de palco
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
@@ -338,7 +338,7 @@ const Home = () => {
       
       <section id="nossa-essencia" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 -mt-4 relative z-20" aria-labelledby="nossa-essencia-title">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 id="nossa-essencia-title" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="nossa-essencia-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Nossa essência
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
@@ -385,11 +385,11 @@ const Home = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-rjb-yellow/0 to-rjb-yellow/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
               <div className="relative z-10">
                 <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     {card.icon}
                   </svg>
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-yellow transition-colors duration-300">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors duration-300">
                   {card.title}
                 </h3>
                 <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 leading-relaxed">
@@ -404,7 +404,7 @@ const Home = () => {
       {/* Avise-me dos próximos shows */}
       <section id="avise-me" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="avise-me-title">
         <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-r from-rjb-yellow/20 via-rjb-yellow/15 to-rjb-yellow/10 dark:from-rjb-yellow/15 dark:via-rjb-yellow/10 dark:to-rjb-yellow/5 border-2 border-rjb-yellow/30 p-6 sm:p-8 md:p-10 text-center">
-          <h2 id="avise-me-title" className="text-xl sm:text-2xl md:text-3xl font-extrabold text-rjb-text dark:text-rjb-text-dark mb-2">
+          <h2 id="avise-me-title" className="font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Quer ser avisado dos próximos shows?
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-xl mx-auto mb-6">
@@ -437,17 +437,17 @@ const Home = () => {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-20 relative z-20" aria-label="Explore o site">
         <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-sm sm:text-base text-rjb-text/80 dark:text-rjb-text-dark/80 border-t border-stone-200 dark:border-stone-600/60 pt-8">
           <span className="sr-only">Explore:</span>
-          <Link to="/apresentacoes" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Apresentações</Link>
+          <Link to="/apresentacoes" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Apresentações</Link>
           <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
-          <Link to="/player" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Músicas</Link>
+          <Link to="/player" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Músicas</Link>
           <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
-          <Link to="/agenda" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Agenda</Link>
+          <Link to="/agenda" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Agenda</Link>
           <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
-          <Link to="/partituras" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Partituras</Link>
+          <Link to="/partituras" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Partituras</Link>
           <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
-          <Link to="/repertorio-apresentacoes" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Repertório 2026</Link>
+          <Link to="/repertorio-apresentacoes" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Repertório 2026</Link>
           <span aria-hidden className="text-rjb-text/40 dark:text-rjb-text-dark/40">·</span>
-          <Link to="/contato" className="hover:text-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Contato</Link>
+          <Link to="/contato" className="hover:text-rjb-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded transition-colors">Contato</Link>
         </div>
       </nav>
     </>

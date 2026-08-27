@@ -27,7 +27,7 @@ const PageWrapper = ({ title, subtitle, children }) => {
   return (
     <div className="relative pt-4 sm:pt-6 md:pt-8 pb-12 sm:pb-16 md:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className={`text-center mb-6 sm:mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5'}`}>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold rjb-logo-text text-rjb-yellow mb-2 sm:mb-3 break-words px-2 leading-tight">
+        <h1 className="font-serif tracking-tight text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-semibold rjb-logo-text text-rjb-gold mb-2 sm:mb-3 break-words px-2 leading-[0.98]" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
           {mainTitle}
         </h1>
         {subTitle && (
