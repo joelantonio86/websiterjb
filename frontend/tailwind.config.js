@@ -7,6 +7,11 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        // Breakpoint extra para smartphones grandes / phablets (iPhone 12+, S22+ etc.)
+        // Complementa Tailwind default (sm=640, md=768, lg=1024, xl=1280, 2xl=1536)
+        'xs': '480px',
+      },
       colors: {
         // Light: cinza-pedra suave (menos brilho que branco puro; sem cream genérico)
         'rjb-yellow': '#D4AF37',            // ouro heráldico (metálico, orquestra) — usar em bg/border/ring

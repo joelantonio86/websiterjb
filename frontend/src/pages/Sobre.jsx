@@ -35,7 +35,17 @@ const Sobre = () => {
       <div className={`max-w-5xl mx-auto text-rjb-text dark:text-rjb-text-dark transition-all ${motionDuration} ${isVisible ? motionEnter : motionExit}`}>
         {/* Badge de origem — data e local de fundação */}
         <section className="mb-10 sm:mb-14 text-center px-2 sm:px-4" aria-label="Origem">
-          <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 rounded-full border border-rjb-yellow/40 bg-rjb-yellow/5 text-xs sm:text-sm font-semibold uppercase tracking-widest text-rjb-text-muted dark:text-rjb-text-muted-dark">
+          {/* Mobile (< xs): 2 pílulas empilhadas — texto curto por linha */}
+          <div className="flex flex-col xs:hidden items-center gap-2">
+            <span className="inline-block px-4 py-1.5 rounded-full border border-rjb-yellow/40 bg-rjb-yellow/5 text-[11px] font-semibold uppercase tracking-widest text-rjb-text-muted dark:text-rjb-text-muted-dark">
+              Fundada em 20/11/{FOUNDATION_YEAR}
+            </span>
+            <span className="inline-block px-4 py-1.5 rounded-full border border-rjb-yellow/40 bg-rjb-yellow/5 text-[11px] font-semibold uppercase tracking-widest text-rjb-text-muted dark:text-rjb-text-muted-dark">
+              Nova Iguaçu, RJ
+            </span>
+          </div>
+          {/* xs+ (≥ 480px): pílula única em linha */}
+          <div className="hidden xs:inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 rounded-full border border-rjb-yellow/40 bg-rjb-yellow/5 text-xs sm:text-sm font-semibold uppercase tracking-widest text-rjb-text-muted dark:text-rjb-text-muted-dark">
             <span>Fundada em 20 de novembro de {FOUNDATION_YEAR}</span>
             <span aria-hidden className="text-rjb-yellow">•</span>
             <span>Nova Iguaçu, RJ</span>
