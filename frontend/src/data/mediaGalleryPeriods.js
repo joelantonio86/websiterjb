@@ -1,5 +1,3 @@
-import { AGENDA_EVENTS } from './events'
-
 const MONTHS_PT = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
@@ -16,12 +14,13 @@ export function formatPeriodLabel (periodKey) {
 
 /**
  * Períodos para galeria admin: Dezembro 2025 em diante + um mês por cada data
- * já cadastrada na agenda (AGENDA_EVENTS).
+ * já cadastrada na agenda. `events` é opcional (array de objetos com `.date`
+ * no formato ISO YYYY-MM-DD). Sem argumento, devolve só a semente '2025-12'.
  */
-export function getMediaGalleryPeriods () {
+export function getMediaGalleryPeriods (events = []) {
   const keys = new Set(['2025-12'])
-  AGENDA_EVENTS.forEach((ev) => {
-    const d = ev.date
+  ;(Array.isArray(events) ? events : []).forEach((ev) => {
+    const d = ev?.date
     if (typeof d === 'string' && d.length >= 7) {
       const ym = d.slice(0, 7)
       if (ym >= '2025-12') keys.add(ym)

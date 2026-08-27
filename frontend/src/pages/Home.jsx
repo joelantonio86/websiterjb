@@ -2,11 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import BrazilMap from '../components/BrazilMap'
 import StageRoster from '../components/StageRoster'
-import { AGENDA_EVENTS } from '../data/events'
 import { APRESENTACOES_BY_EVENT } from '../data/videos'
 import { fetchAdminYoutubeVideosPublic, mergeEventsWithAdminYoutube } from '../services/publicMedia'
+import { fetchPublicRepertorios, getUpcomingEvents } from '../services/publicRepertorios'
 import { racionais, diversas } from '../data/songs'
 import NextRepertorioHighlight from '../components/NextRepertorioHighlight'
+import SkeletonLoader from '../components/SkeletonLoader'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -40,7 +41,24 @@ const Home = () => {
     return { ...event.videos[0], eventTitle: event.eventTitle, dateFormatted: event.dateFormatted }
   })
   const totalSongs = racionais.length + diversas.length
-  const nextShowsCount = AGENDA_EVENTS.filter(e => e.date.startsWith('2026')).length
+  const [upcomingEvents, setUpcomingEvents] = useState([])
+  const [eventsLoading, setEventsLoading] = useState(true)
+  const nextShowsCount = upcomingEvents.filter((e) => e.date?.startsWith('2026')).length
+
+  useEffect(() => {
+    let mounted = true
+    setEventsLoading(true)
+    fetchPublicRepertorios()
+      .then((list) => {
+        if (!mounted) return
+        setUpcomingEvents(getUpcomingEvents(list))
+      })
+      .finally(() => {
+        if (mounted) setEventsLoading(false)
+      })
+    return () => { mounted = false }
+  }, [])
+
   useEffect(() => {
     const loadFeatured = async () => {
       const adminVideos = await fetchAdminYoutubeVideosPublic('apresentacao')
@@ -135,11 +153,20 @@ const Home = () => {
           </p>
         </div>
         <div className="space-y-3 sm:space-y-4 mb-8">
-          {AGENDA_EVENTS.slice(0, 3).map((event, index) => {
+          {eventsLoading ? (
+            <SkeletonLoader type="card" count={2} />
+          ) : upcomingEvents.length === 0 ? (
+            <div className="p-6 sm:p-8 rounded-xl bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-yellow/20 text-center">
+              <p className="text-rjb-text dark:text-rjb-text-dark font-semibold mb-1">Nenhuma apresentação agendada no momento.</p>
+              <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+                Assim que a diretoria publicar a próxima data, ela aparecerá aqui. Enquanto isso, ouça o nosso <Link to="/player" className="text-rjb-gold hover:underline font-medium">repertório</Link>.
+              </p>
+            </div>
+          ) : upcomingEvents.slice(0, 3).map((event) => {
             const [day, month, year] = event.dateString.split(' ')
             return (
               <div
-                key={event.date}
+                key={event.id || event.date}
                 className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/98 to-rjb-card-light/95 dark:from-rjb-card-dark dark:via-rjb-card-dark/98 dark:to-rjb-card-dark/95 border-l-4 border-rjb-yellow shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <div className="flex-shrink-0 inline-flex flex-col items-center sm:items-start p-2.5 sm:p-3 bg-rjb-yellow/15 dark:bg-rjb-yellow/10 rounded-lg border border-rjb-yellow/30">
@@ -149,7 +176,7 @@ const Home = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-rjb-text dark:text-rjb-text-dark">{event.title}</h3>
-                  <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">{event.location} · {/^\d{1,2}:\d{2}$/.test(event.time) ? `${event.time}h` : event.time}</p>
+                  <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">{event.location} · {event.time}</p>
                 </div>
                 <Link
                   to={event.link || '/agenda'}
