@@ -8,15 +8,15 @@ const ProgressIndicator = ({ steps, currentStep, className = '' }) => {
           <div key={index} className="flex flex-col items-center flex-1 relative">
             {index < steps.length - 1 && (
               <div className={`absolute top-5 left-[50%] w-full h-0.5 ${
-                index < currentStep ? 'bg-rjb-yellow' : 'bg-gray-300 dark:bg-gray-700'
+                index < currentStep ? 'bg-rjb-yellow' : 'bg-rjb-border-light dark:bg-rjb-border-dark'
               }`} style={{ zIndex: 0 }}></div>
             )}
             <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
               index < currentStep
                 ? 'bg-rjb-yellow border-rjb-yellow text-rjb-text'
                 : index === currentStep
-                ? 'bg-rjb-yellow/20 border-rjb-yellow text-rjb-yellow'
-                : 'bg-transparent border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-600'
+                ? 'bg-rjb-yellow/20 border-rjb-yellow text-rjb-gold'
+                : 'bg-transparent border-rjb-border-light dark:border-rjb-border-dark text-rjb-text-muted dark:text-rjb-text-muted-dark'
             }`}>
               {index < currentStep ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,14 +29,14 @@ const ProgressIndicator = ({ steps, currentStep, className = '' }) => {
             <div className={`mt-2 text-xs sm:text-sm text-center ${
               index <= currentStep
                 ? 'text-rjb-text dark:text-rjb-text-dark font-semibold'
-                : 'text-gray-400 dark:text-gray-600'
+                : 'text-rjb-text-muted dark:text-rjb-text-muted-dark'
             }`}>
               {step.label}
             </div>
           </div>
         ))}
       </div>
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+      <div className="w-full bg-rjb-border-light dark:bg-rjb-border-dark rounded-full h-2 overflow-hidden">
         <div
           className="bg-gradient-to-r from-rjb-yellow to-yellow-500 h-2 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}

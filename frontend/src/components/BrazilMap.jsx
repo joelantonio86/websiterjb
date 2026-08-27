@@ -143,7 +143,7 @@ const BrazilMap = ({ onTotalLoad }) => {
           {statsError}
         </div>
       )}
-      <div className="rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl relative">
+      <div className="rounded-2xl overflow-hidden border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl relative">
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{
@@ -261,9 +261,9 @@ const BrazilMap = ({ onTotalLoad }) => {
                 fixed left-0 right-0 bottom-0 z-50 max-h-[52vh] flex flex-col
                 md:absolute md:left-1/2 md:right-auto md:bottom-4 md:max-h-[75vh] md:w-[min(90vw,360px)] md:-translate-x-1/2
                 rounded-t-2xl md:rounded-2xl
-                bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                bg-rjb-card-light dark:bg-rjb-card-dark text-rjb-text dark:text-rjb-text-dark
                 shadow-[0_-8px_32px_rgba(0,0,0,0.2)] md:shadow-xl
-                border border-gray-200/80 dark:border-gray-700/80 border-b-0 md:border-b
+                border border-rjb-border-light dark:border-rjb-border-dark border-b-0 md:border-b
                 transition-all duration-300 ease-out
               "
               onMouseEnter={() => {
@@ -277,8 +277,8 @@ const BrazilMap = ({ onTotalLoad }) => {
               aria-labelledby="map-tooltip-title"
             >
               {/* Handle + título + fechar (mobile) */}
-              <div className="flex-shrink-0 flex flex-col items-center pt-2 pb-1 px-4 md:pt-3 md:pb-2 md:px-4 border-b border-gray-200/80 dark:border-gray-700/80">
-                <span className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600 md:hidden" aria-hidden />
+              <div className="flex-shrink-0 flex flex-col items-center pt-2 pb-1 px-4 md:pt-3 md:pb-2 md:px-4 border-b border-rjb-border-light dark:border-rjb-border-dark">
+                <span className="w-10 h-1 rounded-full bg-rjb-border-light dark:bg-rjb-border-dark md:hidden" aria-hidden />
                 <div className="flex items-center justify-between w-full mt-2 md:mt-0">
                   <h3 id="map-tooltip-title" className="font-semibold text-base md:text-sm text-rjb-text dark:text-rjb-text-dark">
                     {tooltip.name} · {tooltip.count === 1 ? '1 componente' : `${tooltip.count} componentes`}
@@ -286,7 +286,7 @@ const BrazilMap = ({ onTotalLoad }) => {
                   <button
                     type="button"
                     onClick={() => setTooltip(null)}
-                    className="md:hidden p-2 -mr-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    className="md:hidden p-2 -mr-2 rounded-full text-rjb-text-muted dark:text-rjb-text-muted-dark hover:bg-rjb-border-light/40 dark:hover:bg-rjb-border-dark/40 hover:text-rjb-text dark:hover:text-rjb-text-dark transition-colors"
                     aria-label="Fechar"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -300,7 +300,7 @@ const BrazilMap = ({ onTotalLoad }) => {
                 {tooltip.cities.length > 0 && (
                   <section className="mb-3">
                     <h4 className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">Cidades</h4>
-                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-0.5">
+                    <ul className="text-sm text-rjb-text dark:text-rjb-text-dark space-y-0.5">
                       {tooltip.cities.map(([city, n]) => (
                         <li key={city}>{city}: {n}</li>
                       ))}
@@ -310,7 +310,7 @@ const BrazilMap = ({ onTotalLoad }) => {
                 {tooltip.instruments.length > 0 && (
                   <section>
                     <h4 className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">Instrumentos</h4>
-                    <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-0.5">
+                    <ul className="text-sm text-rjb-text dark:text-rjb-text-dark space-y-0.5">
                       {tooltip.instruments.map(([inst, n]) => (
                         <li key={inst}>{inst}: {n}</li>
                       ))}
@@ -331,17 +331,17 @@ const BrazilMap = ({ onTotalLoad }) => {
             <div className="flex items-center gap-2">
               <span className="text-rjb-text/70 dark:text-rjb-text-dark/70">Quantidade por estado:</span>
               <span className="flex items-center gap-1.5" role="img" aria-label="Escala: menos a mais componentes">
-                <span className="w-4 h-3 rounded-sm border border-gray-300/60 dark:border-gray-600/60" style={{ background: '#e5e7eb' }} title="0 componentes" />
+                <span className="w-4 h-3 rounded-sm border border-rjb-border-light dark:border-rjb-border-dark" style={{ background: '#e5e7eb' }} title="0 componentes" />
                 <span className="text-[10px] text-rjb-text/60 dark:text-rjb-text-dark/60">0</span>
-                <span className="w-4 h-3 rounded-sm border border-gray-300/60 dark:border-gray-600/60" style={{ background: getFillColor(1, maxCount) }} title="Poucos" />
-                <span className="w-4 h-3 rounded-sm border border-gray-300/60 dark:border-gray-600/60" style={{ background: getFillColor(maxCount, maxCount) }} title="Máximo no estado" />
+                <span className="w-4 h-3 rounded-sm border border-rjb-border-light dark:border-rjb-border-dark" style={{ background: getFillColor(1, maxCount) }} title="Poucos" />
+                <span className="w-4 h-3 rounded-sm border border-rjb-border-light dark:border-rjb-border-dark" style={{ background: getFillColor(maxCount, maxCount) }} title="Máximo no estado" />
                 <span className="text-[10px] text-rjb-text/60 dark:text-rjb-text-dark/60">máx.</span>
               </span>
             </div>
           )}
         </div>
         {instrumentsLegend.length > 0 && (
-          <div className="rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light/80 dark:bg-rjb-card-dark/80 p-4 text-xs">
+          <div className="rounded-xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-card-light/80 dark:bg-rjb-card-dark/80 p-4 text-xs">
             <h4 className="font-semibold text-rjb-text dark:text-rjb-text-dark mb-2.5">Instrumentos no Brasil</h4>
             <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 mb-2">Quantidade total de componentes por instrumento em todos os estados:</p>
             <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-rjb-text/85 dark:text-rjb-text-dark/85">

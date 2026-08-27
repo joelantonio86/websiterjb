@@ -282,7 +282,7 @@ const StageRoster = () => {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light dark:bg-rjb-card-dark overflow-hidden" role="status" aria-live="polite">
+      <div className="rounded-2xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-card-light dark:bg-rjb-card-dark overflow-hidden" role="status" aria-live="polite">
         <div className="p-8 sm:p-12 flex flex-col items-center justify-center gap-4">
           <div className="w-10 h-10 border-2 border-rjb-yellow/40 border-t-rjb-yellow rounded-full animate-spin" aria-hidden />
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando mapa de palco...</p>
@@ -301,7 +301,7 @@ const StageRoster = () => {
 
   if (roster.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-rjb-card-light dark:bg-rjb-card-dark p-8 sm:p-12 text-center">
+      <div className="rounded-2xl border border-rjb-border-light dark:border-rjb-border-dark bg-rjb-card-light dark:bg-rjb-card-dark p-8 sm:p-12 text-center">
         <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-sm sm:text-base">Nenhum componente cadastrado no mapa de palco.</p>
       </div>
     )
@@ -325,7 +325,7 @@ const StageRoster = () => {
 
   return (
     <div className="stage-plot w-full overflow-x-auto pb-6 safe-area-inset-bottom" role="region" aria-label="Mapa de palco">
-      <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark border border-gray-200 dark:border-stone-600/60 shadow-md">
+      <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-border-light dark:border-rjb-border-dark shadow-md">
         {sections.map((sec) => {
           if (sec.items.length === 0) return null
           const idx = sectionIndex++
@@ -349,7 +349,7 @@ const StageRoster = () => {
 
         {demais.length > 0 && (
           <section
-            className="stage-roster-section px-2 sm:px-3 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-500/30"
+            className="stage-roster-section px-2 sm:px-3 py-3 sm:py-4 border-t border-rjb-border-light dark:border-rjb-border-dark"
             style={{ animationDelay: `${sectionIndex * 80}ms` }}
             aria-labelledby="demais-heading"
           >

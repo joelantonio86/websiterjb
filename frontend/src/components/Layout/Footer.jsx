@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom'
 const Footer = () => {
   const currentYear = new Date().getFullYear()
 
-  const footerLinkClass = "group min-h-[44px] inline-flex items-center px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-yellow transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+  const footerLinkClass = "group min-h-[44px] inline-flex items-center px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-gold transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
 
   return (
     <footer className="relative bg-gradient-to-b from-rjb-card-light via-rjb-card-light/95 to-rjb-card-light/90 dark:from-rjb-card-dark dark:via-rjb-card-dark/95 dark:to-rjb-card-dark/90 border-t-2 border-rjb-yellow/20 mt-8 sm:mt-12 py-8 sm:py-10 md:py-12 safe-area-inset-bottom z-20 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="text-center md:text-left">
-            <div className="rjb-logo-text text-xl sm:text-2xl md:text-3xl font-mono font-extrabold text-rjb-yellow mb-1 sm:mb-2">
+            <div className="rjb-logo-text text-xl sm:text-2xl md:text-3xl font-mono font-extrabold text-rjb-gold mb-1 sm:mb-2">
               RJB
             </div>
             <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-xs sm:text-sm md:text-base">

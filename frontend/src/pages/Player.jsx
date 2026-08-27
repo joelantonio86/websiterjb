@@ -199,7 +199,7 @@ const Player = () => {
                   className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 min-w-[48px] min-h-[48px] shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 ${
                     isCurrent && (isPlaying || isLoading)
                       ? 'bg-rjb-yellow text-rjb-text shadow-lg scale-105'
-                      : 'bg-rjb-yellow/20 text-rjb-yellow hover:bg-rjb-yellow/30 hover:scale-105 active:scale-95'
+                      : 'bg-rjb-yellow/20 text-rjb-gold hover:bg-rjb-yellow/30 hover:scale-105 active:scale-95'
                   }`}
                   aria-label={isCurrent && isLoading ? 'Carregando...' : isCurrent && isPlaying ? 'Pausar' : `Tocar ${track.title}`}
                 >
@@ -221,7 +221,7 @@ const Player = () => {
                 <div className="flex-1 min-w-0">
                   <p className={`font-bold text-base truncate mb-1 ${
                     isCurrent 
-                      ? 'text-rjb-yellow' 
+                      ? 'text-rjb-gold' 
                       : 'text-rjb-text dark:text-rjb-text-dark'
                   }`}>
                     {track.title}
@@ -398,7 +398,7 @@ const Player = () => {
             </div>
 
             <div ref={listContainerRef} className="max-h-[calc(100vh-420px)] sm:max-h-[55vh] lg:max-h-[60vh] min-h-[200px] sm:min-h-0 overflow-y-auto pr-1 sm:pr-2 lg:order-3 safe-area-inset-bottom">
-              {renderTrackList(racionaisFiltered, 'Músicas Racionais', 'text-rjb-yellow', { sectionKey: 'racionais', isExpanded: sectionsOpen.racionais })}
+              {renderTrackList(racionaisFiltered, 'Músicas Racionais', 'text-rjb-gold', { sectionKey: 'racionais', isExpanded: sectionsOpen.racionais })}
               {renderTrackList(diversasFiltered, 'Outros Clássicos', 'text-blue-600 dark:text-blue-400', { sectionKey: 'diversas', isExpanded: sectionsOpen.diversas })}
               {filteredTracks.length === 0 && (
                 <div className="text-center py-16">
@@ -533,7 +533,7 @@ const Player = () => {
           Procurando partituras?{' '}
           <Link
             to="/partituras"
-            className="font-semibold text-rjb-yellow hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
+            className="font-semibold text-rjb-gold hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded"
             aria-label="Acessar a Área de Partituras"
           >
             Acesse a Área de Partituras

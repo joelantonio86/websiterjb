@@ -49,7 +49,7 @@ const VideoCard = ({ video, date }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 group-hover:via-black/30 transition-all duration-300"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-white/90 group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex items-center justify-center shadow-2xl">
-              <svg className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-rjb-yellow ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-rjb-gold ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
               </svg>
             </div>
@@ -59,7 +59,7 @@ const VideoCard = ({ video, date }) => {
           </div>
         </div>
         <div className="p-3 sm:p-4 md:p-5">
-          <h4 className="text-sm sm:text-base md:text-lg font-bold text-rjb-text dark:text-rjb-text-dark mb-1 sm:mb-2 line-clamp-2 group-hover:text-rjb-yellow transition-colors duration-300 break-words">
+          <h4 className="text-sm sm:text-base md:text-lg font-bold text-rjb-text dark:text-rjb-text-dark mb-1 sm:mb-2 line-clamp-2 group-hover:text-rjb-gold transition-colors duration-300 break-words">
             {video.title}
           </h4>
           {date && (

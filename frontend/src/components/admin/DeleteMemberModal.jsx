@@ -55,7 +55,7 @@ const DeleteMemberModal = ({ member, onClose, onSuccess }) => {
         </div>
         <h3 className="text-xl font-bold mb-2 text-red-600 dark:text-red-400">Confirmar Exclusão</h3>
         <p className="text-sm opacity-70 mb-4">Esta ação não pode ser desfeita. Deseja realmente excluir o membro:</p>
-        <p className="text-base font-bold mb-4 text-rjb-text dark:text-rjb-text-dark bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <p className="text-base font-bold mb-4 text-rjb-text dark:text-rjb-text-dark bg-rjb-border-light/40 dark:bg-rjb-border-dark/40 p-3 rounded-lg">
           {member.name}
         </p>
         <div className="mb-4">
@@ -79,7 +79,7 @@ const DeleteMemberModal = ({ member, onClose, onSuccess }) => {
         <div className="flex space-x-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="flex-1 py-2.5 rounded-lg bg-rjb-border-light dark:bg-rjb-border-dark text-rjb-text dark:text-rjb-text-dark font-bold hover:bg-rjb-border-light/70 dark:hover:bg-rjb-border-dark/70 transition-colors"
           >
             Cancelar
           </button>

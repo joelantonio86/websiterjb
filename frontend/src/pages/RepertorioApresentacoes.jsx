@@ -104,12 +104,12 @@ const RepertorioApresentacoes = () => {
               <div className="p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4">
                   <div className="flex-shrink-0 inline-flex flex-col items-center sm:items-start p-3 sm:p-4 bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 rounded-xl border border-rjb-yellow/30">
-                    <span className="text-2xl sm:text-3xl font-extrabold text-rjb-yellow leading-none">{evento.dateShort.split(' ')[0]}</span>
+                    <span className="text-2xl sm:text-3xl font-extrabold text-rjb-gold leading-none">{evento.dateShort.split(' ')[0]}</span>
                     <span className="text-xs sm:text-sm font-bold text-rjb-text dark:text-rjb-text-dark uppercase tracking-wide">{evento.dateShort.split(' ')[1]}</span>
                     <span className="text-xs text-rjb-text/70 dark:text-rjb-text-dark/70 mt-0.5">{evento.dateShort.split(' ')[2]}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl sm:text-2xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1">
+                    <h2 className="font-serif tracking-tight text-2xl sm:text-3xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-1">
                       {evento.title}
                     </h2>
                     <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
@@ -126,7 +126,7 @@ const RepertorioApresentacoes = () => {
                         const inProduction = typeof musica === 'object' && musica.inProduction
                         return (
                           <li key={i} className="flex items-start gap-3 text-rjb-text dark:text-rjb-text-dark">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-rjb-yellow/20 dark:bg-rjb-yellow/10 text-rjb-yellow font-semibold text-sm flex items-center justify-center">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-rjb-yellow/20 dark:bg-rjb-yellow/10 text-rjb-gold font-semibold text-sm flex items-center justify-center">
                               {i + 1}
                             </span>
                             <span className="font-medium flex items-center gap-2 flex-wrap">
@@ -161,7 +161,7 @@ const RepertorioApresentacoes = () => {
         </div>
 
         <p className="text-center text-sm text-rjb-text/60 dark:text-rjb-text-dark/60 max-w-2xl mx-auto">
-          Para ouvir as músicas do nosso repertório, acesse a página <Link to="/player" className="text-rjb-yellow hover:underline font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded">Músicas</Link>.
+          Para ouvir as músicas do nosso repertório, acesse a página <Link to="/player" className="text-rjb-gold hover:underline font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 rounded">Músicas</Link>.
         </p>
       </div>
     </PageWrapper>

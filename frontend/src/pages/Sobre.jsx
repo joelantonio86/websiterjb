@@ -1,6 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
+
+const FOUNDATION_YEAR = 2015
+
+const MISSAO_ITEMS = [
+  'Promover a Cultura Racional através da arte musical.',
+  'Desenvolver e executar um repertório instrumental de excelência.',
+  'Inspirar o raciocínio, o equilíbrio e a paz no público.',
+]
 
 const Sobre = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -20,74 +28,116 @@ const Sobre = () => {
   const motionEnter = 'opacity-100 translate-y-0'
   const motionExit = reducedMotion ? 'opacity-0' : 'opacity-0 translate-y-5'
 
+  const yearsActive = useMemo(() => new Date().getFullYear() - FOUNDATION_YEAR, [])
+
   return (
     <PageWrapper title="Sobre a RJB">
-      <div className={`max-w-4xl mx-auto space-y-6 sm:space-y-8 text-rjb-text dark:text-rjb-text-dark transition-all ${motionDuration} ${isVisible ? motionEnter : motionExit}`}>
-        <section id="expressao" className="relative" aria-labelledby="expressao-heading">
-          <h2 id="expressao-heading" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow border-b-2 border-rjb-yellow/50 pb-2 sm:pb-3 inline-block">
-            A Expressão Musical do Saber
-          </h2>
+      <div className={`max-w-5xl mx-auto text-rjb-text dark:text-rjb-text-dark transition-all ${motionDuration} ${isVisible ? motionEnter : motionExit}`}>
+        {/* Badge de origem — data e local de fundação */}
+        <section className="mb-10 sm:mb-14 text-center px-2 sm:px-4" aria-label="Origem">
+          <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 rounded-full border border-rjb-yellow/40 bg-rjb-yellow/5 text-xs sm:text-sm font-semibold uppercase tracking-widest text-rjb-text-muted dark:text-rjb-text-muted-dark">
+            <span>Fundada em 20 de novembro de {FOUNDATION_YEAR}</span>
+            <span aria-hidden className="text-rjb-yellow">•</span>
+            <span>Nova Iguaçu, RJ</span>
+          </div>
         </section>
 
-        <div className="relative border-l-4 border-rjb-yellow pl-4 sm:pl-6 pr-3 sm:pr-4 py-4 sm:py-5 bg-gradient-to-r from-rjb-yellow/5 via-rjb-yellow/5 to-transparent dark:from-rjb-yellow/10 dark:via-rjb-yellow/5 dark:to-transparent rounded-r-xl shadow-lg hover:shadow-xl transition-all duration-300">
-          <div className="absolute -left-2 top-5 sm:top-6 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-rjb-yellow border-2 border-rjb-bg-light dark:border-rjb-bg-dark shadow-lg"></div>
-          <p className="text-base sm:text-lg md:text-xl font-medium italic text-rjb-text/90 dark:text-rjb-text-dark/90 leading-relaxed">
-            A <strong className="text-rjb-yellow">Racional Jazz Band (RJB)</strong> nasceu da união de dois propósitos elevados: a excelência artística do Jazz e a profundidade da <strong className="text-rjb-yellow">Cultura Racional</strong>. Fundada em <strong className="text-rjb-yellow">20 de novembro de 2015</strong>, a RJB rapidamente se estabeleceu como um veículo de expressão para um conhecimento que transcende, utilizando a música como sua linguagem universal.
-          </p>
-        </div>
+        {/* Stats — anos de trajetória + próxima apresentação */}
+        <section
+          className="mb-12 sm:mb-16 grid grid-cols-2 gap-4 md:gap-8 py-6 sm:py-8 border-y border-rjb-border-light dark:border-rjb-border-dark"
+          aria-label="Números da RJB"
+        >
+          {[
+            { value: yearsActive, label: yearsActive === 1 ? 'ano de trajetória' : 'anos de trajetória' },
+            { value: 1, label: 'apresentação em maio/2026' },
+          ].map((stat, i) => (
+            <div key={i} className="text-center">
+              <p className="font-serif font-semibold text-4xl sm:text-5xl md:text-6xl text-rjb-gold leading-none tabular-nums" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+                {stat.value}
+              </p>
+              <p className="mt-2 text-[10px] sm:text-xs md:text-sm text-rjb-text-muted dark:text-rjb-text-muted-dark uppercase tracking-wider">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </section>
 
-        <div className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none">
-          <p className="text-rjb-text/80 dark:text-rjb-text-dark/80 leading-relaxed text-sm sm:text-base md:text-lg">
-            Acreditamos que a música instrumental é a forma mais pura de comunicação. O Jazz, com sua liberdade rítmica e improvisação harmoniosa, oferece o palco ideal para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
-          </p>
-        </div>
-        
-        <section id="conceito" className="relative mt-8 sm:mt-10 pt-6 sm:pt-8 border-t-2 border-rjb-yellow/20" aria-labelledby="conceito-heading">
-          <h3 id="conceito-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-rjb-yellow to-yellow-500 rounded-full" aria-hidden></div>
-            <span>O Conceito Racional</span>
-          </h3>
-
-          <div className="space-y-3 sm:space-y-4 text-rjb-text/80 dark:text-rjb-text-dark/80 leading-relaxed text-sm sm:text-base md:text-lg">
-            <p>
-              A Cultura Racional é o conhecimento que revela a origem e o destino de tudo e de todos, promovendo o raciocínio, o equilíbrio e a ligação com o Mundo de Energia Racional. Nossa missão não é apenas performar; é <strong className="text-rjb-yellow font-semibold">transmitir essa mensagem de Luz e de Paz</strong> através de arranjos exclusivos e composições inspiradas nos pilares da Cultura.
+        {/* Seção 1 — A Expressão Musical do Saber */}
+        <section id="expressao" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="expressao-heading">
+          <div className="md:sticky md:top-24 md:self-start">
+            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo I</p>
+            <h2 id="expressao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+              A Expressão<br />Musical do Saber
+            </h2>
+          </div>
+          <div className="space-y-4 sm:space-y-5 text-rjb-text/85 dark:text-rjb-text-dark/85 leading-relaxed text-base sm:text-lg">
+            <p className="first-letter:font-serif first-letter:text-5xl sm:first-letter:text-6xl first-letter:font-semibold first-letter:text-rjb-gold first-letter:float-left first-letter:leading-none first-letter:mr-2 first-letter:mt-1">
+              A <strong className="text-rjb-gold font-semibold">Racional Jazz Band (RJB)</strong> nasceu da união de dois propósitos elevados: a excelência artística do Jazz e a profundidade da <strong className="text-rjb-gold font-semibold">Cultura Racional</strong>. Fundada em <strong className="text-rjb-gold font-semibold">20 de novembro de 2015</strong>, a RJB rapidamente se estabeleceu como um veículo de expressão para um conhecimento que transcende, utilizando a música como sua linguagem universal.
             </p>
-            
+            <p>
+              Acreditamos que a música instrumental é a forma mais pura de comunicação. O Jazz, com sua liberdade rítmica e improvisação harmoniosa, oferece o palco ideal para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
+            </p>
+          </div>
+        </section>
+
+        {/* Seção 2 — O Conceito Racional */}
+        <section id="conceito" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="conceito-heading">
+          <div className="md:sticky md:top-24 md:self-start">
+            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo II</p>
+            <h2 id="conceito-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+              O Conceito<br />Racional
+            </h2>
+          </div>
+          <div className="space-y-4 sm:space-y-5 text-rjb-text/85 dark:text-rjb-text-dark/85 leading-relaxed text-base sm:text-lg">
+            <p>
+              A Cultura Racional é o conhecimento que revela a origem e o destino de tudo e de todos, promovendo o raciocínio, o equilíbrio e a ligação com o Mundo de Energia Racional. Nossa missão não é apenas performar; é <strong className="text-rjb-gold font-semibold">transmitir essa mensagem de Luz e de Paz</strong> através de arranjos exclusivos e composições inspiradas nos pilares da Cultura.
+            </p>
             <p>
               Cada apresentação, cada nota e cada melodia da RJB é um convite para o público refletir sobre sua essência e o universo que o cerca, encontrando a harmonia entre o macrocosmo e o próprio ser.
             </p>
           </div>
         </section>
 
-        <section id="missao" className="mt-8 sm:mt-12 p-5 sm:p-6 md:p-8 bg-gradient-to-br from-rjb-yellow/10 via-rjb-yellow/5 to-transparent dark:from-rjb-yellow/20 dark:via-rjb-yellow/10 dark:to-transparent rounded-xl sm:rounded-2xl border-2 border-rjb-yellow/30 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]" aria-labelledby="missao-heading">
-          <h3 id="missao-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-rjb-yellow/30 to-rjb-yellow/20 dark:from-rjb-yellow/20 dark:to-rjb-yellow/10">
-              <svg className="w-5 h-5 sm:w-6 sm:h-7 md:w-7 md:h-7 text-rjb-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <span>Nossa Missão</span>
-          </h3>
-          <ul className="space-y-2 sm:space-y-3 text-rjb-text/80 dark:text-rjb-text-dark/80 text-sm sm:text-base md:text-lg">
-            {[
-              'Promover a Cultura Racional através da arte musical.',
-              'Desenvolver e executar um repertório instrumental de excelência.',
-              'Inspirar o raciocínio, o equilíbrio e a paz no público.'
-            ].map((item, index) => (
-              <li key={index} className="flex items-start gap-2 sm:gap-3 group">
-                <div className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rjb-yellow group-hover:scale-150 transition-transform duration-300"></div>
-                <span className="flex-1">{item}</span>
+        {/* Seção 3 — Nossa Missão */}
+        <section id="missao" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="missao-heading">
+          <div className="md:sticky md:top-24 md:self-start">
+            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo III</p>
+            <h2 id="missao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+              Nossa<br />Missão
+            </h2>
+          </div>
+          <ul className="space-y-3 sm:space-y-4">
+            {MISSAO_ITEMS.map((item, i) => (
+              <li
+                key={i}
+                className="group flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-rjb-card-light dark:bg-rjb-card-dark border border-rjb-border-light dark:border-rjb-border-dark hover:border-rjb-yellow/50 shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                <span aria-hidden className="flex-shrink-0 font-serif text-2xl sm:text-3xl font-semibold text-rjb-gold leading-none w-10 sm:w-12 tabular-nums" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+                  0{i + 1}
+                </span>
+                <p className="flex-1 text-base sm:text-lg text-rjb-text/85 dark:text-rjb-text-dark/85 leading-relaxed">
+                  {item}
+                </p>
               </li>
             ))}
           </ul>
         </section>
 
-        <nav className="mt-10 sm:mt-12 pt-8 sm:pt-10 border-t border-stone-200 dark:border-stone-600/60" aria-label="Próximos passos">
-          <p className="text-sm font-semibold text-rjb-text/70 dark:text-rjb-text-dark/70 mb-4">Explore mais</p>
-          <div className="flex flex-wrap gap-3 sm:gap-4">
+        {/* CTA final */}
+        <section
+          className="mt-12 sm:mt-16 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-rjb-yellow/15 via-rjb-yellow/8 to-transparent dark:from-rjb-yellow/20 dark:via-rjb-yellow/10 dark:to-transparent border-2 border-rjb-yellow/30 text-center shadow-xl"
+          aria-labelledby="cta-heading"
+        >
+          <h3 id="cta-heading" className="font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-3" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
+            Sinta a música. Viva o saber.
+          </h3>
+          <p className="text-sm sm:text-base md:text-lg text-rjb-text/75 dark:text-rjb-text-dark/75 max-w-2xl mx-auto mb-6">
+            Explore o repertório, conheça a agenda de shows ou entre em contato conosco.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/player"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rjb-yellow/15 dark:bg-rjb-yellow/10 border border-rjb-yellow/40 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/25 dark:hover:bg-rjb-yellow/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-rjb-yellow text-rjb-text font-bold text-sm sm:text-base hover:bg-yellow-500 transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
               aria-label="Ouça nossas músicas no player"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" /></svg>
@@ -95,20 +145,22 @@ const Sobre = () => {
             </Link>
             <Link
               to="/apresentacoes"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-rjb-yellow/60 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/15 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
               aria-label="Ver apresentações da banda"
             >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
               Ver apresentações
             </Link>
             <Link
-              to="/player"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-rjb-yellow/50 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-              aria-label="Ouça o repertório na página Músicas"
+              to="/contato"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-rjb-yellow/60 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/15 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              aria-label="Entrar em contato"
             >
-              Ouça o repertório
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              Falar conosco
             </Link>
           </div>
-        </nav>
+        </section>
       </div>
     </PageWrapper>
   )

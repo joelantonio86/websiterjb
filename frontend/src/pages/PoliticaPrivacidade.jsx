@@ -20,7 +20,7 @@ const PoliticaPrivacidade = () => {
           </p>
 
           <section className="mb-6">
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Informações que coletamos</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Informações que coletamos</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-2">
               Podemos coletar informações quando você:
             </p>
@@ -32,23 +32,23 @@ const PoliticaPrivacidade = () => {
           </section>
 
           <section className="mb-6">
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Uso das informações</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Uso das informações</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
               Utilizamos as informações coletadas para responder a contatos, gerenciar o cadastro de membros, melhorar nossos serviços e comunicar-nos com você quando necessário.
             </p>
           </section>
 
           <section className="mb-6">
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Proteção e compartilhamento</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Proteção e compartilhamento</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
               Não vendemos, trocamos ou transferimos suas informações para terceiros, exceto quando necessário para o funcionamento do site ou exigido por lei.
             </p>
           </section>
 
           <section>
-            <h3 className="text-lg font-semibold text-rjb-yellow mb-2">Contato</h3>
+            <h3 className="text-lg font-semibold text-rjb-gold mb-2">Contato</h3>
             <p className="text-rjb-text/80 dark:text-rjb-text-dark/80">
-              Para dúvidas sobre esta política, entre em contato através da nossa <Link to="/contato" className="text-rjb-yellow hover:underline">página de contato</Link>.
+              Para dúvidas sobre esta política, entre em contato através da nossa <Link to="/contato" className="text-rjb-gold hover:underline">página de contato</Link>.
             </p>
           </section>
         </div>

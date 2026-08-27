@@ -36,7 +36,7 @@ const Breadcrumbs = () => {
         <li>
           <Link
             to="/"
-            className="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors flex items-center gap-1"
+            className="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-gold transition-colors flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -52,11 +52,11 @@ const Breadcrumbs = () => {
             <li key={to} className="flex items-center">
               <span className="text-rjb-text/30 dark:text-rjb-text-dark/30 mx-2">/</span>
               {isLast ? (
-                <span className="text-rjb-yellow font-semibold">{getBreadcrumbName(value)}</span>
+                <span className="text-rjb-gold font-semibold">{getBreadcrumbName(value)}</span>
               ) : (
                 <Link
                   to={to}
-                  className="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-yellow transition-colors"
+                  className="text-rjb-text/70 dark:text-rjb-text-dark/70 hover:text-rjb-gold transition-colors"
                 >
                   {getBreadcrumbName(value)}
                 </Link>

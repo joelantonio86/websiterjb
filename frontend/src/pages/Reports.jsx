@@ -9,7 +9,7 @@ import api from '../services/api'
 
 const StatCard = ({ title, value, tone = 'yellow' }) => {
   const toneMap = {
-    yellow: 'border-rjb-yellow/25 bg-rjb-yellow/5 text-rjb-yellow',
+    yellow: 'border-rjb-yellow/25 bg-rjb-yellow/5 text-rjb-gold',
     blue: 'border-blue-500/25 bg-blue-500/5 text-blue-500',
     emerald: 'border-emerald-500/25 bg-emerald-500/5 text-emerald-500'
   }
@@ -99,7 +99,7 @@ const Reports = () => {
       <div className="min-h-screen bg-gradient-to-br from-rjb-bg-light via-rjb-bg-light/95 to-rjb-yellow/5 dark:from-rjb-bg-dark dark:via-rjb-bg-dark/95 dark:to-rjb-yellow/5 pt-16 sm:pt-20 md:pt-28 pb-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-5 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow">Área Administrativa</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-gold">Área Administrativa</h1>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">Acesso restrito a administradores e responsáveis.</p>
           </div>
 
@@ -149,7 +149,7 @@ const Reports = () => {
         <header className="rounded-2xl border border-rjb-yellow/20 bg-rjb-card-light/70 dark:bg-rjb-card-dark/70 shadow-lg p-5 sm:p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow">Painel Administrativo</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-gold">Painel Administrativo</h1>
               <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">
                 Gestão de convites, membros e mídia. Logado como <span className="font-semibold break-all">{user.email}</span>
               </p>
@@ -165,7 +165,7 @@ const Reports = () => {
               )}
               <button
                 onClick={handleLogout}
-                className="bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/50 text-rjb-yellow font-semibold py-2.5 px-4 rounded-xl hover:bg-rjb-yellow/10 transition-colors"
+                className="bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/50 text-rjb-gold font-semibold py-2.5 px-4 rounded-xl hover:bg-rjb-yellow/10 transition-colors"
               >
                 Sair
               </button>

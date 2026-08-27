@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const RJB_MENU_SECTIONS = [
@@ -96,14 +96,14 @@ const Header = () => {
           <div className="hidden lg:flex space-x-6 xl:space-x-8 items-center">
             <Link
               to="/"
-              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/') && 'nav-link-active'}`}
+              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/') && 'nav-link-active'}`}
             >
               Home
             </Link>
             
             <Link
               to="/sobre"
-              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/sobre') && 'nav-link-active'}`}
+              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/sobre') && 'nav-link-active'}`}
             >
               Sobre
             </Link>
@@ -124,7 +124,7 @@ const Header = () => {
             >
               <button
                 onClick={() => setRjbDropdownOpen(!rjbDropdownOpen)}
-                className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-all duration-300 font-semibold py-5 text-sm xl:text-base ${isRjbPage && 'nav-link-active'}`}
+                className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-all duration-300 font-semibold py-5 text-sm xl:text-base ${isRjbPage && 'nav-link-active'}`}
                 aria-expanded={rjbDropdownOpen}
                 aria-haspopup="true"
               >
@@ -139,7 +139,7 @@ const Header = () => {
                     <div className="grid grid-cols-2 gap-0 p-4">
                       {RJB_MENU_SECTIONS.map((section, sIdx) => (
                         <div key={sIdx} className={sIdx === 0 ? 'pr-4 border-r border-rjb-yellow/20 dark:border-rjb-text-dark/20' : 'pl-4'}>
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-rjb-yellow mb-1 px-1">{section.title}</h4>
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-rjb-gold mb-1 px-1">{section.title}</h4>
                           <p className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mb-3 px-1">{section.subtitle}</p>
                           <div className="space-y-1">
                             {section.items.map((item) => (
@@ -151,7 +151,7 @@ const Header = () => {
                               >
                                 <span className="flex items-center gap-2.5">
                                   <span className="text-lg group-hover/item:scale-110 transition-transform">{item.icon}</span>
-                                  <span className="font-semibold text-sm text-rjb-text dark:text-rjb-text-dark group-hover/item:text-rjb-yellow">{item.label}</span>
+                                  <span className="font-semibold text-sm text-rjb-text dark:text-rjb-text-dark group-hover/item:text-rjb-gold">{item.label}</span>
                                 </span>
                                 <span className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 pl-7 leading-tight">{item.description}</span>
                               </Link>
@@ -167,14 +167,14 @@ const Header = () => {
 
             <Link
               to="/agenda"
-              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/agenda') && 'nav-link-active'}`}
+              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/agenda') && 'nav-link-active'}`}
             >
               Agenda
             </Link>
             
             <Link
               to="/contato"
-              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/contato') && 'nav-link-active'}`}
+              className={`nav-link flex items-center text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-colors font-semibold py-5 text-sm xl:text-base ${isActive('/contato') && 'nav-link-active'}`}
             >
               Contato
             </Link>
@@ -183,7 +183,7 @@ const Header = () => {
             <Tooltip content={`Tema: ${themeLabel} · Clique para: ${nextThemeLabel}`} position="bottom">
               <button
                 onClick={cycleTheme}
-                className="group relative text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-all duration-300 p-2 rounded-full hover:bg-rjb-yellow/10 focus:outline-none transform hover:scale-110 active:scale-95"
+                className="group relative text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-all duration-300 p-2 rounded-full hover:bg-rjb-yellow/10 focus:outline-none transform hover:scale-110 active:scale-95"
                 aria-label={`Tema ${themeLabel}. Próximo: ${nextThemeLabel}`}
               >
                 {isDark ? (
@@ -226,7 +226,7 @@ const Header = () => {
           <div className="lg:hidden flex items-center gap-2">
             <button
               onClick={cycleTheme}
-              className="text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow transition-all duration-300 p-2 rounded-md hover:bg-rjb-yellow/10 focus:outline-none transform active:scale-95"
+              className="text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold transition-all duration-300 p-2 rounded-md hover:bg-rjb-yellow/10 focus:outline-none transform active:scale-95"
               aria-label={`Tema ${themeLabel}. Próximo: ${nextThemeLabel}`}
             >
               {isDark ? (
@@ -245,8 +245,8 @@ const Header = () => {
                 e.stopPropagation()
                 setMobileMenuOpen(!mobileMenuOpen)
               }}
-              className={`relative inline-flex items-center justify-center p-2.5 rounded-lg text-rjb-text dark:text-rjb-text-dark hover:text-rjb-yellow hover:bg-rjb-yellow/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rjb-yellow transition-all duration-300 transform active:scale-95 touch-manipulation ${
-                mobileMenuOpen ? 'bg-rjb-yellow/20 text-rjb-yellow' : ''
+              className={`relative inline-flex items-center justify-center p-2.5 rounded-lg text-rjb-text dark:text-rjb-text-dark hover:text-rjb-gold hover:bg-rjb-yellow/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rjb-yellow transition-all duration-300 transform active:scale-95 touch-manipulation ${
+                mobileMenuOpen ? 'bg-rjb-yellow/20 text-rjb-gold' : ''
               }`}
               aria-controls="mobile-menu"
               aria-expanded={mobileMenuOpen}
@@ -278,8 +278,8 @@ const Header = () => {
                 to="/"
                 className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-gold shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-gold hover:shadow-sm'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -292,8 +292,8 @@ const Header = () => {
                 to="/sobre"
                 className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/sobre')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-gold shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-gold hover:shadow-sm'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -309,8 +309,8 @@ const Header = () => {
                   onClick={() => setRjbDropdownOpen(!rjbDropdownOpen)}
                   className={`flex items-center justify-between w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                     isRjbPage
-                      ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                      : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                      ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-gold shadow-md'
+                      : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-gold hover:shadow-sm'
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -327,7 +327,7 @@ const Header = () => {
                   <div className="mt-2 ml-4 space-y-3 bg-rjb-bg-light/50 dark:bg-rjb-card-dark/50 rounded-xl p-3 border border-rjb-yellow/20">
                     {RJB_MENU_SECTIONS.map((section, sIdx) => (
                       <div key={sIdx}>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-rjb-yellow mb-1.5 px-2">{section.title}</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-rjb-gold mb-1.5 px-2">{section.title}</h4>
                         <div className="space-y-1">
                           {section.items.map((item, idx) => (
                             <Link
@@ -335,8 +335,8 @@ const Header = () => {
                               to={item.path}
                               className={`flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                                 isActive(item.path)
-                                  ? 'bg-rjb-yellow/30 text-rjb-yellow shadow-sm'
-                                  : 'text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-yellow'
+                                  ? 'bg-rjb-yellow/30 text-rjb-gold shadow-sm'
+                                  : 'text-rjb-text/90 dark:text-rjb-text-dark/90 hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:text-rjb-gold'
                               }`}
                               onClick={() => {
                                 setMobileMenuOpen(false)
@@ -358,8 +358,8 @@ const Header = () => {
                 to="/agenda"
                 className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/agenda')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-gold shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-gold hover:shadow-sm'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -372,8 +372,8 @@ const Header = () => {
                 to="/contato"
                 className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/contato')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-gold shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-gold hover:shadow-sm'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -396,8 +396,8 @@ const Header = () => {
                 to="/admin"
                 className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
                   isActive('/admin')
-                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-yellow shadow-md'
-                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-yellow hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-rjb-yellow/30 to-yellow-500/20 text-rjb-gold shadow-md'
+                    : 'text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 hover:text-rjb-gold hover:shadow-sm'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -431,4 +431,3 @@ const Header = () => {
 }
 
 export default Header
-

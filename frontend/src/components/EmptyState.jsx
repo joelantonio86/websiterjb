@@ -9,7 +9,7 @@ const EmptyState = ({
   const variants = {
     default: {
       iconBg: 'bg-rjb-yellow/20 dark:bg-rjb-yellow/10',
-      iconColor: 'text-rjb-yellow',
+      iconColor: 'text-rjb-gold',
       titleColor: 'text-rjb-text dark:text-rjb-text-dark',
       descColor: 'text-rjb-text/70 dark:text-rjb-text-dark/70'
     },

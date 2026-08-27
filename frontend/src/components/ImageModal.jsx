@@ -35,7 +35,7 @@ const ImageModal = ({ imageUrl, isOpen, onClose }) => {
       >
         <button
           onClick={onClose}
-          className="absolute -top-10 sm:-top-12 right-0 sm:right-0 text-white hover:text-rjb-yellow transition-all duration-300 text-3xl sm:text-4xl md:text-5xl font-light z-10 p-1 sm:p-2 rounded-full hover:bg-white/10 backdrop-blur-sm transform hover:scale-110 active:scale-95 touch-manipulation"
+          className="absolute -top-10 sm:-top-12 right-0 sm:right-0 text-white hover:text-rjb-gold transition-all duration-300 text-3xl sm:text-4xl md:text-5xl font-light z-10 p-1 sm:p-2 rounded-full hover:bg-white/10 backdrop-blur-sm transform hover:scale-110 active:scale-95 touch-manipulation"
           aria-label="Fechar imagem"
         >
           &times;
