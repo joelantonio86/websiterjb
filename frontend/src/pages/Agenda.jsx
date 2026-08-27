@@ -2,14 +2,31 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 import EmptyState from '../components/EmptyState'
-import { AGENDA_EVENTS } from '../data/events'
+import SkeletonLoader from '../components/SkeletonLoader'
+import { fetchPublicRepertorios, getUpcomingEvents } from '../services/publicRepertorios'
 
 const Agenda = () => {
   const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(false)
+  const [events, setEvents] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsVisible(true)
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    setIsLoading(true)
+    fetchPublicRepertorios()
+      .then((list) => {
+        if (!mounted) return
+        setEvents(getUpcomingEvents(list))
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false)
+      })
+    return () => { mounted = false }
   }, [])
 
   return (
@@ -21,9 +38,13 @@ const Agenda = () => {
           </p>
         </div>
         
-        {AGENDA_EVENTS.length > 0 ? (
+        {isLoading ? (
           <div className="space-y-3 sm:space-y-4">
-            {AGENDA_EVENTS.map((event, index) => {
+            <SkeletonLoader type="card" count={3} />
+          </div>
+        ) : events.length > 0 ? (
+          <div className="space-y-3 sm:space-y-4">
+            {events.map((event, index) => {
               const dateParts = event.dateString.split(' ')
               const day = dateParts[0]
               const month = dateParts[1]

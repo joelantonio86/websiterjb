@@ -6,6 +6,7 @@ import ConfirmationDialog from '../ConfirmationDialog'
 import api from '../../services/api'
 import { getMediaGalleryPeriods, formatPeriodLabel } from '../../data/mediaGalleryPeriods'
 import { getStaticSiteMediaForMonth } from '../../data/staticSiteMediaReference'
+import { fetchPublicRepertorios } from '../../services/publicRepertorios'
 
 const LEGACY_PERIOD = '_legacy'
 
@@ -21,7 +22,8 @@ function classifyAttachment (name = '', mime = '') {
 }
 
 const AttachmentsManagement = () => {
-  const periods = useMemo(() => getMediaGalleryPeriods(), [])
+  const [repertorioDates, setRepertorioDates] = useState([])
+  const periods = useMemo(() => getMediaGalleryPeriods(repertorioDates), [repertorioDates])
   const [attachments, setAttachments] = useState([])
   const [files, setFiles] = useState([])
   const [filePreviewUrls, setFilePreviewUrls] = useState([])
@@ -56,6 +58,18 @@ const AttachmentsManagement = () => {
     } catch (error) {
       console.error('Erro ao buscar anexos:', error)
     }
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    fetchPublicRepertorios().then((list) => {
+      if (!mounted) return
+      const dates = (Array.isArray(list) ? list : [])
+        .filter((r) => r?.date && !r?.archived)
+        .map((r) => ({ date: r.date }))
+      setRepertorioDates(dates)
+    })
+    return () => { mounted = false }
   }, [])
 
   const fetchYoutubeVideos = useCallback(async () => {
