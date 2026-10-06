@@ -47,6 +47,8 @@ api.interceptors.response.use(
     const status = error.response?.status
     const url = String(error.config?.url || '')
     const isLoginRequest = url.includes('/api/admin/login')
+      || url.includes('/api/admin/forgot-password')
+      || url.includes('/api/admin/reset-password')
     if (!isLoginRequest && (status === 401 || status === 403)) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')

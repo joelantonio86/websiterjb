@@ -14,6 +14,7 @@ const jwt = require('jsonwebtoken');
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 const storageAdapter = require('./storageAdapter');
+const adminPassword = require('./adminPassword');
 
 // --- 1. Constantes e Ambiente (Preservadas do Original) ---
 // Validar variáveis de ambiente críticas
@@ -81,6 +82,18 @@ const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
     message: { status: 429, message: "Muitas tentativas de login. Aguarde alguns minutos." }
+});
+
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { status: 429, message: "Muitas solicitações de redefinição. Aguarde alguns minutos." }
+});
+
+const resetPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { status: 429, message: "Muitas tentativas de redefinição. Aguarde alguns minutos." }
 });
 
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
@@ -229,18 +242,149 @@ app.post('/api/admin/generate-key', authenticateJWT, async (req, res) => {
     }
 });
 
-app.post('/api/admin/login', loginLimiter, (req, res) => {
-    const { email, password } = req.body;
-    console.log(`🔐 Tentativa de login: ${email || '(sem email)'}`);
-    const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
-    if (!user) {
-        console.warn(`🔐 Login falhou para: ${email || '(sem email)'}`);
+async function currentPasswordMatches(user, password) {
+    const email = adminPassword.normalizeEmail(user.email);
+    const snap = await db.collection('adminPasswordOverrides').doc(email).get();
+    if (snap.exists && snap.data()?.passwordHash) {
+        return adminPassword.verifyPasswordHash(password, snap.data().passwordHash);
+    }
+    return adminPassword.passwordsMatch(password, user.password);
+}
+
+function createMailTransport() {
+    return nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user: SENDER_EMAIL, pass: SENDER_PASS }
+    });
+}
+
+app.post('/api/admin/login', loginLimiter, async (req, res) => {
+    const { email, password } = req.body || {};
+    console.log(`🔐 Tentativa de login: ${adminPassword.normalizeEmail(email) || '(sem email)'}`);
+    const user = adminPassword.findAdminUser(ADMIN_USERS, email);
+    if (!user || typeof password !== 'string') {
+        console.warn(`🔐 Login falhou para: ${adminPassword.normalizeEmail(email) || '(sem email)'}`);
         return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
+    }
+
+    try {
+        const valid = await currentPasswordMatches(user, password);
+        if (!valid) {
+            console.warn(`🔐 Login falhou para: ${adminPassword.normalizeEmail(email)}`);
+            return res.status(401).json({ status: 401, message: 'E-mail ou senha incorretos.' });
+        }
+    } catch (error) {
+        console.error('Erro ao verificar senha administrativa:', error.message);
+        return res.status(503).json({ status: 503, message: 'Não foi possível verificar o login agora. Tente novamente.' });
     }
 
     const token = jwt.sign({ userId: user.email, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
     console.log(`🔐 Login OK: ${user.email} (${user.role})`);
     res.status(200).json({ status: 200, message: 'Login OK', token, role: user.role });
+});
+
+app.post('/api/admin/forgot-password', forgotPasswordLimiter, async (req, res) => {
+    const generic = { status: 200, message: adminPassword.GENERIC_FORGOT_MESSAGE };
+    if (!SENDER_EMAIL || !SENDER_PASS) {
+        console.error('Redefinição de senha indisponível: GMAIL_USER ou GMAIL_PASS ausente.');
+        return res.status(503).json({ status: 503, message: 'O envio de e-mail está indisponível. Tente mais tarde.' });
+    }
+
+    const email = adminPassword.normalizeEmail(req.body?.email);
+    const user = adminPassword.findAdminUser(ADMIN_USERS, email);
+
+    if (!user) {
+        return res.status(200).json(generic);
+    }
+
+    try {
+        const token = adminPassword.createResetToken();
+        const tokenHash = adminPassword.hashToken(token);
+        const normalized = adminPassword.normalizeEmail(user.email);
+        const expiresAt = adminPassword.resetExpiry();
+
+        await db.collection('adminPasswordResets').doc(tokenHash).set({
+            email: normalized,
+            expiresAt,
+            used: false,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection('adminPasswordResetCurrent').doc(normalized).set({
+            tokenHash,
+            expiresAt,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        const link = adminPassword.buildResetLink(token);
+        const transporter = createMailTransport();
+        await transporter.sendMail({
+            from: `"Racional Jazz Band" <${SENDER_EMAIL}>`,
+            to: user.email,
+            subject: 'Redefinição de senha — área administrativa',
+            text: [
+                'Recebemos um pedido para definir uma nova senha da área administrativa.',
+                '',
+                'Abra o link abaixo nos próximos 30 minutos:',
+                link,
+                '',
+                'Se você não fez este pedido, ignore este e-mail. A senha atual continua valendo até que uma nova seja definida.'
+            ].join('\n')
+        });
+
+        console.log(`🔐 Link de redefinição enviado para ${normalized}`);
+        return res.status(200).json(generic);
+    } catch (error) {
+        console.error('Erro ao solicitar redefinição de senha:', error.message);
+        return res.status(500).json({ status: 500, message: 'Não foi possível enviar o e-mail de redefinição. Tente novamente.' });
+    }
+});
+
+app.post('/api/admin/reset-password', resetPasswordLimiter, async (req, res) => {
+    const token = String(req.body?.token || '').trim();
+    const password = req.body?.password;
+    const passwordError = adminPassword.validateNewPassword(password);
+    if (!adminPassword.isResetTokenFormat(token) || passwordError) {
+        return res.status(400).json({
+            status: 400,
+            message: passwordError || 'Link de redefinição inválido. Solicite um novo.'
+        });
+    }
+
+    try {
+        const tokenHash = adminPassword.hashToken(token);
+        const resetRef = db.collection('adminPasswordResets').doc(tokenHash);
+        const resetSnap = await resetRef.get();
+        if (!resetSnap.exists) {
+            return res.status(400).json({ status: 400, message: 'Link de redefinição inválido ou expirado. Solicite um novo.' });
+        }
+
+        const resetData = resetSnap.data() || {};
+        const email = adminPassword.normalizeEmail(resetData.email);
+        const currentSnap = await db.collection('adminPasswordResetCurrent').doc(email).get();
+        const currentHash = currentSnap.exists ? currentSnap.data()?.tokenHash : null;
+        const expired = !resetData.expiresAt || Number(resetData.expiresAt) < Date.now();
+        const user = adminPassword.findAdminUser(ADMIN_USERS, email);
+
+        if (resetData.used || expired || currentHash !== tokenHash || !user) {
+            return res.status(400).json({ status: 400, message: 'Link de redefinição inválido ou expirado. Solicite um novo.' });
+        }
+
+        const passwordHash = adminPassword.hashPassword(password);
+        await db.collection('adminPasswordOverrides').doc(email).set({
+            passwordHash,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        await resetRef.update({
+            used: true,
+            usedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        console.log(`🔐 Senha administrativa redefinida para ${email}`);
+        return res.status(200).json({ status: 200, message: 'Senha atualizada. Entre com a nova senha.' });
+    } catch (error) {
+        console.error('Erro ao redefinir senha administrativa:', error.message);
+        return res.status(500).json({ status: 500, message: 'Não foi possível atualizar a senha. Tente novamente.' });
+    }
 });
 
 // --- 6. Rotas de Membros e Cadastro (Uso Único Implementado) ---

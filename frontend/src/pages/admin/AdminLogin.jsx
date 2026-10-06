@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { showMessage } from '../../components/MessageBox'
 
@@ -78,6 +78,11 @@ const AdminLogin = () => {
               >
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>
+              <p className="text-center text-sm">
+                <Link to="/admin/esqueci-senha" className="font-semibold text-rjb-yellow hover:underline">
+                  Esqueci minha senha
+                </Link>
+              </p>
             </form>
           </div>
         </section>
