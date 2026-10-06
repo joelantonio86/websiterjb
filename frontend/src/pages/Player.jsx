@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
-import { racionais, diversas, R2_BASE_URL } from '../data/songs'
+import usePartiturasCatalog from '../hooks/usePartiturasCatalog'
 import { useAudio } from '../contexts/AudioContext'
 
 const SOURCE_ORIGINAL = 'original'
 const SOURCE_SIBELIUS = 'sibelius'
 
-const buildTrack = (item, folder, source) => {
-  const base = `${R2_BASE_URL}/${folder}`
+const buildTrack = (item, folder, source, r2BaseUrl) => {
+  const base = `${r2BaseUrl}/${folder}`
   const path = source === SOURCE_ORIGINAL
     ? `${base}/mp3original/${item.mp3}.mp3`
     : `${base}/mp3/${item.mp3}.mp3`
@@ -24,14 +24,22 @@ const buildTrack = (item, folder, source) => {
   }
 }
 
-// Ordem: primeiro Músicas Racionais (A–Z), depois Outros Clássicos (A–Z) — para next/prev respeitarem a mesma sequência da tela
-const racionaisOriginal = [...racionais.map(s => buildTrack(s, 'racionais', SOURCE_ORIGINAL))].sort((a, b) => a.title.localeCompare(b.title))
-const diversasOriginal = [...diversas.map(s => buildTrack(s, 'diversas', SOURCE_ORIGINAL))].sort((a, b) => a.title.localeCompare(b.title))
-const allTracksOriginal = [...racionaisOriginal, ...diversasOriginal]
+// Catálogo estático não traz as flags. No catálogo da API, só entra a versão cujo arquivo foi enviado.
+const hasAudioForSource = (item, source) => {
+  if (!item?.mp3 || !item?.title) return false
+  if (source === SOURCE_ORIGINAL) {
+    if (typeof item.hasMp3Original === 'boolean') return item.hasMp3Original
+    return true
+  }
+  if (typeof item.hasMp3 === 'boolean') return item.hasMp3
+  return true
+}
 
-const racionaisSibelius = [...racionais.map(s => buildTrack(s, 'racionais', SOURCE_SIBELIUS))].sort((a, b) => a.title.localeCompare(b.title))
-const diversasSibelius = [...diversas.map(s => buildTrack(s, 'diversas', SOURCE_SIBELIUS))].sort((a, b) => a.title.localeCompare(b.title))
-const allTracksSibelius = [...racionaisSibelius, ...diversasSibelius]
+const buildTrackList = (items, folder, source, r2BaseUrl) =>
+  items
+    .filter((item) => hasAudioForSource(item, source))
+    .map((item) => buildTrack(item, folder, source, r2BaseUrl))
+    .sort((a, b) => a.title.localeCompare(b.title, 'pt'))
 
 const formatTime = (seconds) => {
   if (seconds == null || !Number.isFinite(seconds)) return '0:00'
@@ -42,6 +50,7 @@ const formatTime = (seconds) => {
 
 const Player = () => {
   const { currentTrack, isPlaying, isLoading, currentTime, duration, trackError, playTrack, togglePlayPause, seekTo, stopTrack, setOnTrackEnded } = useAudio()
+  const { racionais, diversas, r2BaseUrl } = usePartiturasCatalog()
   const [source, setSource] = useState(SOURCE_ORIGINAL)
   const [searchTerm, setSearchTerm] = useState('')
   const [isVisible, setIsVisible] = useState(false)
@@ -74,7 +83,18 @@ const Player = () => {
   }, [currentTrack?.audioUrl])
 
 
-  const tracks = source === SOURCE_ORIGINAL ? allTracksOriginal : allTracksSibelius
+  const tracksBySource = useMemo(() => ({
+    [SOURCE_ORIGINAL]: [
+      ...buildTrackList(racionais, 'racionais', SOURCE_ORIGINAL, r2BaseUrl),
+      ...buildTrackList(diversas, 'diversas', SOURCE_ORIGINAL, r2BaseUrl)
+    ],
+    [SOURCE_SIBELIUS]: [
+      ...buildTrackList(racionais, 'racionais', SOURCE_SIBELIUS, r2BaseUrl),
+      ...buildTrackList(diversas, 'diversas', SOURCE_SIBELIUS, r2BaseUrl)
+    ]
+  }), [racionais, diversas, r2BaseUrl])
+
+  const tracks = tracksBySource[source]
   // Lista única na ordem da tela: Racionais (A–Z) depois Diversas (A–Z); busca só filtra, mantém a ordem
   const filteredTracks = useMemo(() => {
     if (!searchTerm.trim()) return tracks
@@ -254,7 +274,7 @@ const Player = () => {
             Escolha Originais ou Sibelius, toque em uma faixa na lista e use os controles acima.
           </p>
           <p className="mt-2 text-xs sm:text-sm text-rjb-text/50 dark:text-rjb-text-dark/50 text-center lg:text-left">
-            {source === SOURCE_ORIGINAL ? allTracksOriginal.length : allTracksSibelius.length} músicas
+            {tracks.length} músicas
             {searchTerm.trim() && ` · ${filteredTracks.length} na busca`}
           </p>
         </div>
