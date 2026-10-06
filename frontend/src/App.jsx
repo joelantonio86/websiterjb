@@ -22,6 +22,8 @@ import Financeiro from './pages/Financeiro'
 import ProtectedRoute from './components/ProtectedRoute'
 import SheetsAdminRoute from './components/SheetsAdminRoute'
 import AdminLogin from './pages/admin/AdminLogin'
+import AdminForgotPassword from './pages/admin/AdminForgotPassword'
+import AdminResetPassword from './pages/admin/AdminResetPassword'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminInvites from './pages/admin/AdminInvites'
@@ -53,6 +55,8 @@ function App() {
                 <Route path="/termos-uso" element={<TermosUso />} />
                 <Route path="/cadastro" element={<MemberRegistration />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/esqueci-senha" element={<AdminForgotPassword />} />
+                <Route path="/admin/redefinir-senha" element={<AdminResetPassword />} />
                 
                 <Route
                   path="/admin"
