@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import PageWrapper from '../components/PageWrapper'
 import usePartiturasCatalog from '../hooks/usePartiturasCatalog'
+import { racionais as staticRacionais, diversas as staticDiversas } from '../data/songs'
 import { useAudio } from '../contexts/AudioContext'
 
 const SOURCE_ORIGINAL = 'original'
@@ -24,15 +25,27 @@ const buildTrack = (item, folder, source, r2BaseUrl) => {
   }
 }
 
-// Catálogo estático não traz as flags. No catálogo da API, só entra a versão cujo arquivo foi enviado.
+// O catálogo antigo está no R2 pelo nome do arquivo, sem o marcador hasMp3Original.
+// Música nova, que só existe na API, entra na aba se o MP3 correspondente foi enviado.
+const catalogSlugs = new Set(
+  [...staticRacionais, ...staticDiversas].map((item) => item.mp3)
+)
+
 const hasAudioForSource = (item, source) => {
   if (!item?.mp3 || !item?.title) return false
-  if (source === SOURCE_ORIGINAL) {
-    if (typeof item.hasMp3Original === 'boolean') return item.hasMp3Original
-    return true
+  if (catalogSlugs.has(item.mp3)) return true
+  if (source === SOURCE_ORIGINAL) return item.hasMp3Original === true
+  return item.hasMp3 === true
+}
+
+const withStaticCatalog = (apiItems, staticItems, folder) => {
+  const bySlug = new Map(staticItems.map((item) => [item.mp3, { ...item, folder }]))
+  for (const item of apiItems) {
+    if (!item?.mp3) continue
+    const previous = bySlug.get(item.mp3)
+    bySlug.set(item.mp3, previous ? { ...previous, ...item } : item)
   }
-  if (typeof item.hasMp3 === 'boolean') return item.hasMp3
-  return true
+  return [...bySlug.values()]
 }
 
 const buildTrackList = (items, folder, source, r2BaseUrl) =>
@@ -83,16 +96,20 @@ const Player = () => {
   }, [currentTrack?.audioUrl])
 
 
-  const tracksBySource = useMemo(() => ({
-    [SOURCE_ORIGINAL]: [
-      ...buildTrackList(racionais, 'racionais', SOURCE_ORIGINAL, r2BaseUrl),
-      ...buildTrackList(diversas, 'diversas', SOURCE_ORIGINAL, r2BaseUrl)
-    ],
-    [SOURCE_SIBELIUS]: [
-      ...buildTrackList(racionais, 'racionais', SOURCE_SIBELIUS, r2BaseUrl),
-      ...buildTrackList(diversas, 'diversas', SOURCE_SIBELIUS, r2BaseUrl)
-    ]
-  }), [racionais, diversas, r2BaseUrl])
+  const tracksBySource = useMemo(() => {
+    const racionaisCatalog = withStaticCatalog(racionais, staticRacionais, 'racionais')
+    const diversasCatalog = withStaticCatalog(diversas, staticDiversas, 'diversas')
+    return {
+      [SOURCE_ORIGINAL]: [
+        ...buildTrackList(racionaisCatalog, 'racionais', SOURCE_ORIGINAL, r2BaseUrl),
+        ...buildTrackList(diversasCatalog, 'diversas', SOURCE_ORIGINAL, r2BaseUrl)
+      ],
+      [SOURCE_SIBELIUS]: [
+        ...buildTrackList(racionaisCatalog, 'racionais', SOURCE_SIBELIUS, r2BaseUrl),
+        ...buildTrackList(diversasCatalog, 'diversas', SOURCE_SIBELIUS, r2BaseUrl)
+      ]
+    }
+  }, [racionais, diversas, r2BaseUrl])
 
   const tracks = tracksBySource[source]
   // Lista única na ordem da tela: Racionais (A–Z) depois Diversas (A–Z); busca só filtra, mantém a ordem
