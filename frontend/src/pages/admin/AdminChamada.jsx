@@ -68,6 +68,7 @@ const AdminChamada = () => {
   const [eventId, setEventId] = useState('')
   const [rows, setRows] = useState([])
   const [query, setQuery] = useState('')
+  const [sortMode, setSortMode] = useState('naipe')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
@@ -134,10 +135,15 @@ const AdminChamada = () => {
   const stageMap = useMemo(() => buildStageMap(rows), [rows])
   const visibleRows = useMemo(() => {
     const term = query.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    if (!term) return rows
-    return rows.filter((row) => row.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(term)
-      || row.instrument.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(term))
-  }, [rows, query])
+    const filtered = term
+      ? rows.filter((row) => row.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(term)
+        || row.instrument.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(term))
+      : rows
+    if (sortMode === 'nome') {
+      return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'pt'))
+    }
+    return filtered
+  }, [rows, query, sortMode])
 
   const updateRow = (memberId, patch) => {
     setRows((current) => current.map((row) => (row.memberId === memberId ? { ...row, ...patch } : row)))
@@ -233,6 +239,24 @@ const AdminChamada = () => {
               className="mt-1 w-full p-3 rounded-xl bg-rjb-bg-light dark:bg-rjb-bg-dark border border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark"
             />
           </label>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Ordem da lista">
+          <span className="text-xs font-semibold text-rjb-text/70 dark:text-rjb-text-dark/70">Ordem</span>
+          <button
+            type="button"
+            onClick={() => setSortMode('naipe')}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold ${sortMode === 'naipe' ? 'bg-rjb-yellow text-rjb-text border-rjb-yellow' : 'border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark'}`}
+          >
+            Por naipe
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortMode('nome')}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold ${sortMode === 'nome' ? 'bg-rjb-yellow text-rjb-text border-rjb-yellow' : 'border-rjb-yellow/30 text-rjb-text dark:text-rjb-text-dark'}`}
+          >
+            Por nome
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
