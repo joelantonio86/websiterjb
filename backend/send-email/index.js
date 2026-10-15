@@ -97,7 +97,7 @@ const resetPasswordLimiter = rateLimit({
 });
 
 // --- 3. Serviços (Firebase/GCS) — inicializados depois do listen para o Cloud Run passar no health check ---
-let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, partiturasCollection, bucket, BUCKET_NAME;
+let db, membersCollection, keysCollection, contributionsCollection, depositsCollection, expensesCollection, youtubeVideosCollection, repertoriosCollection, partiturasCollection, chamadasCollection, bucket, BUCKET_NAME;
 
 function initFirebaseAndGCS() {
     try {
@@ -114,6 +114,7 @@ function initFirebaseAndGCS() {
         youtubeVideosCollection = db.collection('youtubeVideos');
         repertoriosCollection = db.collection('repertorios');
         partiturasCollection = db.collection('partituras');
+        chamadasCollection = db.collection('chamadas');
         const storage = new Storage();
         BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'rjb-admin-files-bucket';
         bucket = storage.bucket(BUCKET_NAME);
@@ -1063,10 +1064,102 @@ app.delete('/api/admin/repertorios/:id', authenticateJWT, requireSheetsAdmin, as
         if (!snap.exists) return res.status(404).json({ message: 'Repertório não encontrado.' });
 
         await ref.delete();
+        if (chamadasCollection) {
+            try { await chamadasCollection.doc(req.params.id).delete(); } catch (_) { /* a chamada pode não existir */ }
+        }
         res.status(200).json({ status: 200, message: 'Repertório excluído com sucesso.' });
     } catch (error) {
         console.error('admin/repertorios/delete:', error);
         res.status(500).json({ message: 'Erro ao excluir repertório.' });
+    }
+});
+
+const CALL_STATUSES = new Set(['presente', 'falta', 'suplente']);
+
+function serializeChamada(doc, repertorioId) {
+    const data = doc?.exists ? (doc.data() || {}) : {};
+    const entries = Array.isArray(data.entries) ? data.entries : [];
+    return {
+        repertorioId,
+        saved: Boolean(doc?.exists),
+        entries: entries.map((entry) => ({
+            memberId: String(entry.memberId || ''),
+            status: CALL_STATUSES.has(entry.status) ? entry.status : 'presente',
+            replacesMemberId: entry.status === 'suplente' ? String(entry.replacesMemberId || '') : ''
+        })).filter((entry) => entry.memberId),
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || null
+    };
+}
+
+function sanitizeChamadaEntries(raw) {
+    if (!Array.isArray(raw)) return { error: 'Envie a lista de chamada.' };
+    const entries = [];
+    const seen = new Set();
+    for (const item of raw) {
+        const memberId = String(item?.memberId || '').trim();
+        const status = String(item?.status || '').trim();
+        if (!memberId || seen.has(memberId)) return { error: 'A lista de chamada tem um membro ausente ou repetido.' };
+        if (!CALL_STATUSES.has(status)) return { error: 'Situação de chamada inválida.' };
+        seen.add(memberId);
+        entries.push({
+            memberId,
+            status,
+            replacesMemberId: status === 'suplente' ? String(item?.replacesMemberId || '').trim() : ''
+        });
+    }
+    const byId = new Map(entries.map((entry) => [entry.memberId, entry]));
+    const replacedIds = new Set();
+    for (const entry of entries) {
+        if (entry.status !== 'suplente') continue;
+        const replaced = byId.get(entry.replacesMemberId);
+        if (!replaced || replaced.status !== 'falta') {
+            return { error: 'Cada suplente precisa substituir uma pessoa marcada com falta.' };
+        }
+        if (replacedIds.has(replaced.memberId)) {
+            return { error: 'Cada falta pode ter apenas um suplente.' };
+        }
+        replacedIds.add(replaced.memberId);
+    }
+    return { entries };
+}
+
+app.get('/api/admin/chamadas/:repertorioId', authenticateJWT, requireSheetsAdmin, async (req, res) => {
+    try {
+        const repertorioId = String(req.params.repertorioId || '').trim();
+        const eventSnap = await repertoriosCollection.doc(repertorioId).get();
+        if (!eventSnap.exists) return res.status(404).json({ message: 'Evento não encontrado.' });
+        const snap = await chamadasCollection.doc(repertorioId).get();
+        res.status(200).json(serializeChamada(snap, repertorioId));
+    } catch (error) {
+        console.error('admin/chamadas/get:', error);
+        res.status(500).json({ message: 'Erro ao carregar a chamada.' });
+    }
+});
+
+app.put('/api/admin/chamadas/:repertorioId', authenticateJWT, requireSheetsAdmin, async (req, res) => {
+    try {
+        const repertorioId = String(req.params.repertorioId || '').trim();
+        const eventSnap = await repertoriosCollection.doc(repertorioId).get();
+        if (!eventSnap.exists) return res.status(404).json({ message: 'Evento não encontrado.' });
+
+        const membersSnap = await membersCollection.get();
+        const memberIds = new Set(membersSnap.docs.map((doc) => doc.id));
+        const { error, entries } = sanitizeChamadaEntries(req.body?.entries);
+        if (error) return res.status(400).json({ message: error });
+        if (entries.some((entry) => !memberIds.has(entry.memberId))) {
+            return res.status(400).json({ message: 'A chamada inclui um membro que não está cadastrado.' });
+        }
+
+        await chamadasCollection.doc(repertorioId).set({
+            repertorioId,
+            entries,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedBy: req.user?.email || req.user?.userId || null
+        });
+        res.status(200).json({ status: 200, message: 'Chamada salva.' });
+    } catch (error) {
+        console.error('admin/chamadas/save:', error);
+        res.status(500).json({ message: 'Erro ao salvar a chamada.' });
     }
 });
 
