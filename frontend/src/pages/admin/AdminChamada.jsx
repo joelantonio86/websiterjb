@@ -71,6 +71,7 @@ const AdminChamada = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
+  const [loadedEventId, setLoadedEventId] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -85,9 +86,11 @@ const AdminChamada = () => {
         const list = Array.isArray(eventsRes.data) ? eventsRes.data : []
         list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
         setEvents(list)
-        setRows(mergeChamada(membersRes.data?.allMembers || [], []))
         if (list[0]) setEventId(list[0].id)
-        else setLoading(false)
+        else {
+          setRows([])
+          setLoading(false)
+        }
       } catch (err) {
         if (!mounted) return
         setError(err.response?.data?.message || 'Não foi possível carregar eventos e membros.')
@@ -111,9 +114,12 @@ const AdminChamada = () => {
         ])
         if (!mounted) return
         setRows(mergeChamada(membersRes.data?.allMembers || [], callRes.data?.entries || []))
+        setLoadedEventId(eventId)
         setDirty(false)
       } catch (err) {
         if (!mounted) return
+        setRows([])
+        setLoadedEventId('')
         setError(err.response?.data?.message || 'Não foi possível carregar a chamada deste evento.')
       } finally {
         if (mounted) setLoading(false)
@@ -124,6 +130,7 @@ const AdminChamada = () => {
   }, [eventId])
 
   const event = events.find((item) => item.id === eventId) || null
+  const callReady = Boolean(eventId) && loadedEventId === eventId && !loading
   const stageMap = useMemo(() => buildStageMap(rows), [rows])
   const visibleRows = useMemo(() => {
     const term = query.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -232,7 +239,7 @@ const AdminChamada = () => {
           <button
             type="button"
             onClick={save}
-            disabled={!eventId || saving || loading}
+            disabled={!callReady || saving}
             className="bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-2.5 px-4 rounded-xl disabled:opacity-50"
           >
             {saving ? 'Salvando...' : 'Salvar chamada'}
@@ -240,7 +247,7 @@ const AdminChamada = () => {
           <button
             type="button"
             onClick={download}
-            disabled={!eventId || loading || rows.length === 0}
+            disabled={!callReady || rows.length === 0}
             className="border border-rjb-yellow/50 text-rjb-gold font-semibold py-2.5 px-4 rounded-xl disabled:opacity-50"
           >
             Baixar PDF
@@ -308,7 +315,11 @@ const AdminChamada = () => {
 
       <div>
         <h3 className="text-base font-bold text-rjb-text dark:text-rjb-text-dark mb-2">Pré-visualização do mapa</h3>
-        <StageMapPreview event={event} stageMap={stageMap} />
+        {callReady ? (
+          <StageMapPreview event={event} stageMap={stageMap} />
+        ) : (
+          <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">Carregando o mapa deste evento...</p>
+        )}
       </div>
     </section>
   )

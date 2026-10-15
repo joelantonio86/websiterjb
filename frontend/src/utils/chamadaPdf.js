@@ -38,7 +38,8 @@ export function downloadStageMapPdf({ event, stageMap }) {
     doc.text('Racional Jazz Band', margin, y + 6)
     doc.setFontSize(12)
     doc.setTextColor(30, 30, 30)
-    doc.text(event?.name || 'Apresentação', margin, y + 12)
+    const title = doc.splitTextToSize(event?.name || 'Apresentação', pageWidth - margin * 2)[0]
+    doc.text(title, margin, y + 12)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(70, 70, 70)
@@ -98,14 +99,15 @@ export function downloadStageMapPdf({ event, stageMap }) {
   })
 
   if (stageMap.absent.length > 0) {
-    ensureSpace(16)
-    doc.setFont('helvetica', 'bold')
+    doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
+    const line = stageMap.absent.map((row) => `${row.name} (${row.instrument})`).join(' · ')
+    const lines = doc.splitTextToSize(line, pageWidth - margin * 2)
+    ensureSpace(8 + lines.length * 4)
+    doc.setFont('helvetica', 'bold')
     doc.setTextColor(90, 90, 90)
     doc.text('Faltas', margin, y + 4)
     doc.setFont('helvetica', 'normal')
-    const line = stageMap.absent.map((row) => `${row.name} (${row.instrument})`).join(' · ')
-    const lines = doc.splitTextToSize(line, pageWidth - margin * 2)
     doc.text(lines, margin, y + 8)
   }
 
