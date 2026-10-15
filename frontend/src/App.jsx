@@ -31,6 +31,7 @@ import AdminMembers from './pages/admin/AdminMembers'
 import AdminMedia from './pages/admin/AdminMedia'
 import AdminRepertorios from './pages/admin/AdminRepertorios'
 import AdminPartituras from './pages/admin/AdminPartituras'
+import AdminChamada from './pages/admin/AdminChamada'
 function App() {
   return (
     <ErrorBoundary>
@@ -75,6 +76,14 @@ function App() {
                     element={
                       <SheetsAdminRoute>
                         <AdminRepertorios />
+                      </SheetsAdminRoute>
+                    }
+                  />
+                  <Route
+                    path="chamada"
+                    element={
+                      <SheetsAdminRoute>
+                        <AdminChamada />
                       </SheetsAdminRoute>
                     }
                   />

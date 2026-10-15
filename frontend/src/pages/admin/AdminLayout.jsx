@@ -19,6 +19,7 @@ const AdminLayout = () => {
     ...(sheetsOk
       ? [
           { to: '/admin/repertorios', label: 'Repertório' },
+          { to: '/admin/chamada', label: 'Chamada' },
           { to: '/admin/partituras', label: 'Partituras' },
         ]
       : []),
