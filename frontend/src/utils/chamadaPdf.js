@@ -31,53 +31,61 @@ export function downloadStageMapPdf({ event, stageMap }) {
     y = margin
   }
 
+  const centerText = (text, yPos, maxWidth) => {
+    const line = doc.splitTextToSize(String(text || ''), maxWidth)[0] || ''
+    doc.text(line, pageWidth / 2, yPos, { align: 'center' })
+  }
+
   const writeHeader = () => {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
     doc.setTextColor(90, 60, 10)
-    doc.text('Racional Jazz Band', margin, y + 6)
+    centerText('Racional Jazz Band', y + 6, pageWidth - margin * 2)
     doc.setFontSize(12)
     doc.setTextColor(30, 30, 30)
-    const title = doc.splitTextToSize(event?.name || 'Apresentação', pageWidth - margin * 2)[0]
-    doc.text(title, margin, y + 12)
+    centerText(event?.name || 'Apresentação', y + 12, pageWidth - margin * 2)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(70, 70, 70)
     const place = event?.location ? ` · ${event.location}` : ''
-    doc.text(`${formatDate(event?.date)}${place}`, margin, y + 17)
+    centerText(`${formatDate(event?.date)}${place}`, y + 17, pageWidth - margin * 2)
     y += 22
   }
 
   writeHeader()
 
   const drawCards = (items) => {
-    items.forEach((item, index) => {
-      const column = index % columns
-      if (column === 0) ensureSpace(cardH + gap)
-      const x = margin + column * (cardW + gap)
-      doc.setFillColor(255, 250, 240)
-      doc.setDrawColor(180, 140, 40)
-      doc.roundedRect(x, y, cardW, cardH, 1.5, 1.5, 'FD')
-      doc.setFillColor(184, 138, 30)
-      doc.rect(x, y, 1.4, cardH, 'F')
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(8)
-      doc.setTextColor(30, 30, 30)
-      const name = doc.splitTextToSize(item.displayName, cardW - 5)[0]
-      doc.text(name, x + 3, y + 5)
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(7)
-      doc.text(doc.splitTextToSize(item.instrument, cardW - 5)[0], x + 3, y + 9)
-      doc.setFontSize(7)
-      doc.text(item.state || '—', x + 3, y + 13)
-      if (item.status === 'suplente') {
-        doc.setFontSize(6)
-        doc.setTextColor(120, 80, 10)
-        const note = item.replacesName ? `Suplente de ${item.replacesName}` : 'Suplente'
-        doc.text(doc.splitTextToSize(note, cardW - 5)[0], x + 3, y + 16.5)
-      }
-      if (column === columns - 1 || index === items.length - 1) y += cardH + gap
-    })
+    for (let start = 0; start < items.length; start += columns) {
+      const rowItems = items.slice(start, start + columns)
+      ensureSpace(cardH + gap)
+      const rowWidth = rowItems.length * cardW + (rowItems.length - 1) * gap
+      const startX = (pageWidth - rowWidth) / 2
+      rowItems.forEach((item, column) => {
+        const x = startX + column * (cardW + gap)
+        const centerX = x + cardW / 2
+        doc.setFillColor(255, 250, 240)
+        doc.setDrawColor(180, 140, 40)
+        doc.roundedRect(x, y, cardW, cardH, 1.5, 1.5, 'FD')
+        doc.setFillColor(184, 138, 30)
+        doc.rect(x, y, 1.4, cardH, 'F')
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(8)
+        doc.setTextColor(30, 30, 30)
+        const name = doc.splitTextToSize(item.displayName, cardW - 6)[0]
+        doc.text(name, centerX, y + 5, { align: 'center' })
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(7)
+        doc.text(doc.splitTextToSize(item.instrument, cardW - 6)[0], centerX, y + 9, { align: 'center' })
+        doc.text(item.state || '—', centerX, y + 13, { align: 'center' })
+        if (item.status === 'suplente') {
+          doc.setFontSize(6)
+          doc.setTextColor(120, 80, 10)
+          const note = item.replacesName ? `Suplente de ${item.replacesName}` : 'Suplente'
+          doc.text(doc.splitTextToSize(note, cardW - 6)[0], centerX, y + 16.5, { align: 'center' })
+        }
+      })
+      y += cardH + gap
+    }
   }
 
   stageMap.sections.forEach((section) => {
@@ -85,13 +93,13 @@ export function downloadStageMapPdf({ event, stageMap }) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(10)
     doc.setTextColor(90, 60, 10)
-    doc.text(section.title, margin, y + 4)
+    centerText(section.title, y + 4, pageWidth - margin * 2)
     y += 6
     if (section.subtitle) {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
       doc.setTextColor(90, 90, 90)
-      doc.text(section.subtitle, margin, y + 3)
+      centerText(section.subtitle, y + 3, pageWidth - margin * 2)
       y += 5
     }
     drawCards(section.items)
@@ -106,9 +114,9 @@ export function downloadStageMapPdf({ event, stageMap }) {
     ensureSpace(8 + lines.length * 4)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(90, 90, 90)
-    doc.text('Faltas', margin, y + 4)
+    doc.text('Faltas', pageWidth / 2, y + 4, { align: 'center' })
     doc.setFont('helvetica', 'normal')
-    doc.text(lines, margin, y + 8)
+    doc.text(lines, pageWidth / 2, y + 8, { align: 'center' })
   }
 
   const filename = `mapa-palco-${event?.date || 'evento'}-${fileSlug(event?.name)}.pdf`
