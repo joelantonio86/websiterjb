@@ -4,6 +4,7 @@ import { showLoader } from '../LoadingOverlay'
 import api from '../../services/api'
 import EditMemberModal from './EditMemberModal'
 import DeleteMemberModal from './DeleteMemberModal'
+import { filterMembers, normalizeMemberText, uniqueMemberInstruments } from '../../utils/memberFilters'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 
@@ -42,34 +43,18 @@ const MembersReport = () => {
     }
   }
 
-  const normalizeText = (text) => {
-    return (text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  }
-
   const applyFiltersAndSort = () => {
-    let filtered = [...members]
-
-    // Aplicar filtros
-    if (filters.name) {
-      const searchName = normalizeText(filters.name)
-      filtered = filtered.filter(m => normalizeText(m.name).includes(searchName))
-    }
-    if (filters.instrument) {
-      filtered = filtered.filter(m => normalizeText(m.instrument) === normalizeText(filters.instrument))
-    }
-    if (filters.location) {
-      filtered = filtered.filter(m => `${m.city || ''}/${m.state || ''}`.trim() === filters.location)
-    }
+    const filtered = filterMembers(members, filters)
 
     // Aplicar ordenação
     filtered.sort((a, b) => {
       let aVal, bVal
       if (sortColumn === 'name') {
-        aVal = normalizeText(a.name)
-        bVal = normalizeText(b.name)
+        aVal = normalizeMemberText(a.name)
+        bVal = normalizeMemberText(b.name)
       } else if (sortColumn === 'instrument') {
-        aVal = normalizeText(a.instrument)
-        bVal = normalizeText(b.instrument)
+        aVal = normalizeMemberText(a.instrument)
+        bVal = normalizeMemberText(b.instrument)
       } else if (sortColumn === 'location') {
         aVal = `${a.city || ''}/${a.state || ''}`.trim()
         bVal = `${b.city || ''}/${b.state || ''}`.trim()
@@ -103,15 +88,7 @@ const MembersReport = () => {
     setSortDirection(true)
   }
 
-  const getUniqueInstruments = () => {
-    const instruments = new Set()
-    members.forEach(m => {
-      if (m.instrument && m.instrument.trim()) {
-        instruments.add(m.instrument.trim())
-      }
-    })
-    return Array.from(instruments).sort()
-  }
+  const getUniqueInstruments = () => uniqueMemberInstruments(members)
 
   const getUniqueLocations = () => {
     const locations = new Set()
@@ -313,7 +290,7 @@ const MembersReport = () => {
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Buscar por nome..."
+                      placeholder="Buscar por nome ou instrumento..."
                       value={filters.name}
                       onChange={(e) => handleFilterChange('name', e.target.value)}
                       className="pl-10 sm:pl-12 pr-3 sm:pr-4 w-full py-2.5 sm:py-3 text-base rounded-lg sm:rounded-xl border-2 border-rjb-border-light dark:border-rjb-border-dark dark:bg-rjb-bg-dark/50 focus:border-rjb-yellow focus:ring-2 sm:focus:ring-4 focus:ring-rjb-yellow/20 outline-none transition-all shadow-sm hover:shadow-md"
