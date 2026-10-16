@@ -6,6 +6,7 @@ import ConfirmationDialog from '../ConfirmationDialog'
 import EmptyState from '../EmptyState'
 import SkeletonLoader from '../SkeletonLoader'
 import RepertorioFormModal from './RepertorioFormModal'
+import RepertorioFichaModal from './RepertorioFichaModal'
 
 const formatDate = (dateStr) => {
   if (!dateStr) return 'Data não informada'
@@ -23,6 +24,7 @@ const Repertorios = () => {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
   const [showArchived, setShowArchived] = useState(false)
+  const [fichaRepertorio, setFichaRepertorio] = useState(null)
 
   const fetchRepertorios = useCallback(async () => {
     setIsLoading(true)
@@ -173,6 +175,13 @@ const Repertorios = () => {
         <div className="flex flex-wrap gap-2 pt-2 mt-auto border-t border-rjb-yellow/20">
           <button
             type="button"
+            onClick={() => setFichaRepertorio(repertorio)}
+            className="flex-1 min-w-[6rem] inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-rjb-yellow text-rjb-text text-sm font-bold hover:bg-yellow-500 transition-colors"
+          >
+            Ficha
+          </button>
+          <button
+            type="button"
             onClick={() => openEditModal(repertorio)}
             className="flex-1 min-w-[6rem] inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-rjb-yellow/50 text-sm font-semibold text-rjb-text dark:text-rjb-text-dark hover:bg-rjb-yellow/10 transition-colors"
           >
@@ -205,7 +214,7 @@ const Repertorios = () => {
             {active.length} activo{active.length !== 1 ? 's' : ''} no site · {archived.length} arquivado{archived.length !== 1 ? 's' : ''}
           </p>
           <p className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mt-0.5">
-            Arquivar esconde do site sem apagar. Excluir remove de vez.
+            Arquivar esconde do site sem apagar. A ficha de cada apresentação guarda regência, intérprete, participação especial e observação.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -274,6 +283,17 @@ const Repertorios = () => {
           repertorio={editingRepertorio}
           onClose={closeModal}
           onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {fichaRepertorio && (
+        <RepertorioFichaModal
+          repertorio={fichaRepertorio}
+          onClose={() => setFichaRepertorio(null)}
+          onSaved={() => {
+            setFichaRepertorio(null)
+            fetchRepertorios()
+          }}
         />
       )}
 

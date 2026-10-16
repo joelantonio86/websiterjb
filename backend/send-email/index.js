@@ -939,14 +939,22 @@ app.get('/api/public/youtube-videos', async (req, res) => {
 
 // --- 8.2 Rotas de Repertórios (CRUD admin + leitura pública) ---
 
+function clipFichaText(value, max) {
+    return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
 function sanitizeRepertorioSongs(rawSongs) {
     if (!Array.isArray(rawSongs)) return [];
     return rawSongs
         .filter(s => s && typeof s === 'object' && String(s.title || '').trim())
         .map(s => ({
-            title: String(s.title).trim(),
-            folder: String(s.folder || '').trim(),
-            mp3: String(s.mp3 || '').trim()
+            title: clipFichaText(s.title, 160),
+            folder: clipFichaText(s.folder, 40),
+            mp3: clipFichaText(s.mp3, 160),
+            regencia: clipFichaText(s.regencia, 80),
+            interprete: clipFichaText(s.interprete, 80),
+            partEsp: clipFichaText(s.partEsp, 80),
+            observacao: clipFichaText(s.observacao, 240)
         }))
         .slice(0, 200);
 }
@@ -963,14 +971,31 @@ function validateRepertorioPayload(body) {
     return { value: { name, date, location, songs } };
 }
 
-function serializeRepertorio(doc) {
+function serializeRepertorioSong(song, includeFicha) {
+    const base = {
+        title: String(song?.title || '').trim(),
+        folder: String(song?.folder || '').trim(),
+        mp3: String(song?.mp3 || '').trim()
+    };
+    if (!includeFicha) return base;
+    return {
+        ...base,
+        regencia: String(song?.regencia || '').trim(),
+        interprete: String(song?.interprete || '').trim(),
+        partEsp: String(song?.partEsp || '').trim(),
+        observacao: String(song?.observacao || '').trim()
+    };
+}
+
+function serializeRepertorio(doc, includeFicha = false) {
     const d = doc.data();
+    const songs = Array.isArray(d.songs) ? d.songs : [];
     return {
         id: doc.id,
         name: d.name || '',
         date: d.date || '',
         location: d.location || '',
-        songs: Array.isArray(d.songs) ? d.songs : [],
+        songs: songs.map((song) => serializeRepertorioSong(song, includeFicha)),
         archived: Boolean(d.archived),
         createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
         updatedAt: d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toISOString() : null
@@ -981,7 +1006,7 @@ function serializeRepertorio(doc) {
 app.get('/api/admin/repertorios', authenticateJWT, requireSheetsAdmin, async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
-        const data = snapshot.docs.map(serializeRepertorio);
+        const data = snapshot.docs.map((doc) => serializeRepertorio(doc, true));
         res.status(200).json(data);
     } catch (error) {
         console.error('admin/repertorios/list:', error);
@@ -1168,7 +1193,7 @@ app.get('/api/public/repertorios', async (req, res) => {
     try {
         const snapshot = await repertoriosCollection.orderBy('date', 'asc').get();
         const data = snapshot.docs
-            .map(serializeRepertorio)
+            .map((doc) => serializeRepertorio(doc, false))
             .filter((r) => !r.archived);
         res.status(200).json(data);
     } catch (error) {
