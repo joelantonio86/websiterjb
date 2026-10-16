@@ -3,8 +3,9 @@ import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
 import api from '../../services/api'
 import usePartiturasCatalog from '../../hooks/usePartiturasCatalog'
+import { blankFicha, songKey, toggleOrderedSong } from '../../utils/repertorioFicha'
 
-const getSongId = (song) => `${song.folder}-${song.mp3}`
+const getSongId = (song) => songKey(song)
 
 const normalize = (text) =>
   String(text || '')
@@ -25,11 +26,12 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
     [racionais, diversas]
   )
 
-  const [name, setName] = useState('')
-  const [date, setDate] = useState('')
-  const [location, setLocation] = useState('')
+  const [name, setName] = useState(() => repertorio?.name || '')
+  const [date, setDate] = useState(() => repertorio?.date || '')
+  const [location, setLocation] = useState(() => repertorio?.location || '')
   const [songSearch, setSongSearch] = useState('')
-  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [orderedSongs, setOrderedSongs] = useState(() => (repertorio?.songs || []).map(blankFicha))
+  const savedSongs = repertorio?.songs || []
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -38,7 +40,12 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
       setName(repertorio.name || '')
       setDate(repertorio.date || '')
       setLocation(repertorio.location || '')
-      setSelectedIds(new Set((repertorio.songs || []).map((s) => `${s.folder}-${s.mp3}`)))
+      setOrderedSongs((repertorio.songs || []).map(blankFicha))
+    } else {
+      setName('')
+      setDate('')
+      setLocation('')
+      setOrderedSongs([])
     }
   }, [repertorio])
 
@@ -59,19 +66,10 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
     return ALL_SONGS.filter((s) => normalize(s.title).includes(term))
   }, [songSearch, ALL_SONGS])
 
-  const selectedSongs = useMemo(
-    () => ALL_SONGS.filter((s) => selectedIds.has(getSongId(s))),
-    [selectedIds, ALL_SONGS]
-  )
+  const selectedIds = useMemo(() => new Set(orderedSongs.map(getSongId)), [orderedSongs])
 
   const toggleSong = (song) => {
-    const id = getSongId(song)
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+    setOrderedSongs((prev) => toggleOrderedSong(prev, song, savedSongs))
   }
 
   const validate = () => {
@@ -90,7 +88,7 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
       name: name.trim(),
       date,
       location: location.trim(),
-      songs: selectedSongs.map((s) => ({ title: s.title, folder: s.folder, mp3: s.mp3 })),
+      songs: orderedSongs.map(blankFicha),
     }
 
     setSubmitting(true)
@@ -196,14 +194,14 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
                 Músicas do repertório
               </label>
 
-              {selectedSongs.length > 0 && (
+              {orderedSongs.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {selectedSongs.map((s) => (
+                  {orderedSongs.map((s, index) => (
                     <span
                       key={getSongId(s)}
                       className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-xs font-semibold bg-rjb-yellow/20 text-rjb-text dark:text-rjb-text-dark border border-rjb-yellow/40"
                     >
-                      {s.title}
+                      {index + 1}. {s.title}
                       <button
                         type="button"
                         onClick={() => toggleSong(s)}
@@ -259,7 +257,7 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
                 )}
               </div>
               <p className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mt-1">
-                {selectedSongs.length} música{selectedSongs.length !== 1 ? 's' : ''} selecionada{selectedSongs.length !== 1 ? 's' : ''}.
+                {orderedSongs.length} música{orderedSongs.length !== 1 ? 's' : ''} selecionada{orderedSongs.length !== 1 ? 's' : ''}. A ordem dos números está nos selos acima. Música nova entra no fim; tirar e marcar de novo devolve a ficha ao lugar anterior.
               </p>
             </div>
 
