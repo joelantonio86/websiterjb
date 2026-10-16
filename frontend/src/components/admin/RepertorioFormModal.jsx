@@ -3,7 +3,7 @@ import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
 import api from '../../services/api'
 import usePartiturasCatalog from '../../hooks/usePartiturasCatalog'
-import { blankFicha, songKey } from '../../utils/repertorioFicha'
+import { blankFicha, songKey, toggleOrderedSong } from '../../utils/repertorioFicha'
 
 const getSongId = (song) => songKey(song)
 
@@ -26,11 +26,12 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
     [racionais, diversas]
   )
 
-  const [name, setName] = useState('')
-  const [date, setDate] = useState('')
-  const [location, setLocation] = useState('')
+  const [name, setName] = useState(() => repertorio?.name || '')
+  const [date, setDate] = useState(() => repertorio?.date || '')
+  const [location, setLocation] = useState(() => repertorio?.location || '')
   const [songSearch, setSongSearch] = useState('')
-  const [orderedSongs, setOrderedSongs] = useState([])
+  const [orderedSongs, setOrderedSongs] = useState(() => (repertorio?.songs || []).map(blankFicha))
+  const savedSongs = repertorio?.songs || []
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -68,13 +69,7 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
   const selectedIds = useMemo(() => new Set(orderedSongs.map(getSongId)), [orderedSongs])
 
   const toggleSong = (song) => {
-    const id = getSongId(song)
-    setOrderedSongs((prev) => {
-      if (prev.some((item) => getSongId(item) === id)) {
-        return prev.filter((item) => getSongId(item) !== id)
-      }
-      return [...prev, blankFicha(song)]
-    })
+    setOrderedSongs((prev) => toggleOrderedSong(prev, song, savedSongs))
   }
 
   const validate = () => {
@@ -262,7 +257,7 @@ const RepertorioFormModal = ({ repertorio, onClose, onSuccess }) => {
                 )}
               </div>
               <p className="text-xs text-rjb-text/50 dark:text-rjb-text-dark/50 mt-1">
-                {orderedSongs.length} música{orderedSongs.length !== 1 ? 's' : ''} selecionada{orderedSongs.length !== 1 ? 's' : ''}. A ordem daqui é o número da ficha.
+                {orderedSongs.length} música{orderedSongs.length !== 1 ? 's' : ''} selecionada{orderedSongs.length !== 1 ? 's' : ''}. A ordem dos números está nos selos acima. Música nova entra no fim; tirar e marcar de novo devolve a ficha ao lugar anterior.
               </p>
             </div>
 

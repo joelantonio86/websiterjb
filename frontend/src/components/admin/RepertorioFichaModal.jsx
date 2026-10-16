@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import api from '../../services/api'
 import { showMessage } from '../MessageBox'
 import { showLoader } from '../LoadingOverlay'
-import { blankFicha, moveSong } from '../../utils/repertorioFicha'
+import { blankFicha, FICHA_LIMITS, moveSong } from '../../utils/repertorioFicha'
 import { downloadRepertorioFichaPdf } from '../../utils/repertorioFichaPdf'
 
 const formatDate = (dateStr) => {
@@ -12,15 +12,24 @@ const formatDate = (dateStr) => {
 }
 
 const FIELDS = [
-  { key: 'regencia', label: 'Regência', placeholder: 'Regência' },
-  { key: 'interprete', label: 'Intérprete', placeholder: 'Intérprete ou Instrumental' },
-  { key: 'partEsp', label: 'Part. esp.', placeholder: 'Part. esp.' },
-  { key: 'observacao', label: 'Observações', placeholder: 'Observação' },
+  { key: 'regencia', label: 'Regência', placeholder: 'Regência', maxLength: FICHA_LIMITS.regencia },
+  { key: 'interprete', label: 'Intérprete', placeholder: 'Intérprete ou Instrumental', maxLength: FICHA_LIMITS.interprete },
+  { key: 'partEsp', label: 'Part. esp.', placeholder: 'Part. esp.', maxLength: FICHA_LIMITS.partEsp },
+  { key: 'observacao', label: 'Observações', placeholder: 'Observação', maxLength: FICHA_LIMITS.observacao },
 ]
+
+const CLOSE_CONFIRM = 'Há alterações sem salvar. Fechar a ficha mesmo assim?'
 
 const RepertorioFichaModal = ({ repertorio, onClose, onSaved }) => {
   const [songs, setSongs] = useState(() => (repertorio?.songs || []).map(blankFicha))
+  const [baseline] = useState(() => JSON.stringify((repertorio?.songs || []).map(blankFicha)))
   const [saving, setSaving] = useState(false)
+  const dirty = JSON.stringify(songs) !== baseline
+
+  const requestClose = useCallback(() => {
+    if (dirty && !window.confirm(CLOSE_CONFIRM)) return
+    onClose()
+  }, [dirty, onClose])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -28,10 +37,10 @@ const RepertorioFichaModal = ({ repertorio, onClose, onSaved }) => {
   }, [])
 
   useEffect(() => {
-    const handleEscape = (event) => { if (event.key === 'Escape') onClose() }
+    const handleEscape = (event) => { if (event.key === 'Escape') requestClose() }
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [onClose])
+  }, [requestClose])
 
   const updateSong = (index, key, value) => {
     setSongs((current) => current.map((song, songIndex) => (
@@ -71,7 +80,7 @@ const RepertorioFichaModal = ({ repertorio, onClose, onSaved }) => {
 
   return (
     <div
-      onClick={onClose}
+      onClick={requestClose}
       className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[95] flex items-center justify-center p-3 sm:p-6"
     >
       <div
@@ -110,7 +119,7 @@ const RepertorioFichaModal = ({ repertorio, onClose, onSaved }) => {
             </button>
             <button
               type="button"
-              onClick={onClose}
+              onClick={requestClose}
               className="px-3 py-2 rounded-lg border border-stone-400/40 text-sm font-semibold"
             >
               Fechar
@@ -150,6 +159,7 @@ const RepertorioFichaModal = ({ repertorio, onClose, onSaved }) => {
                           <td key={field.key} className="px-2 py-2">
                             <input
                               value={song[field.key]}
+                              maxLength={field.maxLength}
                               onChange={(event) => updateSong(index, field.key, event.target.value)}
                               aria-label={`${field.label} de ${song.title}`}
                               placeholder={field.placeholder}
@@ -222,7 +232,9 @@ const RepertorioFichaModal = ({ repertorio, onClose, onSaved }) => {
                         <span className="font-semibold text-rjb-text/70 dark:text-rjb-text-dark/70">{field.label}</span>
                         <input
                           value={song[field.key]}
+                          maxLength={field.maxLength}
                           onChange={(event) => updateSong(index, field.key, event.target.value)}
+                          aria-label={`${field.label} de ${song.title}`}
                           placeholder={field.placeholder}
                           className="mt-1 w-full px-2 py-2 rounded-md border border-stone-300 dark:border-stone-600 bg-white dark:bg-rjb-bg-dark text-sm text-rjb-text dark:text-rjb-text-dark outline-none focus:ring-2 focus:ring-rjb-yellow"
                         />

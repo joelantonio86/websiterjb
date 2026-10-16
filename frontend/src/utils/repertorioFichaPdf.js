@@ -57,12 +57,11 @@ export function downloadRepertorioFichaPdf({ name, date, location, songs }) {
       halign: 'center',
     },
     columnStyles: {
-      0: { cellWidth: 14, halign: 'center' },
-      1: { cellWidth: 70 },
-      2: { cellWidth: 36 },
-      3: { cellWidth: 52 },
-      4: { cellWidth: 34, halign: 'center' },
-      5: { cellWidth: 60 },
+      0: { cellWidth: 12, halign: 'center' },
+      1: { cellWidth: 74 },
+      2: { cellWidth: 34 },
+      3: { cellWidth: 50 },
+      4: { cellWidth: 32, halign: 'center' },
     },
     didParseCell: (data) => {
       if (data.section === 'body' && data.column.index === 4 && String(data.cell.raw || '').trim()) {
