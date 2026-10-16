@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { canManageSheets } from '../../utils/sheetsAdminAccess'
+import { canViewFinance } from '../../utils/financeAccess'
 
 const linkBase =
   'px-3 py-2 rounded-xl text-sm font-semibold transition-colors border'
@@ -25,10 +26,7 @@ const AdminLayout = () => {
       : []),
   ]
 
-  const canFinance =
-    user?.role === 'financeiro' ||
-    user?.role === 'admin-financeiro' ||
-    user?.role === 'financeiro-view'
+  const canFinance = canViewFinance(user)
 
   const handleLogout = () => {
     logout()

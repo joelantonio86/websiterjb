@@ -1658,9 +1658,19 @@ app.put('/api/admin/update-member/:id', authenticateJWT, async (req, res) => {
 
 // --- 10. Rotas da Área Financeira ---
 
+// Consulta do financeiro: papéis financeiros ou e-mails liberados explicitamente.
+const FINANCE_VIEW_EMAILS = new Set(['andressamqxs@gmail.com']);
+
+function canViewFinanceUser(user) {
+    const role = user?.role;
+    if (role === 'financeiro' || role === 'admin-financeiro' || role === 'financeiro-view') return true;
+    const email = String(user?.email || user?.userId || '').trim().toLowerCase();
+    return FINANCE_VIEW_EMAILS.has(email);
+}
+
 // Middleware para verificar acesso financeiro (role 'financeiro', 'admin-financeiro' ou 'financeiro-view')
 function requireFinanceAccess(req, res, next) {
-    if (req.user.role !== 'financeiro' && req.user.role !== 'admin-financeiro' && req.user.role !== 'financeiro-view') {
+    if (!canViewFinanceUser(req.user)) {
         return res.status(403).json({ status: 403, message: 'Acesso negado. Área restrita ao financeiro.' });
     }
     next();

@@ -20,6 +20,7 @@ import TermosUso from './pages/TermosUso'
 import MemberRegistration from './pages/MemberRegistration'
 import Financeiro from './pages/Financeiro'
 import ProtectedRoute from './components/ProtectedRoute'
+import { canViewFinance } from './utils/financeAccess'
 import SheetsAdminRoute from './components/SheetsAdminRoute'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminForgotPassword from './pages/admin/AdminForgotPassword'
@@ -99,7 +100,7 @@ function App() {
                 <Route 
                   path="/financeiro" 
                   element={
-                    <ProtectedRoute requiredRole={['financeiro', 'admin-financeiro', 'financeiro-view']}>
+                    <ProtectedRoute requiredRole={['financeiro', 'admin-financeiro', 'financeiro-view']} allow={canViewFinance}>
                       <Financeiro />
                     </ProtectedRoute>
                   } 

@@ -6,6 +6,7 @@ import MembersReport from '../components/admin/MembersReport'
 import InvitesManagement from '../components/admin/InvitesManagement'
 import AttachmentsManagement from '../components/admin/AttachmentsManagement'
 import api from '../services/api'
+import { canViewFinance } from '../utils/financeAccess'
 
 const StatCard = ({ title, value, tone = 'yellow' }) => {
   const toneMap = {
@@ -155,7 +156,7 @@ const Reports = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {(user.role === 'financeiro' || user.role === 'admin-financeiro' || user.role === 'financeiro-view') && (
+              {canViewFinance(user) && (
                 <button
                   onClick={() => navigate('/financeiro')}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-colors"
