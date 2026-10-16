@@ -23,6 +23,7 @@ const RJB_MENU_SECTIONS = [
 ]
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { canViewFinance } from '../../utils/financeAccess'
 import Logo from '../Logo'
 import Tooltip from '../Tooltip'
 
@@ -406,7 +407,7 @@ const Header = () => {
                   <span>Área Administrativa</span>
                 </span>
               </Link>
-              {user && (user.role === 'financeiro' || user.role === 'admin-financeiro' || user.role === 'financeiro-view') && (
+              {canViewFinance(user) && (
                 <Link
                   to="/financeiro"
                   className={`mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation ${
