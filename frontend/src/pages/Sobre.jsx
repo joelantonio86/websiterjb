@@ -85,8 +85,23 @@ const Sobre = () => {
               A <strong className="text-rjb-gold font-semibold">Racional Jazz Band (RJB)</strong> nasceu da união de dois propósitos elevados: a excelência artística do Jazz e a profundidade da <strong className="text-rjb-gold font-semibold">Cultura Racional</strong>. Fundada em <strong className="text-rjb-gold font-semibold">20 de novembro de 2015</strong>, a RJB rapidamente se estabeleceu como um veículo de expressão para um conhecimento que transcende, utilizando a música como sua linguagem universal.
             </p>
             <p>
+              Pelo número de componentes e pela diversidade de instrumentos, a RJB pode ser considerada uma banda de música. É uma orquestra sem fins lucrativos. O maior objetivo é difundir a <strong className="text-rjb-gold font-semibold">Cultura Racional do Terceiro Milênio</strong>, dos livros <strong className="text-rjb-gold font-semibold">Universo em Desencanto</strong>: um conhecimento de paz, amor e fraternidade entre os povos.
+            </p>
+            <p>
+              A banda reúne músicos, cantores, produção, apoio e regentes. Todos são estudantes de Cultura Racional e vêm de diversos estados brasileiros, entre eles Rio de Janeiro, São Paulo, Minas Gerais, Rio Grande do Sul, Ceará, Paraná, Goiás e Santa Catarina.
+            </p>
+            <p>
+              Desde novembro de 2015, pelo branco dos uniformes e pelos acordes, a RJB participa de eventos com uma mensagem de paz, amor e fraternidade universal.
+            </p>
+            <p>
               Acreditamos que a música instrumental é a forma mais pura de comunicação. O Jazz, com sua liberdade rítmica e improvisação harmoniosa, oferece o palco ideal para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
             </p>
+            <aside className="rounded-2xl border border-rjb-yellow/40 bg-rjb-yellow/5 p-4 sm:p-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-2">No currículo</p>
+              <p>
+                Em <strong className="text-rjb-gold font-semibold">2017</strong>, na cidade de <strong className="text-rjb-gold font-semibold">Aparecida (SP)</strong>, a banda participou da comemoração dos 300 anos da fé em torno do encontro da imagem de Nossa Senhora da Conceição Aparecida no Rio Paraíba do Sul, em 1717.
+              </p>
+            </aside>
           </div>
         </section>
 
