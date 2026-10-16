@@ -87,6 +87,12 @@ const Sobre = () => {
             <p>
               Acreditamos que a música instrumental é a forma mais pura de comunicação. O Jazz, com sua liberdade rítmica e improvisação harmoniosa, oferece o palco ideal para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
             </p>
+            <p>
+              A RJB é uma orquestra sem fins lucrativos. O maior objetivo é difundir a <strong className="text-rjb-gold font-semibold">Cultura Racional do Terceiro Milênio</strong>, dos livros <strong className="text-rjb-gold font-semibold">Universo em Desencanto</strong>. Reúne músicos, cantores, produção, apoio e regentes, estudantes vindos de vários estados brasileiros. Desde 2015, pelo branco dos uniformes e pelos acordes, leva uma mensagem de paz, amor e fraternidade.
+            </p>
+            <p>
+              Em 2017, a banda se apresentou em Aparecida (SP), na comemoração dos 300 anos da imagem de Nossa Senhora da Conceição Aparecida.
+            </p>
           </div>
         </section>
 
