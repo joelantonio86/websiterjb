@@ -10,11 +10,11 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="text-center md:text-left">
-            <div className="rjb-logo-text text-xl sm:text-2xl md:text-3xl font-mono font-extrabold text-rjb-gold mb-1 sm:mb-2">
-              RJB
+            <div className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide text-rjb-gold mb-1 sm:mb-2">
+              OUD
             </div>
             <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-xs sm:text-sm md:text-base">
-              Racional Jazz Band © {currentYear}. Todos os direitos reservados.
+              Orquestra Universo em Desencanto © {currentYear}. Todos os direitos reservados.
             </p>
           </div>
           
@@ -39,7 +39,7 @@ const Footer = () => {
             <span className="text-rjb-text/30 dark:text-rjb-text-dark/30 hidden sm:inline">•</span>
             <Link to="/cadastro" className={footerLinkClass}>
               <span className="flex items-center gap-1 sm:gap-1.5">
-                Faça parte da RJB
+                Faça parte da OUD
                 <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                 </svg>

@@ -40,7 +40,7 @@ export function downloadStageMapPdf({ event, stageMap }) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
     doc.setTextColor(90, 60, 10)
-    centerText('Racional Jazz Band', y + 6, pageWidth - margin * 2)
+    centerText('Orquestra Universo em Desencanto', y + 6, pageWidth - margin * 2)
     doc.setFontSize(12)
     doc.setTextColor(30, 30, 30)
     centerText(event?.name || 'Apresentação', y + 12, pageWidth - margin * 2)

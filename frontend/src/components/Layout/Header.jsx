@@ -16,7 +16,7 @@ const RJB_MENU_SECTIONS = [
     subtitle: 'Assista e veja',
     items: [
       { path: '/apresentacoes', label: 'Apresentações', icon: '🎬', description: 'Shows e apresentações oficiais' },
-      { path: '/bastidores', label: 'Ensaios', icon: '🎤', description: 'Bastidores e ensaios da banda' },
+      { path: '/bastidores', label: 'Ensaios', icon: '🎤', description: 'Bastidores e ensaios da orquestra' },
       { path: '/fotos', label: 'Fotos', icon: '📸', description: 'Galeria de fotos dos eventos' },
     ],
   },
@@ -128,7 +128,7 @@ const Header = () => {
                 aria-expanded={rjbDropdownOpen}
                 aria-haspopup="true"
               >
-                A RJB
+                A OUD
                 <svg className={`ml-1 w-4 h-4 transition-transform duration-300 ${rjbDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -315,7 +315,7 @@ const Header = () => {
                 >
                   <span className="flex items-center gap-3">
                     <span className="text-xl">🎷</span>
-                    <span>A RJB</span>
+                    <span>A OUD</span>
                   </span>
                   <svg className={`ml-1 w-5 h-5 transition-transform duration-300 ${rjbDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

@@ -6,7 +6,7 @@ const PoliticaPrivacidade = () => {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    document.title = 'Política de Privacidade — Racional Jazz Band'
+    document.title = 'Política de Privacidade — Orquestra Universo em Desencanto'
     setIsVisible(true)
   }, [])
 
@@ -16,7 +16,7 @@ const PoliticaPrivacidade = () => {
         <div className="bg-rjb-card-light dark:bg-rjb-card-dark rounded-2xl p-6 sm:p-8 lg:p-10 shadow-lg border-l-4 border-rjb-yellow">
           <h2 className="text-xl font-bold text-rjb-text dark:text-rjb-text-dark mb-4">Última atualização</h2>
           <p className="text-rjb-text/80 dark:text-rjb-text-dark/80 mb-6">
-            Esta Política de Privacidade descreve como a Racional Jazz Band coleta, usa e protege as informações que você nos fornece ao utilizar nosso site.
+            Esta Política de Privacidade descreve como a Orquestra Universo em Desencanto coleta, usa e protege as informações que você nos fornece ao utilizar nosso site.
           </p>
 
           <section className="mb-6">
@@ -26,7 +26,7 @@ const PoliticaPrivacidade = () => {
             </p>
             <ul className="list-disc list-inside text-rjb-text/80 dark:text-rjb-text-dark/80 space-y-1 ml-2">
               <li>Preenche o formulário de contato (nome, e-mail, assunto e mensagem)</li>
-              <li>Realiza cadastro como membro da banda</li>
+              <li>Realiza cadastro como membro da orquestra</li>
               <li>Navega pelo site (dados de uso e cookies essenciais)</li>
             </ul>
           </section>

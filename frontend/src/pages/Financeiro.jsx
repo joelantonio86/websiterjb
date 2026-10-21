@@ -287,7 +287,7 @@ const Financeiro = () => {
                 Área Financeira
               </h1>
               <p className="mt-1 text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70">
-                Controle de contribuições, depósitos e gastos da RJB
+                Controle de contribuições, depósitos e gastos da OUD
               </p>
             </div>
           </div>
@@ -414,7 +414,7 @@ const Financeiro = () => {
           <section className="animate-fade-in" aria-labelledby="expenses-title">
             <div className="rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-none border border-rjb-border-light dark:border-rjb-border-dark overflow-hidden bg-rjb-card-light dark:bg-rjb-card-dark ring-1 ring-black/5 dark:ring-white/5">
               <div className="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-red-600/10 via-red-600/5 to-transparent dark:from-red-600/15 dark:via-red-600/10 border-b border-red-600/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h2 id="expenses-title" className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da RJB</h2>
+                <h2 id="expenses-title" className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark">Gastos da OUD</h2>
                 {canWrite && (
                   <button
                     type="button"

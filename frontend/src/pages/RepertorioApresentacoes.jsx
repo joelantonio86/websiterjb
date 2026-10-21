@@ -38,8 +38,8 @@ const RepertorioApresentacoes = () => {
   const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
-    document.title = 'Repertório das Apresentações 2026 | RJB'
-    return () => { document.title = 'Racional Jazz Band' }
+    document.title = 'Repertório das Apresentações 2026 | OUD'
+    return () => { document.title = 'Orquestra Universo em Desencanto' }
   }, [])
 
   useEffect(() => {
@@ -72,7 +72,7 @@ const RepertorioApresentacoes = () => {
       <div className={`space-y-6 sm:space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
         <div className="text-center mb-6 sm:mb-8">
           <p className="text-base sm:text-lg md:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 max-w-3xl mx-auto leading-relaxed px-2">
-            Área para os músicos da RJB: confira o repertório previsto para cada apresentação de 2026. As músicas serão publicadas assim que forem definidas pelo regente.
+            Área para os músicos da OUD: confira o repertório previsto para cada apresentação de 2026. As músicas serão publicadas assim que forem definidas pelo regente.
           </p>
         </div>
 

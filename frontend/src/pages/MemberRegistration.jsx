@@ -151,7 +151,7 @@ const MemberRegistration = () => {
             value={formData.inviteKey}
             onChange={(e) => setFormData({ ...formData, inviteKey: e.target.value.toUpperCase() })}
             className="w-full p-3 text-base rounded-lg border border-rjb-yellow/30 bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark"
-            placeholder="Ex: RJB-MEMBER-2025"
+            placeholder="Ex: OUD-MEMBER-2026"
           />
         </div>
 

@@ -15,7 +15,7 @@ const Home = () => {
   const [reducedMotion, setReducedMotion] = useState(false)
 
   useEffect(() => {
-    document.title = 'Racional Jazz Band — Música, Arte e Cultura'
+    document.title = 'Orquestra Universo em Desencanto'
     setIsVisible(true)
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setReducedMotion(mq.matches)
@@ -90,20 +90,25 @@ const Home = () => {
       <section className="relative min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden px-4" id="hero">
         <div className="relative z-10 max-w-7xl mx-auto w-full text-center">
           <div className={`text-center pt-8 sm:pt-12 pb-16 sm:pb-24 transition-all ${motion.duration} ${isVisible ? `opacity-100 translate-y-0 ${motion.enterAlt}` : exit}`}>
-            <h1 className={`font-serif rjb-logo-text text-rjb-gold mb-3 sm:mb-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[0.95] tracking-tight text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-[9rem] xl:text-[11rem] font-semibold ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
-              Racional <em className="italic font-medium" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}>Jazz</em> Band
+            <img
+              src="/logo-oud.jpg"
+              alt=""
+              className="mx-auto mb-6 h-28 w-28 sm:h-36 sm:w-36 rounded-full object-cover shadow-lg"
+            />
+            <p className={`mb-3 text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] text-rjb-yellow-ink dark:text-rjb-yellow ${isVisible ? motion.enterAlt : exitY}`}>
+              Orquestra
+            </p>
+            <h1 className={`font-serif text-rjb-gold mb-4 sm:mb-6 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[1.05] tracking-tight text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-semibold px-2 ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
+              Universo em Desencanto
             </h1>
-            <h2 className={`font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 px-2 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-300'} leading-tight ${isVisible ? motion.enterAlt : exitY}`}>
-              Música, Arte e Cultura Racional
-            </h2>
-            <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 mb-6 sm:mb-10 max-w-4xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
-              A Racional Jazz Band é a expressão musical do conhecimento Racional, unindo a força do jazz, a beleza da melodia e a pureza de um saber que transcende.
+            <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 mb-6 sm:mb-10 max-w-3xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
+              A Orquestra Universo em Desencanto é a expressão musical da Cultura Racional. Reúne músicos de vários estados em repertório instrumental e apresentações.
             </p>
             <div className={`flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-500'} px-4 ${isVisible ? motion.enterAlt : exitY}`} data-tour="hero-buttons">
               <button
                 onClick={() => navigate('/apresentacoes')}
-                className="group relative bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl overflow-hidden w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-                aria-label="Ver apresentações da banda"
+                className="group relative bg-oud-green text-white border border-rjb-yellow font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-oud-green-deep transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl overflow-hidden w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
+                aria-label="Ver apresentações da orquestra"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -111,12 +116,11 @@ const Home = () => {
                   </svg>
                   Ver Apresentações
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
               </button>
               <button
                 onClick={() => navigate('/sobre')}
                 className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-                aria-label="Conhecer a história da banda"
+                aria-label="Conhecer a história da orquestra"
               >
                 <span className="flex items-center justify-center gap-2">
                   <svg className="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -247,7 +251,7 @@ const Home = () => {
               Assista em destaque
             </h2>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
-              Uma amostra do que a RJB leva ao palco.
+              Uma amostra do que a OUD leva ao palco.
             </p>
           </div>
           <button
@@ -314,7 +318,7 @@ const Home = () => {
 
       {/* Números / mini-stats */}
       <section id="numeros" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 relative z-20 rounded-3xl bg-gradient-to-b from-rjb-yellow/5 to-transparent dark:from-rjb-yellow/5 dark:to-transparent" aria-labelledby="numeros-heading">
-        <h2 id="numeros-heading" className="sr-only">Números da RJB</h2>
+        <h2 id="numeros-heading" className="sr-only">Números da OUD</h2>
         <div className="flex flex-wrap justify-center gap-8 sm:gap-12 md:gap-16">
           <div className="text-center">
             <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-gold tabular-nums">{totalSongs}</p>
@@ -344,7 +348,7 @@ const Home = () => {
             Componentes por estado
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
-            A Racional Jazz Band reúne componentes de diversos estados do Brasil. Passe o mouse sobre um estado para ver a quantidade.
+            A Orquestra Universo em Desencanto reúne componentes de diversos estados do Brasil. Passe o mouse sobre um estado para ver a quantidade.
           </p>
         </div>
         <BrazilMap onTotalLoad={setTotalComponents} />
@@ -435,7 +439,7 @@ const Home = () => {
             Quer ser avisado dos próximos shows?
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-xl mx-auto mb-6">
-            Entre em contato e receba informações sobre as próximas apresentações da Racional Jazz Band.
+            Entre em contato e receba informações sobre as próximas apresentações da Orquestra Universo em Desencanto.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link

@@ -8,7 +8,7 @@ export const API_BASE =
     : 'https://rjb-email-sender-215755766100.europe-west1.run.app')
 
 if (import.meta.env.DEV) {
-  console.info('[RJB] API_BASE =', API_BASE)
+  console.info('[OUD] API_BASE =', API_BASE)
 }
 
 const api = axios.create({

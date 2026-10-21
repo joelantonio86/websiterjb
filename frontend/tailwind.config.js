@@ -14,20 +14,22 @@ export default {
       },
       colors: {
         // Light: cinza-pedra suave (menos brilho que branco puro; sem cream genérico)
-        'rjb-yellow': '#D4AF37',            // ouro heráldico (metálico, orquestra) — usar em bg/border/ring
-        'rjb-gold': 'var(--rjb-gold)',      // ouro adaptativo p/ TEXTO (sépia no light, metálico no dark)
-        'rjb-yellow-ink': '#7A5F00',        // texto/link dourado legível no light (~5.6:1 sobre #FBFAF7)
-        'rjb-yellow-hover': '#A6871C',      // hover intermediário
-        'rjb-text': '#2C2A26',
-        'rjb-text-muted': '#5A564E',        // texto secundário light (~6.8:1)
-        'rjb-bg-light': '#E5E2DB',
-        'rjb-card-light': '#FBFAF7',
-        'rjb-border-light': '#D4D0C7',
-        'rjb-bg-dark': '#0E0E10',
-        'rjb-card-dark': '#242427',
-        'rjb-border-dark': '#33333A',
-        'rjb-text-dark': '#E0E0E0',
-        'rjb-text-muted-dark': '#A8A29A',   // texto secundário dark (~7.5:1)
+        'rjb-yellow': '#D4AF37',
+        'rjb-gold': 'var(--rjb-gold)',
+        'rjb-yellow-ink': '#7A5F00',
+        'rjb-yellow-hover': '#A6871C',
+        'oud-green': '#0E3D2E',
+        'oud-green-deep': '#07281E',
+        'rjb-text': '#12382C',
+        'rjb-text-muted': '#3E5C4C',
+        'rjb-bg-light': '#FFFFFF',
+        'rjb-card-light': '#FFFFFF',
+        'rjb-border-light': '#E4DDD0',
+        'rjb-bg-dark': '#07281E',
+        'rjb-card-dark': '#0E3A2C',
+        'rjb-border-dark': '#1E5A44',
+        'rjb-text-dark': '#F6F3EA',
+        'rjb-text-muted-dark': '#D4CBB4',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

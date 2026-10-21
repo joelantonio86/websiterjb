@@ -25,7 +25,7 @@ const Bastidores = () => {
       <div className={`space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
         <div className="text-center mb-8">
           <p className="text-lg sm:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 max-w-3xl mx-auto leading-relaxed">
-            Acompanhe o processo criativo, os ensaios e a dedicação dos músicos da Racional Jazz Band. Veja a música sendo feita, nota por nota, em vídeos exclusivos dos bastidores e entrevistas com a equipe, organizados por data.
+            Acompanhe o processo criativo, os ensaios e a dedicação dos músicos da Orquestra Universo em Desencanto. Veja a música sendo feita, nota por nota, em vídeos dos bastidores e entrevistas com a equipe, organizados por data.
           </p>
         </div>
         

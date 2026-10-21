@@ -10,7 +10,7 @@ const PageWrapper = ({ title, subtitle, children }) => {
     '/partituras': 'Partituras / Área exclusiva para músicos',
     '/repertorio-apresentacoes': 'Repertório 2026 / Músicas previstas para cada show',
     '/apresentacoes': 'Apresentações / Shows e apresentações oficiais',
-    '/bastidores': 'Ensaios / Bastidores e ensaios da banda',
+    '/bastidores': 'Ensaios / Bastidores e ensaios da orquestra',
     '/fotos': 'Fotos / Galeria de fotos dos eventos',
   }
 
