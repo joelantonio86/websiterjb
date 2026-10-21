@@ -84,7 +84,7 @@ const Header = () => {
   const isRjbPage = Object.keys(subMenuRJB).some(path => location.pathname === path)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 header-rjb shadow-lg dark:shadow-black/50" data-tour="header">
+    <header className="fixed top-0 left-0 right-0 z-50 header-rjb" data-tour="header">
       <nav className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
@@ -213,7 +213,7 @@ const Header = () => {
 
             <Link
               to="/cadastro"
-              className="group nav-link bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-2"
+              className="group nav-link bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold py-2 px-4 rounded-sm text-xs xl:text-sm hover:bg-rjb-text/90 dark:hover:bg-white transition-colors duration-300 flex items-center gap-2"
             >
               <span>Cadastro</span>
               <svg className="w-3 h-3 xl:w-4 xl:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +384,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/cadastro"
-                className="mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-xl text-base font-semibold bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                className="mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-sm text-base font-semibold bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark hover:bg-rjb-text/90 dark:hover:bg-white transition-colors duration-300 touch-manipulation"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="flex items-center gap-3">

@@ -93,21 +93,22 @@ const Home = () => {
             <img
               src="/logo-oud.jpg"
               alt=""
-              className="mx-auto mb-6 h-28 w-28 sm:h-36 sm:w-36 rounded-full object-cover shadow-lg"
+              className="mx-auto mb-8 h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover ring-1 ring-rjb-text/10 dark:ring-rjb-text-dark/15 shadow-sm"
             />
-            <p className={`mb-3 text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] text-rjb-yellow-ink dark:text-rjb-yellow ${isVisible ? motion.enterAlt : exitY}`}>
+            <p className={`mb-4 text-[11px] sm:text-xs font-medium uppercase tracking-[0.42em] text-rjb-yellow-ink dark:text-rjb-yellow ${isVisible ? motion.enterAlt : exitY}`}>
               Orquestra
             </p>
-            <h1 className={`font-serif text-rjb-gold mb-4 sm:mb-6 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[1.05] tracking-tight text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-semibold px-2 ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
+            <h1 className={`font-serif text-rjb-text dark:text-rjb-text-dark mb-5 sm:mb-6 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[1.02] tracking-tight text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-medium px-2 ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}>
               Universo em Desencanto
             </h1>
-            <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 mb-6 sm:mb-10 max-w-3xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
+            <div className="mx-auto mb-6 h-px w-16 bg-rjb-yellow" aria-hidden />
+            <p className={`text-sm sm:text-base md:text-lg text-rjb-text-muted dark:text-rjb-text-muted-dark mb-8 sm:mb-10 max-w-2xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
               A Orquestra Universo em Desencanto é a expressão musical da Cultura Racional. Reúne músicos de vários estados em repertório instrumental e apresentações.
             </p>
             <div className={`flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-500'} px-4 ${isVisible ? motion.enterAlt : exitY}`} data-tour="hero-buttons">
               <button
                 onClick={() => navigate('/apresentacoes')}
-                className="group relative bg-oud-green text-white border border-rjb-yellow font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-oud-green-deep transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl overflow-hidden w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2"
+                className="group relative bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold py-3 px-6 sm:px-8 rounded-sm text-sm sm:text-base tracking-wide hover:bg-rjb-text/90 dark:hover:bg-white transition-colors duration-300 w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-rjb-bg-dark"
                 aria-label="Ver apresentações da orquestra"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
@@ -119,7 +120,7 @@ const Home = () => {
               </button>
               <button
                 onClick={() => navigate('/sobre')}
-                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                className="group bg-transparent border border-rjb-text/20 dark:border-rjb-text-dark/25 text-rjb-text dark:text-rjb-text-dark font-semibold py-3 px-6 sm:px-8 rounded-sm text-sm sm:text-base tracking-wide hover:border-rjb-yellow dark:hover:border-rjb-yellow transition-colors duration-300 w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-rjb-bg-dark"
                 aria-label="Conhecer a história da orquestra"
               >
                 <span className="flex items-center justify-center gap-2">
@@ -131,7 +132,7 @@ const Home = () => {
               </button>
               <button
                 onClick={() => navigate('/player')}
-                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                className="group bg-transparent border border-rjb-text/20 dark:border-rjb-text-dark/25 text-rjb-text dark:text-rjb-text-dark font-semibold py-3 px-6 sm:px-8 rounded-sm text-sm sm:text-base tracking-wide hover:border-rjb-yellow dark:hover:border-rjb-yellow transition-colors duration-300 w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-rjb-bg-dark"
                 aria-label="Ouça nossas músicas no player"
               >
                 <span className="flex items-center justify-center gap-2">
@@ -444,7 +445,7 @@ const Home = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/contato"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rjb-yellow text-rjb-text font-bold hover:bg-yellow-500 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold tracking-wide hover:bg-rjb-text/90 dark:hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-rjb-bg-dark"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

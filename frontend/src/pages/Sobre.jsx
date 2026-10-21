@@ -75,8 +75,8 @@ const Sobre = () => {
         {/* Seção 1 — A Expressão Musical do Saber */}
         <section id="expressao" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="expressao-heading">
           <div className="md:sticky md:top-24 md:self-start">
-            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo I</p>
-            <h2 id="expressao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rjb-yellow-ink dark:text-rjb-yellow mb-2">Capítulo I</p>
+            <h2 id="expressao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-medium text-rjb-text dark:text-rjb-text-dark leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
               A Expressão<br />Musical do Saber
             </h2>
           </div>
@@ -93,8 +93,8 @@ const Sobre = () => {
         {/* Seção 2 — O Conceito Racional */}
         <section id="conceito" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="conceito-heading">
           <div className="md:sticky md:top-24 md:self-start">
-            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo II</p>
-            <h2 id="conceito-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rjb-yellow-ink dark:text-rjb-yellow mb-2">Capítulo II</p>
+            <h2 id="conceito-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-medium text-rjb-text dark:text-rjb-text-dark leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
               O Conceito<br />Racional
             </h2>
           </div>
@@ -111,8 +111,8 @@ const Sobre = () => {
         {/* Seção 3 — Nossa Missão */}
         <section id="missao" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="missao-heading">
           <div className="md:sticky md:top-24 md:self-start">
-            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo III</p>
-            <h2 id="missao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rjb-yellow-ink dark:text-rjb-yellow mb-2">Capítulo III</p>
+            <h2 id="missao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-medium text-rjb-text dark:text-rjb-text-dark leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
               Nossa<br />Missão
             </h2>
           </div>
@@ -147,7 +147,7 @@ const Sobre = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/player"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-rjb-yellow text-rjb-text font-bold text-sm sm:text-base hover:bg-yellow-500 transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-sm bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold text-sm sm:text-base tracking-wide hover:bg-rjb-text/90 dark:hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-rjb-bg-dark"
               aria-label="Ouça nossas músicas no player"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" /></svg>

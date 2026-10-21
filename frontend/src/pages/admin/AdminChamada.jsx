@@ -23,7 +23,7 @@ const statusButton = (active, tone) => {
 const StageMapPreview = ({ event, stageMap }) => (
   <div className="rounded-2xl bg-white text-stone-900 shadow-lg p-4 sm:p-6 overflow-x-auto">
     <div className="text-center mb-4">
-      <p className="text-xs font-semibold tracking-wide text-oud-green">Orquestra Universo em Desencanto</p>
+      <p className="text-xs font-semibold tracking-[0.16em] uppercase text-rjb-yellow-ink">Orquestra Universo em Desencanto</p>
       <h3 className="text-lg sm:text-xl font-bold">{event?.name || 'Apresentação'}</h3>
       <p className="text-sm text-stone-600">
         {formatDate(event?.date)}
