@@ -213,7 +213,7 @@ const Header = () => {
 
             <Link
               to="/cadastro"
-              className="group bg-rjb-text text-white dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold py-2 px-4 rounded-sm text-xs xl:text-sm hover:bg-rjb-text/85 dark:hover:bg-white transition-colors duration-300 flex items-center gap-2"
+              className="group bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-2 px-4 rounded-full text-xs xl:text-sm hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
             >
               <span>Cadastro</span>
               <svg className="w-3 h-3 xl:w-4 xl:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +384,7 @@ const Header = () => {
               </Link>
               <Link
                 to="/cadastro"
-                className="mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-sm text-base font-semibold bg-rjb-text text-white dark:bg-rjb-text-dark dark:text-rjb-bg-dark hover:bg-rjb-text/85 dark:hover:bg-white transition-colors duration-300 touch-manipulation"
+                className="mobile-menu-item block w-full text-left px-4 py-3.5 min-h-[44px] rounded-full text-base font-semibold bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg touch-manipulation"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="flex items-center gap-3">

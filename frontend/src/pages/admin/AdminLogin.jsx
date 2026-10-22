@@ -74,7 +74,7 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold py-3 rounded-sm hover:bg-rjb-text/90 dark:hover:bg-white transition-colors disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all disabled:opacity-50"
               >
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>

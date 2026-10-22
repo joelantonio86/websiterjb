@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --rjb-gold: #143D32;
+    --rjb-gold: #7A5F00;
   }
   .dark {
-    --rjb-gold: #E6D3A1;
+    --rjb-gold: #D4AF37;
   }
   body {
     @apply bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark transition-colors duration-300;
@@ -16,27 +16,22 @@
 
 @layer utilities {
   .rjb-logo-text {
-    background: none;
-    -webkit-text-fill-color: #141414;
-    color: #141414;
-  }
-
-  .dark .rjb-logo-text {
-    -webkit-text-fill-color: #F5F3EE;
-    color: #F5F3EE;
+    background: linear-gradient(135deg, #E6C34A 0%, #D4AF37 45%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   .header-rjb {
-    background-color: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(20, 20, 20, 0.08);
+    background-color: #FBFAF7;
+    border-bottom: 1px solid rgba(44, 42, 38, 0.15);
     transition: background-color 0.5s ease, border-color 0.5s ease;
     z-index: 9999 !important;
   }
   
   .dark .header-rjb {
-    background-color: rgba(17, 17, 17, 0.94);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: #242427;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.22);
   }
   
   .rjb-logo-image {
@@ -55,16 +50,16 @@
   }
   
   .nav-link-active {
-    border-bottom: 2px solid #143D32;
+    border-bottom: 3px solid #D4AF37;
     padding-bottom: 5px;
-    font-weight: 600;
-    color: #141414 !important;
+    font-weight: 700;
+    color: #7A5F00 !important;
     position: relative;
   }
 
   .dark .nav-link-active {
-    color: #F5F3EE !important;
-    border-bottom-color: #C6A36A;
+    color: #D4AF37 !important;
+    border-bottom-color: #D4AF37;
   }
   
   .nav-link-active::after {
@@ -457,7 +452,7 @@
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    background: #C6A36A;
+    background: #D4AF37;
     height: 16px;
     width: 16px;
     border-radius: 50%;
@@ -482,7 +477,7 @@
   }
 
   input[type="range"]::-moz-range-thumb {
-    background: #C6A36A;
+    background: #D4AF37;
     height: 16px;
     width: 16px;
     border-radius: 50%;

@@ -10,7 +10,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="text-center md:text-left">
-            <div className="font-serif text-xl sm:text-2xl font-medium tracking-[0.18em] text-rjb-text dark:text-rjb-text-dark mb-1 sm:mb-2">
+            <div className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide rjb-logo-text mb-1 sm:mb-2">
               OUD
             </div>
             <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-xs sm:text-sm md:text-base">
