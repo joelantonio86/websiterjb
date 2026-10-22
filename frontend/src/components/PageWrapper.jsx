@@ -30,7 +30,7 @@ const PageWrapper = ({ title, subtitle, children }) => {
         <h1 className="font-serif tracking-tight text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-rjb-text dark:text-rjb-text-dark mb-2 sm:mb-3 break-words px-2 leading-[0.98]" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}>
           {mainTitle}
         </h1>
-        <div className="mx-auto mb-2 h-px w-12 bg-rjb-yellow" aria-hidden />
+        <div className="mx-auto mb-2 h-px w-12 bg-oud-green dark:bg-rjb-yellow" aria-hidden />
         {subTitle && (
           <p className="text-base sm:text-lg md:text-xl dark:text-rjb-text-dark/70 text-rjb-text/70 mb-6 sm:mb-8 transition-all duration-700 delay-200 px-2">
             {subTitle}

@@ -101,7 +101,7 @@ const Home = () => {
             <h1 className={`font-serif text-rjb-text dark:text-rjb-text-dark mb-5 sm:mb-6 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[1.02] tracking-tight text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-medium px-2 ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}>
               Universo em Desencanto
             </h1>
-            <div className="mx-auto mb-6 h-px w-16 bg-rjb-yellow" aria-hidden />
+            <div className="mx-auto mb-6 h-px w-16 bg-oud-green dark:bg-rjb-yellow" aria-hidden />
             <p className={`text-sm sm:text-base md:text-lg text-rjb-text-muted dark:text-rjb-text-muted-dark mb-8 sm:mb-10 max-w-2xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
               A Orquestra Universo em Desencanto é a expressão musical da Cultura Racional. Reúne músicos de vários estados em repertório instrumental e apresentações.
             </p>

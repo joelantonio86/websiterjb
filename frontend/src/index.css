@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --rjb-gold: #6E5424;
+    --rjb-gold: #143D32;
   }
   .dark {
-    --rjb-gold: #E4D2A4;
+    --rjb-gold: #E6D3A1;
   }
   body {
     @apply bg-rjb-bg-light dark:bg-rjb-bg-dark text-rjb-text dark:text-rjb-text-dark transition-colors duration-300;
@@ -17,26 +17,26 @@
 @layer utilities {
   .rjb-logo-text {
     background: none;
-    -webkit-text-fill-color: #1A1916;
-    color: #1A1916;
+    -webkit-text-fill-color: #141414;
+    color: #141414;
   }
 
   .dark .rjb-logo-text {
-    -webkit-text-fill-color: #F4F0E8;
-    color: #F4F0E8;
+    -webkit-text-fill-color: #F5F3EE;
+    color: #F5F3EE;
   }
   
   .header-rjb {
-    background-color: rgba(243, 240, 234, 0.92);
+    background-color: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(26, 25, 22, 0.08);
+    border-bottom: 1px solid rgba(20, 20, 20, 0.08);
     transition: background-color 0.5s ease, border-color 0.5s ease;
     z-index: 9999 !important;
   }
   
   .dark .header-rjb {
-    background-color: rgba(15, 14, 12, 0.92);
-    border-bottom: 1px solid rgba(228, 210, 164, 0.16);
+    background-color: rgba(17, 17, 17, 0.94);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
   
   .rjb-logo-image {
@@ -55,16 +55,16 @@
   }
   
   .nav-link-active {
-    border-bottom: 2px solid #C6A36A;
+    border-bottom: 2px solid #143D32;
     padding-bottom: 5px;
     font-weight: 600;
-    color: #1A1916 !important;
+    color: #141414 !important;
     position: relative;
   }
 
   .dark .nav-link-active {
-    color: #E4D2A4 !important;
-    border-bottom-color: #E4D2A4;
+    color: #F5F3EE !important;
+    border-bottom-color: #C6A36A;
   }
   
   .nav-link-active::after {
