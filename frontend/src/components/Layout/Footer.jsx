@@ -3,50 +3,44 @@ import { Link } from 'react-router-dom'
 const Footer = () => {
   const currentYear = new Date().getFullYear()
 
-  const footerLinkClass = "group min-h-[44px] inline-flex items-center px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg hover:bg-rjb-yellow/10 dark:hover:bg-rjb-yellow/5 text-rjb-text/60 dark:text-rjb-text-dark/60 hover:text-rjb-gold transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+  const footerLinkClass = 'min-h-[44px] inline-flex items-center text-sm text-rjb-text/80 dark:text-rjb-text-dark/80 hover:text-rjb-gold transition-colors'
 
   return (
-    <footer className="relative bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-border-light dark:border-rjb-border-dark mt-8 sm:mt-12 py-8 sm:py-10 md:py-12 safe-area-inset-bottom z-20 transition-colors duration-500">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
-          <div className="text-center md:text-left">
-            <div className="font-serif text-xl sm:text-2xl font-medium tracking-[0.18em] text-rjb-text dark:text-rjb-text-dark mb-1 sm:mb-2">
-              OUD
+    <footer className="relative bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow/50 mt-8 sm:mt-12 safe-area-inset-bottom z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <img
+              src="/logo-oud.jpg"
+              alt=""
+              className="h-12 w-12 rounded-full object-cover ring-1 ring-rjb-yellow/80"
+            />
+            <div>
+              <p className="font-serif text-lg font-semibold tracking-[0.08em] text-rjb-text dark:text-rjb-text-dark leading-none">
+                OUD
+              </p>
+              <p className="mt-1 text-sm text-rjb-text/70 dark:text-rjb-text-dark/70">
+                Orquestra Universo em Desencanto
+              </p>
             </div>
-            <p className="text-rjb-text/70 dark:text-rjb-text-dark/70 text-xs sm:text-sm md:text-base">
-              Orquestra Universo em Desencanto © {currentYear}. Todos os direitos reservados.
-            </p>
           </div>
-          
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm md:text-base">
+
+          <nav aria-label="Rodapé" className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6">
             <Link to="/politica-privacidade" className={footerLinkClass}>
-              <span className="flex items-center gap-1 sm:gap-1.5">
-                Política de Privacidade
-                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
+              Política de Privacidade
             </Link>
-            <span className="text-rjb-text/30 dark:text-rjb-text-dark/30 hidden sm:inline">•</span>
             <Link to="/termos-uso" className={footerLinkClass}>
-              <span className="flex items-center gap-1 sm:gap-1.5">
-                Termos de Uso
-                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
+              Termos de Uso
             </Link>
-            <span className="text-rjb-text/30 dark:text-rjb-text-dark/30 hidden sm:inline">•</span>
             <Link to="/cadastro" className={footerLinkClass}>
-              <span className="flex items-center gap-1 sm:gap-1.5">
-                Faça parte da OUD
-                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </span>
+              Faça parte da OUD
             </Link>
-          </div>
+          </nav>
         </div>
+
+        <p className="mt-6 pt-4 border-t border-rjb-yellow/30 text-xs sm:text-sm text-rjb-text/60 dark:text-rjb-text-dark/60">
+          © {currentYear} Orquestra Universo em Desencanto. Todos os direitos reservados.
+        </p>
       </div>
     </footer>
   )
