@@ -216,7 +216,7 @@ const Home = () => {
       </section>
 
       {/* Para músicos */}
-      <section id="para-musicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20 bg-gradient-to-b from-rjb-yellow/5 to-transparent dark:from-rjb-yellow/5 dark:to-transparent rounded-3xl" aria-labelledby="para-musicos-title">
+      <section id="para-musicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="para-musicos-title">
         <div className="text-center mb-8 sm:mb-10">
           <h2 id="para-musicos-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Para músicos
@@ -227,19 +227,18 @@ const Home = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {[
-            { to: '/partituras', icon: '🎼', title: 'Partituras', description: 'Área exclusiva com partituras do repertório.' },
-            { to: '/repertorio-apresentacoes', icon: '📋', title: 'Repertório 2026', description: 'Músicas previstas para cada apresentação do ano.' },
-            { to: '/player', icon: '🎵', title: 'Músicas', description: 'Ouça e estude o repertório completo.' },
-          ].map((item, index) => (
+            { to: '/partituras', title: 'Partituras', description: 'Área exclusiva com partituras do repertório.' },
+            { to: '/repertorio-apresentacoes', title: 'Repertório 2026', description: 'Músicas previstas para cada apresentação do ano.' },
+            { to: '/player', title: 'Músicas', description: 'Ouça e estude o repertório completo.' },
+          ].map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="group flex flex-col p-5 sm:p-6 rounded-2xl bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl border border-rjb-yellow/20 hover:border-rjb-yellow/50 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="group flex flex-col p-5 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow shadow-sm hover:shadow-md transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
             >
-              <span className="text-3xl sm:text-4xl mb-3 block" aria-hidden="true">{item.icon}</span>
-              <h3 className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 group-hover:text-rjb-gold transition-colors">{item.title}</h3>
+              <h3 className="font-serif text-lg sm:text-xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">{item.title}</h3>
               <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 flex-grow">{item.description}</p>
-              <span className="text-sm font-semibold text-rjb-gold mt-3 inline-flex items-center gap-1">
+              <span className="text-sm font-semibold text-rjb-gold mt-4 inline-flex items-center gap-1">
                 Acessar <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
               </span>
             </Link>
@@ -383,54 +382,36 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {[
             {
-              icon: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6h.01M21 3h.01"></path>
-              ),
               title: 'Música Instrumental',
               description: 'A harmonia perfeita entre os instrumentos e o saber.',
               to: '/sobre',
               ariaLabel: 'Saiba mais sobre nossa música instrumental na página Sobre',
             },
             {
-              icon: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8l4-2 4 2V7m0 8a2 2 0 11-4 0 2 2 0 014 0zM12 11c0 1.657-1.343 3-3 3H5a2 2 0 01-2-2v-3a2 2 0 012-2h4a2 2 0 012 2v1zM21 17a2 2 0 01-2 2h-5m-7-2a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v5"></path>
-              ),
               title: 'Repertório Único',
               description: 'Composições próprias e arranjos exclusivos da cultura Racional.',
               to: '/player',
               ariaLabel: 'Ouça o repertório na página Músicas',
             },
             {
-              icon: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              ),
               title: 'Compromisso Cultural',
               description: 'Divulgando a Cultura Racional em eventos e apresentações.',
               to: '/apresentacoes',
               ariaLabel: 'Ver apresentações e agenda',
             },
-          ].map((card, index) => (
+          ].map((card) => (
             <Link
-              key={index}
+              key={card.title}
               to={card.to}
               aria-label={card.ariaLabel}
-              className="group relative block p-5 sm:p-6 md:p-8 rounded-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/95 to-rjb-card-light/90 dark:from-rjb-card-dark dark:via-rjb-card-dark/95 dark:to-rjb-card-dark/90 shadow-xl dark:shadow-2xl dark:shadow-black/50 border-t-4 border-rjb-yellow/70 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] hover:border-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 animate-fade-in"
-              style={{ animationDelay: `${600 + index * 100}ms` }}
+              className="block p-5 sm:p-6 md:p-8 bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow shadow-sm hover:shadow-md transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-rjb-yellow/0 to-rjb-yellow/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    {card.icon}
-                  </svg>
-                </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors duration-300">
-                  {card.title}
-                </h3>
-                <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 leading-relaxed">
-                  {card.description}
-                </p>
-              </div>
+              <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3 text-rjb-text dark:text-rjb-text-dark">
+                {card.title}
+              </h3>
+              <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 leading-relaxed">
+                {card.description}
+              </p>
             </Link>
           ))}
         </div>
