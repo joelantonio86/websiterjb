@@ -147,7 +147,7 @@ const Sobre = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/player"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold text-sm sm:text-base hover:from-yellow-500 hover:to-yellow-600 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-sm bg-rjb-text text-rjb-bg-light dark:bg-rjb-text-dark dark:text-rjb-bg-dark font-semibold text-sm sm:text-base tracking-wide hover:bg-rjb-text/90 dark:hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-rjb-bg-dark"
               aria-label="Ouça nossas músicas no player"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" /></svg>
