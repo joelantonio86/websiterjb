@@ -12,7 +12,7 @@ const OnboardingTour = () => {
     '/': [
       {
         target: 'header',
-        title: 'Bem-vindo à Racional Jazz Band!',
+        title: 'Bem-vindo à Orquestra Universo em Desencanto!',
         content: 'Este é o menu principal. Use-o para navegar pelo site.',
         position: 'bottom'
       },

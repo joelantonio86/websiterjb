@@ -16,14 +16,12 @@
 
 @layer utilities {
   .rjb-logo-text {
-    background: linear-gradient(135deg, #E6C34A 0%, #D4AF37 45%, #B8860B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #2C2A26;
   }
 
-  /* Ouro adaptativo definido via CSS variable — usado pela cor tailwind rjb-gold */
-  /* Light: sépia dourado (WCAG AA sobre fundo claro); Dark: ouro metálico brilhante */
+  .dark .rjb-logo-text {
+    color: #E0E0E0;
+  }
   
   .header-rjb {
     background-color: #FBFAF7;
@@ -62,6 +60,7 @@
 
   .dark .nav-link-active {
     color: #D4AF37 !important;
+    border-bottom-color: #D4AF37;
   }
   
   .nav-link-active::after {

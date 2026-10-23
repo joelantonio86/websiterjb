@@ -1,58 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useTheme } from '../contexts/ThemeContext'
 
 const Logo = () => {
-  const { isDark } = useTheme()
   const [imageError, setImageError] = useState(false)
-  const [currentUrlIndex, setCurrentUrlIndex] = useState(0)
-
-  // Tenta primeiro do site em produção, depois local
-  const logoUrls = {
-    light: [
-      'https://www.racionaljazzband.com.br/logo.jpeg',
-      '/logo.jpeg',
-      '/logo.jpg'
-    ],
-    dark: [
-      'https://www.racionaljazzband.com.br/logo-dark.png',
-      '/logo-dark.png'
-    ]
-  }
-
-  const currentUrls = isDark ? logoUrls.dark : logoUrls.light
-
-  // Reset quando o tema mudar
-  useEffect(() => {
-    setImageError(false)
-    setCurrentUrlIndex(0)
-  }, [isDark])
-
-  const handleImageError = () => {
-    if (currentUrlIndex < currentUrls.length - 1) {
-      setCurrentUrlIndex(currentUrlIndex + 1)
-    } else {
-      setImageError(true)
-    }
-  }
 
   return (
-    <Link to="/" className="hover:opacity-80 transition-opacity flex items-center space-x-2">
-      {!imageError && currentUrlIndex < currentUrls.length ? (
+    <Link to="/" className="hover:opacity-80 transition-opacity flex items-center" aria-label="Orquestra Universo em Desencanto">
+      {!imageError ? (
         <img
-          src={currentUrls[currentUrlIndex]}
-          alt="Racional Jazz Band Logo"
-          className="h-16 w-auto rjb-logo-image"
+          src="/logo-oud.jpg"
+          alt="Orquestra Universo em Desencanto"
+          className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover"
           decoding="async"
-          onError={handleImageError}
-          key={currentUrlIndex}
+          onError={() => setImageError(true)}
         />
       ) : (
-        <div className="h-16 w-16 rounded-full border-2 border-rjb-yellow flex items-center justify-center bg-rjb-yellow/10 dark:bg-rjb-yellow/5 shadow-lg">
-          <span className="text-2xl font-bold rjb-logo-text">RJB</span>
+        <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-rjb-yellow bg-oud-green flex items-center justify-center">
+          <span className="text-sm font-bold tracking-wide text-rjb-yellow">OUD</span>
         </div>
       )}
-      <span className="sr-only">Racional Jazz Band</span>
     </Link>
   )
 }

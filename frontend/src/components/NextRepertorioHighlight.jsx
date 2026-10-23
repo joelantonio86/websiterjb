@@ -54,7 +54,7 @@ export default function NextRepertorioHighlight({ compact = false }) {
 
   const songs = next.songs || []
   const txt = [
-    `REPERTÓRIO RJB - ${next.name}`,
+    `REPERTÓRIO OUD - ${next.name}`,
     formatDateLabel(next.date) + (next.location ? ` — ${next.location}` : ''),
     '',
     ...songs.map((s, i) => `${i + 1}. ${s.title}`),

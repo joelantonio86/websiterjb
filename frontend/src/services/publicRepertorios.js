@@ -26,7 +26,7 @@ export const mapRepertorioToAgendaEvent = (repertorio) => {
     id: repertorio.id,
     date: rawDate,
     dateString,
-    title: repertorio.name || 'Apresentação RJB',
+    title: repertorio.name || 'Apresentação OUD',
     location: repertorio.location || 'Local a confirmar',
     time: 'A confirmar',
     link: '/repertorio-apresentacoes',

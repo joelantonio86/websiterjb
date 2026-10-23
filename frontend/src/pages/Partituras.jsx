@@ -253,7 +253,7 @@ const Partituras = () => {
       await new Promise(r => setTimeout(r, 400))
       const a = document.createElement('a')
       a.href = URL.createObjectURL(content)
-      a.download = `Partituras_RJB_${new Date().toISOString().slice(0, 10)}.zip`
+      a.download = `Partituras_OUD_${new Date().toISOString().slice(0, 10)}.zip`
       a.click()
       URL.revokeObjectURL(a.href)
       setSelectedSheets(new Set())
@@ -635,7 +635,7 @@ const Partituras = () => {
           {naipeOpen && (
             <div className="px-5 sm:p-6 pt-0 pb-6 border-t border-emerald-500/20">
               <p className="text-xs text-rjb-text/60 dark:text-rjb-text-dark/60 mb-4">
-                Os arquivos ficam no armazenamento público da banda. Se algo não abrir, avise a diretoria — pode ser atualização de repertório em andamento.
+                Os arquivos ficam no armazenamento público da orquestra. Se algo não abrir, avise a diretoria — pode ser atualização de repertório em andamento.
               </p>
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-stretch">

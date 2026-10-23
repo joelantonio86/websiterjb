@@ -73,7 +73,7 @@ const Player = () => {
 
   const [reducedMotion, setReducedMotion] = useState(false)
   useEffect(() => {
-    document.title = 'Músicas — Racional Jazz Band'
+    document.title = 'Músicas — Orquestra Universo em Desencanto'
     setIsVisible(true)
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setReducedMotion(mq.matches)

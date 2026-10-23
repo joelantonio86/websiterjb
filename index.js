@@ -179,7 +179,7 @@ function authenticateJWT(req, res, next) {
 // Nova: Registra no banco a chave gerada pelo Front-end para torná-la válida
 app.post('/api/admin/generate-key', authenticateJWT, async (req, res) => {
     const { inviteKey } = req.body;
-    if (!inviteKey || !/^RJB-AUTO-[A-Z0-9]{6}$/.test(inviteKey)) {
+    if (!inviteKey || !/^(OUD|RJB)-AUTO-[A-Z0-9]{6}$/.test(inviteKey)) {
         return res.status(400).json({ message: 'Formato de chave inválido.' });
     }
     try {
@@ -247,15 +247,15 @@ app.post('/api/register-member', limiter, async (req, res) => {
 
         // 1. E-mail de Boas-Vindas para o Membro
         const memberMailOptions = {
-            from: `"Racional Jazz Band" <${SENDER_EMAIL}>`,
+            from: `"Orquestra Universo em Desencanto" <${SENDER_EMAIL}>`,
             to: email,
-            subject: 'Confirmação de Inscrição - RJB',
-            text: `Olá ${name}!\n\nSua inscrição na Racional Jazz Band foi concluída com sucesso.\n\nInstrumento: ${instrument}\nCidade: ${city}/${state}\n\nEm breve entraremos em contato para mais informações. Seja bem-vindo(a)!`
+            subject: 'Confirmação de Inscrição - OUD',
+            text: `Olá ${name}!\n\nSua inscrição na Orquestra Universo em Desencanto foi concluída com sucesso.\n\nInstrumento: ${instrument}\nCidade: ${city}/${state}\n\nEm breve entraremos em contato para mais informações. Seja bem-vindo(a)!`
         };
 
         // 2. Notificação para a Administração da Banda
         const adminMailOptions = {
-            from: `"Sistema RJB" <${SENDER_EMAIL}>`,
+            from: `"Sistema OUD" <${SENDER_EMAIL}>`,
             to: TARGET_EMAIL,
             subject: `Novo Cadastro: ${name}`,
             text: `Um novo membro se cadastrou!\n\nNome: ${name}\nInstrumento: ${instrument}\nE-mail: ${email}\nTelefone: ${phone}\nLocal: ${city}/${state}\nChave utilizada: ${inviteKey}`
@@ -386,7 +386,7 @@ app.post('/', limiter, async (req, res) => {
     const { senderName, senderEmail, body, subject } = req.body;
     if (!SENDER_EMAIL || !SENDER_PASS) return res.status(500).send('Erro de config SMTP.');
     const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: SENDER_EMAIL, pass: SENDER_PASS } });
-    const mailOptions = { from: `"${senderName}" <${SENDER_EMAIL}>`, to: TARGET_EMAIL, subject: subject || 'Novo Contato RJB', text: body };
+    const mailOptions = { from: `"${senderName}" <${SENDER_EMAIL}>`, to: TARGET_EMAIL, subject: subject || 'Novo contato OUD', text: body };
     try {
         await transporter.sendMail(mailOptions);
         res.status(200).send('Mensagem enviada!');

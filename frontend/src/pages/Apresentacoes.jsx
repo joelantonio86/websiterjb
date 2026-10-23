@@ -25,7 +25,7 @@ const Apresentacoes = () => {
       <div className={`space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
         <div className="text-center mb-8">
           <p className="text-lg sm:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 max-w-3xl mx-auto leading-relaxed">
-            Assista aos nossos principais shows e apresentações de grande público. Experiências sonoras e visuais completas da Racional Jazz Band, organizadas por data.
+            Assista aos principais shows e apresentações de grande público. Experiências sonoras e visuais da Orquestra Universo em Desencanto, organizadas por data.
           </p>
         </div>
         

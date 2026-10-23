@@ -171,7 +171,7 @@ const MembersReport = () => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF()
     doc.setFontSize(16)
-    doc.text('Relatório de Membros - RJB', 14, 15)
+    doc.text('Relatório de Membros — OUD', 14, 15)
     doc.setFontSize(10)
     doc.text(`Total: ${filteredMembers.length} membros`, 14, 22)
     

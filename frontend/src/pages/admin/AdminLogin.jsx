@@ -32,7 +32,7 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-gradient-to-br from-rjb-bg-light via-rjb-bg-light/95 to-rjb-yellow/5 dark:from-rjb-bg-dark dark:via-rjb-bg-dark/95 dark:to-rjb-yellow/5 pt-16 sm:pt-20 md:pt-28 pb-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-rjb-yellow">Área Administrativa</h1>
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium text-rjb-text dark:text-rjb-text-dark">Área Administrativa</h1>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 mt-1">
             Acesso restrito a administradores e responsáveis.
           </p>
@@ -74,7 +74,7 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3 rounded-xl hover:from-yellow-500 hover:to-yellow-600 transition-all disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold py-3 rounded-full hover:from-yellow-500 hover:to-yellow-600 transition-colors disabled:opacity-50"
               >
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>

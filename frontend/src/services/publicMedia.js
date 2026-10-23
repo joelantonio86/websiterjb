@@ -69,7 +69,7 @@ export function mergeEventsWithAdminPhotos (staticEvents = [], adminPhotos = [])
     const current = grouped.get(date) || {
       date,
       dateFormatted: formatPeriodLabel(periodKey),
-      eventTitle: 'Galeria RJB',
+      eventTitle: 'Galeria OUD',
       location: 'Envio administrativo',
       photos: []
     }

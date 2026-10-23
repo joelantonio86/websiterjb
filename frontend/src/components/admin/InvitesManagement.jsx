@@ -12,7 +12,7 @@ const InvitesManagement = () => {
     for (let i = 0; i < 6; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length))
     }
-    const newKey = `RJB-AUTO-${code}`
+    const newKey = `OUD-AUTO-${code}`
     setGeneratedKey(newKey)
     setShowWhatsApp(true)
 
@@ -39,7 +39,7 @@ const InvitesManagement = () => {
   const shareViaWhatsApp = () => {
     if (!generatedKey) return
     const siteUrl = 'https://www.racionaljazzband.com.br/#cadastro'
-    const message = `Olá! Aqui é da RJB. 🎷\n\n` +
+    const message = `Olá! Aqui é da OUD.\n\n` +
       `Já iniciamos a transição para o cadastro via site!\n\n` +
       `Acesse: ${siteUrl}\n` +
       `Use a chave: \`${generatedKey}\`\n\n` +

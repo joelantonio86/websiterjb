@@ -15,7 +15,7 @@ const Sobre = () => {
   const [reducedMotion, setReducedMotion] = useState(false)
 
   useEffect(() => {
-    document.title = 'Sobre — Racional Jazz Band'
+    document.title = 'Sobre — Orquestra Universo em Desencanto'
     setIsVisible(true)
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setReducedMotion(mq.matches)
@@ -31,7 +31,7 @@ const Sobre = () => {
   const yearsActive = useMemo(() => new Date().getFullYear() - FOUNDATION_YEAR, [])
 
   return (
-    <PageWrapper title="Sobre a RJB">
+    <PageWrapper title="Sobre a OUD">
       <div className={`max-w-5xl mx-auto text-rjb-text dark:text-rjb-text-dark transition-all ${motionDuration} ${isVisible ? motionEnter : motionExit}`}>
         {/* Badge de origem — data e local de fundação */}
         <section className="mb-10 sm:mb-14 text-center px-2 sm:px-4" aria-label="Origem">
@@ -55,7 +55,7 @@ const Sobre = () => {
         {/* Stats — anos de trajetória + próxima apresentação */}
         <section
           className="mb-12 sm:mb-16 grid grid-cols-2 gap-4 md:gap-8 py-6 sm:py-8 border-y border-rjb-border-light dark:border-rjb-border-dark"
-          aria-label="Números da RJB"
+          aria-label="Números da OUD"
         >
           {[
             { value: yearsActive, label: yearsActive === 1 ? 'ano de trajetória' : 'anos de trajetória' },
@@ -75,17 +75,17 @@ const Sobre = () => {
         {/* Seção 1 — A Expressão Musical do Saber */}
         <section id="expressao" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="expressao-heading">
           <div className="md:sticky md:top-24 md:self-start">
-            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo I</p>
-            <h2 id="expressao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rjb-yellow-ink dark:text-rjb-yellow mb-2">Capítulo I</p>
+            <h2 id="expressao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-medium text-rjb-text dark:text-rjb-text-dark leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
               A Expressão<br />Musical do Saber
             </h2>
           </div>
           <div className="space-y-4 sm:space-y-5 text-rjb-text/85 dark:text-rjb-text-dark/85 leading-relaxed text-base sm:text-lg">
             <p className="first-letter:font-serif first-letter:text-5xl sm:first-letter:text-6xl first-letter:font-semibold first-letter:text-rjb-gold first-letter:float-left first-letter:leading-none first-letter:mr-2 first-letter:mt-1">
-              A <strong className="text-rjb-gold font-semibold">Racional Jazz Band (RJB)</strong> nasceu da união de dois propósitos elevados: a excelência artística do Jazz e a profundidade da <strong className="text-rjb-gold font-semibold">Cultura Racional</strong>. Fundada em <strong className="text-rjb-gold font-semibold">20 de novembro de 2015</strong>, a RJB rapidamente se estabeleceu como um veículo de expressão para um conhecimento que transcende, utilizando a música como sua linguagem universal.
+              A <strong className="text-rjb-gold font-semibold">Orquestra Universo em Desencanto (OUD)</strong> nasceu da união de dois propósitos elevados: a excelência artística e a profundidade da <strong className="text-rjb-gold font-semibold">Cultura Racional</strong>. Fundada em <strong className="text-rjb-gold font-semibold">20 de novembro de 2015</strong>, a OUD se estabeleceu como um veículo de expressão para um conhecimento que transcende, utilizando a música como sua linguagem universal.
             </p>
             <p>
-              Acreditamos que a música instrumental é a forma mais pura de comunicação. O Jazz, com sua liberdade rítmica e improvisação harmoniosa, oferece o palco ideal para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
+              A música instrumental é a forma mais pura de comunicação da orquestra. O repertório oferece o palco para manifestar os sentimentos de equilíbrio, paz e raciocínio que a Cultura Racional propaga. Cada apresentação é um convite à reflexão e à harmonia.
             </p>
           </div>
         </section>
@@ -93,8 +93,8 @@ const Sobre = () => {
         {/* Seção 2 — O Conceito Racional */}
         <section id="conceito" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="conceito-heading">
           <div className="md:sticky md:top-24 md:self-start">
-            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo II</p>
-            <h2 id="conceito-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rjb-yellow-ink dark:text-rjb-yellow mb-2">Capítulo II</p>
+            <h2 id="conceito-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-medium text-rjb-text dark:text-rjb-text-dark leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
               O Conceito<br />Racional
             </h2>
           </div>
@@ -103,7 +103,7 @@ const Sobre = () => {
               A Cultura Racional é o conhecimento que revela a origem e o destino de tudo e de todos, promovendo o raciocínio, o equilíbrio e a ligação com o Mundo de Energia Racional. Nossa missão não é apenas performar; é <strong className="text-rjb-gold font-semibold">transmitir essa mensagem de Luz e de Paz</strong> através de arranjos exclusivos e composições inspiradas nos pilares da Cultura.
             </p>
             <p>
-              Cada apresentação, cada nota e cada melodia da RJB é um convite para o público refletir sobre sua essência e o universo que o cerca, encontrando a harmonia entre o macrocosmo e o próprio ser.
+              Cada apresentação, cada nota e cada melodia da OUD é um convite para o público refletir sobre sua essência e o universo que o cerca, encontrando a harmonia entre o macrocosmo e o próprio ser.
             </p>
           </div>
         </section>
@@ -111,8 +111,8 @@ const Sobre = () => {
         {/* Seção 3 — Nossa Missão */}
         <section id="missao" className="mb-12 sm:mb-16 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10" aria-labelledby="missao-heading">
           <div className="md:sticky md:top-24 md:self-start">
-            <p className="text-xs font-bold uppercase tracking-widest text-rjb-yellow mb-1">Capítulo III</p>
-            <h2 id="missao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-gold leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rjb-yellow-ink dark:text-rjb-yellow mb-2">Capítulo III</p>
+            <h2 id="missao-heading" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-medium text-rjb-text dark:text-rjb-text-dark leading-[1.05]" style={{ fontVariationSettings: '"opsz" 96, "SOFT" 40' }}>
               Nossa<br />Missão
             </h2>
           </div>
@@ -147,7 +147,7 @@ const Sobre = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/player"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-rjb-yellow text-rjb-text font-bold text-sm sm:text-base hover:bg-yellow-500 transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold text-sm sm:text-base hover:from-yellow-500 hover:to-yellow-600 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
               aria-label="Ouça nossas músicas no player"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" /></svg>
@@ -156,7 +156,7 @@ const Sobre = () => {
             <Link
               to="/apresentacoes"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-rjb-yellow/60 text-rjb-text dark:text-rjb-text-dark font-semibold text-sm sm:text-base hover:bg-rjb-yellow/15 dark:hover:bg-rjb-yellow/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-              aria-label="Ver apresentações da banda"
+              aria-label="Ver apresentações da orquestra"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
               Ver apresentações

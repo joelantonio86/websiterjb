@@ -15,7 +15,7 @@ const Home = () => {
   const [reducedMotion, setReducedMotion] = useState(false)
 
   useEffect(() => {
-    document.title = 'Racional Jazz Band — Música, Arte e Cultura'
+    document.title = 'Orquestra Universo em Desencanto'
     setIsVisible(true)
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setReducedMotion(mq.matches)
@@ -90,20 +90,29 @@ const Home = () => {
       <section className="relative min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden px-4" id="hero">
         <div className="relative z-10 max-w-7xl mx-auto w-full text-center">
           <div className={`text-center pt-8 sm:pt-12 pb-16 sm:pb-24 transition-all ${motion.duration} ${isVisible ? `opacity-100 translate-y-0 ${motion.enterAlt}` : exit}`}>
-            <h1 className={`font-serif rjb-logo-text text-rjb-gold mb-3 sm:mb-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[0.95] tracking-tight text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-[9rem] xl:text-[11rem] font-semibold ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
-              Racional <em className="italic font-medium" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}>Jazz</em> Band
+            <img
+              src="/logo-oud.jpg"
+              alt=""
+              className="mx-auto mb-5 h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover shadow-md ring-2 ring-rjb-yellow/80"
+            />
+            <p className={`mb-4 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.42em] text-rjb-yellow-ink dark:text-rjb-yellow ${isVisible ? motion.enterAlt : exitY}`}>
+              Orquestra
+            </p>
+            <h1 className={`font-serif text-rjb-text dark:text-rjb-text-dark mb-5 sm:mb-6 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-200'} leading-[0.98] tracking-tight text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-semibold px-2 ${isVisible ? motion.enter : exitScale}`} style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}>
+              Universo em Desencanto
             </h1>
-            <h2 className={`font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 px-2 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-300'} leading-tight ${isVisible ? motion.enterAlt : exitY}`}>
+            <div className="mx-auto mb-5 h-px w-16 bg-rjb-yellow" aria-hidden />
+            <h2 className={`font-serif tracking-tight text-2xl sm:text-3xl md:text-4xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-4 sm:mb-6 px-2 leading-tight transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-300'} ${isVisible ? motion.enterAlt : exitY}`}>
               Música, Arte e Cultura Racional
             </h2>
-            <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-rjb-text/80 dark:text-rjb-text-dark/80 mb-6 sm:mb-10 max-w-4xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
-              A Racional Jazz Band é a expressão musical do conhecimento Racional, unindo a força do jazz, a beleza da melodia e a pureza de um saber que transcende.
+            <p className={`text-sm sm:text-base md:text-lg text-rjb-text/80 dark:text-rjb-text-dark/80 mb-8 sm:mb-10 max-w-3xl mx-auto px-2 leading-relaxed transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-400'} ${isVisible ? motion.enterAlt : exitY}`}>
+              A Orquestra Universo em Desencanto é a expressão musical da Cultura Racional. Reúne músicos de vários estados em repertório instrumental e apresentações.
             </p>
             <div className={`flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 transition-all ${motion.duration} ${reducedMotion ? '' : 'delay-500'} px-4 ${isVisible ? motion.enterAlt : exitY}`} data-tour="hero-buttons">
               <button
                 onClick={() => navigate('/apresentacoes')}
-                className="group relative bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl overflow-hidden w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-                aria-label="Ver apresentações da banda"
+                className="group relative bg-gradient-to-r from-rjb-yellow via-yellow-500 to-yellow-500 text-rjb-text font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                aria-label="Ver apresentações da orquestra"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -111,12 +120,11 @@ const Home = () => {
                   </svg>
                   Ver Apresentações
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
               </button>
               <button
                 onClick={() => navigate('/sobre')}
-                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-                aria-label="Conhecer a história da banda"
+                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 transition-colors duration-300 w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                aria-label="Conhecer a história da orquestra"
               >
                 <span className="flex items-center justify-center gap-2">
                   <svg className="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -127,7 +135,7 @@ const Home = () => {
               </button>
               <button
                 onClick={() => navigate('/player')}
-                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                className="group bg-transparent border-2 border-rjb-yellow text-rjb-text dark:text-rjb-text-dark font-bold py-3 px-6 sm:px-8 rounded-full text-base sm:text-lg hover:bg-rjb-yellow/20 dark:hover:bg-rjb-yellow/10 transition-colors duration-300 w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                 aria-label="Ouça nossas músicas no player"
               >
                 <span className="flex items-center justify-center gap-2">
@@ -208,7 +216,7 @@ const Home = () => {
       </section>
 
       {/* Para músicos */}
-      <section id="para-musicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20 bg-gradient-to-b from-rjb-yellow/5 to-transparent dark:from-rjb-yellow/5 dark:to-transparent rounded-3xl" aria-labelledby="para-musicos-title">
+      <section id="para-musicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-20" aria-labelledby="para-musicos-title">
         <div className="text-center mb-8 sm:mb-10">
           <h2 id="para-musicos-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">
             Para músicos
@@ -219,19 +227,18 @@ const Home = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {[
-            { to: '/partituras', icon: '🎼', title: 'Partituras', description: 'Área exclusiva com partituras do repertório.' },
-            { to: '/repertorio-apresentacoes', icon: '📋', title: 'Repertório 2026', description: 'Músicas previstas para cada apresentação do ano.' },
-            { to: '/player', icon: '🎵', title: 'Músicas', description: 'Ouça e estude o repertório completo.' },
-          ].map((item, index) => (
+            { to: '/partituras', title: 'Partituras', description: 'Área exclusiva com partituras do repertório.' },
+            { to: '/repertorio-apresentacoes', title: 'Repertório 2026', description: 'Músicas previstas para cada apresentação do ano.' },
+            { to: '/player', title: 'Músicas', description: 'Ouça e estude o repertório completo.' },
+          ].map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="group flex flex-col p-5 sm:p-6 rounded-2xl bg-rjb-card-light dark:bg-rjb-card-dark shadow-xl border border-rjb-yellow/20 hover:border-rjb-yellow/50 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="group flex flex-col p-5 sm:p-6 bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow shadow-sm hover:shadow-md transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
             >
-              <span className="text-3xl sm:text-4xl mb-3 block" aria-hidden="true">{item.icon}</span>
-              <h3 className="text-lg sm:text-xl font-bold text-rjb-text dark:text-rjb-text-dark mb-1 group-hover:text-rjb-gold transition-colors">{item.title}</h3>
+              <h3 className="font-serif text-lg sm:text-xl font-semibold text-rjb-text dark:text-rjb-text-dark mb-2">{item.title}</h3>
               <p className="text-sm text-rjb-text/70 dark:text-rjb-text-dark/70 flex-grow">{item.description}</p>
-              <span className="text-sm font-semibold text-rjb-gold mt-3 inline-flex items-center gap-1">
+              <span className="text-sm font-semibold text-rjb-gold mt-4 inline-flex items-center gap-1">
                 Acessar <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
               </span>
             </Link>
@@ -247,7 +254,7 @@ const Home = () => {
               Assista em destaque
             </h2>
             <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
-              Uma amostra do que a RJB leva ao palco.
+              Uma amostra do que a OUD leva ao palco.
             </p>
           </div>
           <button
@@ -314,7 +321,7 @@ const Home = () => {
 
       {/* Números / mini-stats */}
       <section id="numeros" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 relative z-20 rounded-3xl bg-gradient-to-b from-rjb-yellow/5 to-transparent dark:from-rjb-yellow/5 dark:to-transparent" aria-labelledby="numeros-heading">
-        <h2 id="numeros-heading" className="sr-only">Números da RJB</h2>
+        <h2 id="numeros-heading" className="sr-only">Números da OUD</h2>
         <div className="flex flex-wrap justify-center gap-8 sm:gap-12 md:gap-16">
           <div className="text-center">
             <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-rjb-gold tabular-nums">{totalSongs}</p>
@@ -344,7 +351,7 @@ const Home = () => {
             Componentes por estado
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-2xl mx-auto">
-            A Racional Jazz Band reúne componentes de diversos estados do Brasil. Passe o mouse sobre um estado para ver a quantidade.
+            A Orquestra Universo em Desencanto reúne componentes de diversos estados do Brasil. Passe o mouse sobre um estado para ver a quantidade.
           </p>
         </div>
         <BrazilMap onTotalLoad={setTotalComponents} />
@@ -375,54 +382,36 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {[
             {
-              icon: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 6h.01M21 3h.01"></path>
-              ),
               title: 'Música Instrumental',
               description: 'A harmonia perfeita entre os instrumentos e o saber.',
               to: '/sobre',
               ariaLabel: 'Saiba mais sobre nossa música instrumental na página Sobre',
             },
             {
-              icon: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8l4-2 4 2V7m0 8a2 2 0 11-4 0 2 2 0 014 0zM12 11c0 1.657-1.343 3-3 3H5a2 2 0 01-2-2v-3a2 2 0 012-2h4a2 2 0 012 2v1zM21 17a2 2 0 01-2 2h-5m-7-2a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v5"></path>
-              ),
               title: 'Repertório Único',
               description: 'Composições próprias e arranjos exclusivos da cultura Racional.',
               to: '/player',
               ariaLabel: 'Ouça o repertório na página Músicas',
             },
             {
-              icon: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              ),
               title: 'Compromisso Cultural',
               description: 'Divulgando a Cultura Racional em eventos e apresentações.',
               to: '/apresentacoes',
               ariaLabel: 'Ver apresentações e agenda',
             },
-          ].map((card, index) => (
+          ].map((card) => (
             <Link
-              key={index}
+              key={card.title}
               to={card.to}
               aria-label={card.ariaLabel}
-              className="group relative block p-5 sm:p-6 md:p-8 rounded-2xl bg-gradient-to-br from-rjb-card-light via-rjb-card-light/95 to-rjb-card-light/90 dark:from-rjb-card-dark dark:via-rjb-card-dark/95 dark:to-rjb-card-dark/90 shadow-xl dark:shadow-2xl dark:shadow-black/50 border-t-4 border-rjb-yellow/70 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] hover:border-rjb-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900 animate-fade-in"
-              style={{ animationDelay: `${600 + index * 100}ms` }}
+              className="block p-5 sm:p-6 md:p-8 bg-rjb-card-light dark:bg-rjb-card-dark border-t border-rjb-yellow shadow-sm hover:shadow-md transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-rjb-yellow/0 to-rjb-yellow/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-rjb-yellow/20 to-rjb-yellow/10 dark:from-rjb-yellow/10 dark:to-rjb-yellow/5 mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                  <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-rjb-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    {card.icon}
-                  </svg>
-                </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 text-rjb-text dark:text-rjb-text-dark group-hover:text-rjb-gold transition-colors duration-300">
-                  {card.title}
-                </h3>
-                <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 leading-relaxed">
-                  {card.description}
-                </p>
-              </div>
+              <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3 text-rjb-text dark:text-rjb-text-dark">
+                {card.title}
+              </h3>
+              <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 leading-relaxed">
+                {card.description}
+              </p>
             </Link>
           ))}
         </div>
@@ -435,12 +424,12 @@ const Home = () => {
             Quer ser avisado dos próximos shows?
           </h2>
           <p className="text-sm sm:text-base text-rjb-text/70 dark:text-rjb-text-dark/70 max-w-xl mx-auto mb-6">
-            Entre em contato e receba informações sobre as próximas apresentações da Racional Jazz Band.
+            Entre em contato e receba informações sobre as próximas apresentações da Orquestra Universo em Desencanto.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/contato"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rjb-yellow text-rjb-text font-bold hover:bg-yellow-500 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-rjb-yellow to-yellow-500 text-rjb-text font-bold hover:from-yellow-500 hover:to-yellow-600 transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-rjb-yellow focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
