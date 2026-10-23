@@ -90,6 +90,11 @@ const Home = () => {
       <section className="relative min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden px-4" id="hero">
         <div className="relative z-10 max-w-7xl mx-auto w-full text-center">
           <div className={`text-center pt-8 sm:pt-12 pb-16 sm:pb-24 transition-all ${motion.duration} ${isVisible ? `opacity-100 translate-y-0 ${motion.enterAlt}` : exit}`}>
+            <img
+              src="/logo-oud.jpg"
+              alt=""
+              className="mx-auto mb-5 h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover shadow-md ring-2 ring-rjb-yellow/80"
+            />
             <p className={`mb-4 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.42em] text-rjb-yellow-ink dark:text-rjb-yellow ${isVisible ? motion.enterAlt : exitY}`}>
               Orquestra
             </p>
